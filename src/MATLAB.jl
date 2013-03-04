@@ -7,7 +7,9 @@ module MATLAB
 	export mxarray, delete, duplicate, jarray
 	
 	# engine
-	export MSession, eval_string, put_variable, get_variable
+	export MSession
+	export get_default_msession, restart_default_msession, close_default_msession
+	export eval_string, put_variable, get_mvariable
 
 	import Base.eltype, Base.close
 	

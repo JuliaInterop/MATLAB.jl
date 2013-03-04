@@ -1,5 +1,11 @@
 # operation on MATLAB engine sessions
 
+###########################################################
+#
+#   Session open & close
+#
+###########################################################
+
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
 
@@ -49,6 +55,42 @@ function close(session::MSession)
 	end
 end
 
+# default session
+
+default_msession = nothing
+
+function restart_default_msession(bufsize::Integer)
+	global default_msession
+	if !(default_msession == nothing)
+		close(default_msession)
+	end
+	default_msession = MSession(bufsize)
+end
+
+restart_default_msession() = restart_default_msession(default_output_buffer_size)
+
+function get_default_msession()
+	global default_msession
+	if default_msession == nothing
+		default_msession = MSession()
+	end
+	default_msession::MSession
+end
+
+function close_default_msession()
+	global default_msession
+	if !(default_msession == nothing)
+		close(default_msession)
+	end
+end
+
+
+###########################################################
+#
+#   communication with MATLAB session
+#
+###########################################################
+
 function eval_string(session::MSession, stmt::ASCIIString)
 	# Evaluate a MATLAB statement in a given MATLAB session
 	
@@ -67,6 +109,9 @@ function eval_string(session::MSession, stmt::ASCIIString)
 	end
 end
 
+eval_string(stmt::ASCIIString) = eval_string(get_default_msession(), stmt)
+
+
 function put_variable(session::MSession, name::Symbol, v::MxArray)
 	# Put a variable into a MATLAB engine session
 	
@@ -82,7 +127,10 @@ end
 
 put_variable(session::MSession, name::Symbol, v) = put_variable(session, name, mxarray(v))
 
-function get_variable(session::MSession, name::Symbol)
+put_variable(name::Symbol, v) = put_variable(get_default_msession(), name, v)
+
+
+function get_mvariable(session::MSession, name::Symbol)
 	
 	@assert libeng::Ptr{Void} != C_NULL
 	
@@ -94,5 +142,14 @@ function get_variable(session::MSession, name::Symbol)
 	end
 	MxArray(pv)
 end
+
+get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
+
+
+###########################################################
+#
+#   macro to simplify syntax
+#
+###########################################################
 
 
