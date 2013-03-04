@@ -152,8 +152,23 @@ get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
 #
 ###########################################################
 
-macro mput(v)
-	esc( :( MATLAB.put_variable($(Meta.quot(v)), $(v)) ) )
+function _mput_multi(vs::Symbol...)
+	nv = length(vs)
+	if nv == 1
+		v = vs[1]
+		:( MATLAB.put_variable($(Meta.quot(v)), $(v)) )
+	else
+		stmts = Array(Expr, nv)
+		for i = 1 : nv
+			v = vs[i]
+			stmts[i] = :( MATLAB.put_variable($(Meta.quot(v)), $(v)) )
+		end
+		Expr(:block, stmts...)
+	end
+end
+
+macro mput(vs...)
+	esc( _mput_multi(vs...) )
 end
 
 macro mget(v)

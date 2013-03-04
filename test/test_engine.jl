@@ -7,8 +7,7 @@ restart_default_msession()
 a = [1. 2. 3.; 4. 5. 6.]
 b = [2. 3. 4.; 8. 7. 6.]
 
-@mput a
-@mput b
+@mput a b
 eval_string("c = a .* b")
 
 c_mx = get_mvariable(:c)
