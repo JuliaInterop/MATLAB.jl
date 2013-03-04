@@ -152,4 +152,16 @@ get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
 #
 ###########################################################
 
+macro mput(v)
+	esc( :( MATLAB.put_variable($(Meta.quot(v)), $(v)) ) )
+end
+
+macro mget(v)
+	:( MATLAB.get_mvariable($(Meta.quot(v))) )
+end
+
+
+
+
+
 

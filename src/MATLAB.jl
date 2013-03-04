@@ -10,6 +10,7 @@ module MATLAB
 	export MSession
 	export get_default_msession, restart_default_msession, close_default_msession
 	export eval_string, put_variable, get_mvariable
+	export @mput, @mget
 
 	import Base.eltype, Base.close
 	
