@@ -99,7 +99,11 @@ ndims(mx::MxArray)   = mxget_attr(mx, :mxGetNumberOfDimensions_730, mwSize)
 
 eltype(mx::MxArray)  = mxclassid_to_type(classid(mx))
 elsize(mx::MxArray)  = mxget_attr(mx, :mxGetElementSize, Uint)
-data_ptr(mx::MxArray) = mxget_attr(mx, :mxGetData, Ptr{Void})
+
+function data_ptr(mx::MxArray)
+	p0::Ptr{Void} = mxget_attr(mx, :mxGetData, Ptr{Void})
+	convert(Ptr{eltype(mx)}, p0)
+end
 
 
 ###########################################################
@@ -179,7 +183,7 @@ function jarray(mx::MxArray)
 	end
 	m = convert(Int, nrows(mx))
 	n = convert(Int, ncols(mx))
-	pointer_to_array(convert(Ptr{T}, data_ptr(mx)), (m, n), false)
+	pointer_to_array(data_ptr(mx), (m, n), false)
 end
 
 
