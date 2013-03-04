@@ -171,12 +171,3 @@ macro mput(vs...)
 	esc( _mput_multi(vs...) )
 end
 
-macro mget(v)
-	:( MATLAB.get_mvariable($(Meta.quot(v))) )
-end
-
-
-
-
-
-

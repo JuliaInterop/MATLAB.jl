@@ -12,6 +12,7 @@ eval_string("c = a .* b")
 
 c_mx = get_mvariable(:c)
 c = jarray(c_mx)
+
 @test isequal(c, a .* b)
 delete(c_mx)
 
