@@ -18,7 +18,15 @@ load_libmx()
 
 # libeng (loaded when needed)
 
-startcmd = "/Applications/MATLAB_R2012b.app/bin/matlab"
+function get_default_startcmd()
+    if OS_NAME == :Darwin
+        "/Applications/MATLAB_R2012b.app/bin/matlab"
+    else
+        C_NULL        
+    end    
+end
+
+const default_startcmd = get_default_startcmd()
 
 function load_libeng()
 	global libeng

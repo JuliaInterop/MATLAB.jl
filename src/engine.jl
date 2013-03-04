@@ -20,9 +20,8 @@ type MSession
 			load_libeng()
 		end
 		@assert libeng != C_NULL
-	
-		ep = ccall(engfunc(:engOpen), Ptr{Void}, (Ptr{Uint8},), 
-			startcmd::ASCIIString)
+
+		ep = ccall(engfunc(:engOpen), Ptr{Void}, (Ptr{Uint8},), default_startcmd)
 		if ep == C_NULL
 			throw(MEngineError("Failed to open a MATLAB engine session."))
 		end	
