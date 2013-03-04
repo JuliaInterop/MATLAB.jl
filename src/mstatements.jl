@@ -96,6 +96,15 @@ function write_mstatement(io::IO, ex::Expr)
 		print(io, ")")
 		print(io, string(h))
 		
+	elseif h == :block
+		for s in a
+			write_mstatement(io, s)
+			print(io, "\n")
+		end
+		
+	elseif h == :line
+		nothing # ignore line numbers
+		
 	else
 		error("Expression $(ex) is not recognized by mstatement.")
 	end

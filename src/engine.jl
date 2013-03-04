@@ -171,3 +171,7 @@ macro mput(vs...)
 	esc( _mput_multi(vs...) )
 end
 
+macro matlab(ex)
+	:( MATLAB.eval_string($(mstatement(ex))) )	
+end
+
