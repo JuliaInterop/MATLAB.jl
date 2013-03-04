@@ -14,5 +14,6 @@ eval_string(eng, "c = a .* b")
 c_mx = get_variable(eng, :c)
 c = jarray(c_mx)
 @test isequal(c, a .* b)
+delete(c_mx)
 
 close(eng)

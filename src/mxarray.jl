@@ -148,6 +148,8 @@ function duplicate(mx::MxArray)
 end
 
 # conversion from Julia variables to MATLAB
+# Note: the conversion is deep-copy, as there is no way to let
+# mxArray use Julia array's memory
 
 function mxarray{T<:MxNumOrBool}(a::Vector{T})
 	n = length(a)
@@ -166,19 +168,18 @@ function mxarray{T<:MxNumOrBool}(a::Matrix{T})
 	mx
 end
 
-# conversion from MATLAB to Julia
+# conversion from MATLAB variable to Julia array
+# jarray returns a light-weight wrapper using pointer_to_array
+# The resultant array is valid until mx is explicitly deleted
 
 function jarray(mx::MxArray)
 	T = eltype(mx)
 	if !(ndims(mx) == 2 && (T <: MxNumOrBool))
 		error("jarray currenly only supports 2D arrays of primitive types.")
 	end
-	m::Uint = nrows(mx)
-	n::Uint = ncols(mx)
-	a = Array(T, m, n)
-	ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint), 
-		a, data_ptr(mx), m * n * sizeof(T))
-	a
+	m = convert(Int, nrows(mx))
+	n = convert(Int, ncols(mx))
+	pointer_to_array(convert(Ptr{T}, data_ptr(mx)), (m, n), false)
 end
 
 

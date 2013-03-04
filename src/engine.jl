@@ -82,7 +82,6 @@ end
 
 put_variable(session::MSession, name::Symbol, v) = put_variable(session, name, mxarray(v))
 
-
 function get_variable(session::MSession, name::Symbol)
 	
 	@assert libeng::Ptr{Void} != C_NULL
