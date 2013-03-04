@@ -1,5 +1,5 @@
 
-using MATLABEngine
+using MATLAB
 using Test
 
 eng = open_msession()

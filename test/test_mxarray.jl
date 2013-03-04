@@ -1,6 +1,6 @@
 # Unit testing for MxArray
 
-using MATLABEngine
+using MATLAB
 using Test
 
 m = 5

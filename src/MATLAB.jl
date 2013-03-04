@@ -1,4 +1,4 @@
-module MATLABEngine
+module MATLAB
 	
 	# mxarray
 	export MxArray, mxClassID, mxComplexity
