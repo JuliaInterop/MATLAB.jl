@@ -2,7 +2,7 @@
 using MATLAB
 using Test
 
-eng = open_msession()
+eng = MSession()
 
 a = [1. 2. 3.; 4. 5. 6.]
 b = [2. 3. 4.; 8. 7. 6.]

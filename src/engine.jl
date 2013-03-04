@@ -1,26 +1,41 @@
 # operation on MATLAB engine sessions
 
+# 64 K buffer should be sufficient to store the output text in most cases
+const default_output_buffer_size = 64 * 1024
+
 type MSession
 	ptr::Ptr{Void}
-end
-
-
-function open_msession()
-	# Open a MATLAB Engine session
+	buffer::Vector{Uint8}
+	bufptr::Ptr{Uint8}
 	
-	global libeng
-	if libeng == C_NULL
-		load_libeng()
+	function MSession(bufsize::Integer)
+		global libeng
+		if libeng == C_NULL
+			load_libeng()
+		end
+		@assert libeng != C_NULL
+	
+		ep = ccall(engfunc(:engOpen), Ptr{Void}, (Ptr{Uint8},), 
+			startcmd::ASCIIString)
+		if ep == C_NULL
+			throw(MEngineError("Failed to open a MATLAB engine session."))
+		end	
+		
+		buf = Array(Uint8, bufsize)
+		
+		if bufsize > 0
+			bufptr = pointer(buf)
+			ccall(engfunc(:engOutputBuffer), Cint, (Ptr{Void}, Ptr{Uint8}, Cint), 
+				ep, bufptr, bufsize)
+		else
+			bufptr = convert(Ptr{Uint8}, C_NULL)
+		end
+		
+		println("A MATLAB session is open successfully")
+		new(ep, buf, bufptr)
 	end
-	@assert libeng != C_NULL
 	
-	p = ccall(dlsym(libeng, :engOpen), Ptr{Void}, (Ptr{Uint8},), 
-		startcmd::ASCIIString)
-	if p == C_NULL
-		throw(MEngineError("Failed to open a MATLAB engine session."))
-	end	
-	println("A MATLAB session is open successfully")
-	MSession(p)
+	MSession() = MSession(default_output_buffer_size)
 end
 
 function close(session::MSession)
@@ -44,6 +59,11 @@ function eval_string(session::MSession, stmt::ASCIIString)
 	
 	if r != 0
 		throw(MEngineError("Invalid engine session."))
+	end
+	
+	bufptr::Ptr{Uint8} = session.bufptr
+	if bufptr != C_NULL
+		print(bytestring(bufptr))
 	end
 end
 
