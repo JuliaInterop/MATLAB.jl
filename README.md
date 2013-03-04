@@ -1,4 +1,4 @@
-MATLABEngine.jl
-===============
+MATLAB.jl
+==========
 
-Calling MATLAB in Julia through MATLAB Engine
+A package to support calling MATLAB functions and manipulating MATLAB arrays in Julia.
