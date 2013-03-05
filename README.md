@@ -143,7 +143,6 @@ close_default_msession()    # close the default session (optional)
 
 You can put multiple variable and evaluate multiple statement by calling ``@mput`` and ``@matlab`` once:
 ```julia
-
 x = linspace(-10., 10., 500)
 y = linspace(2., 3., 500)
 
@@ -152,10 +151,7 @@ y = linspace(2., 3., 500)
     u = x + y
 	v = x - y
 end
-
-u = jarray(get_mvariable(:u))  # retrieve the result from MATLAB session
-v = jarray(get_mvariable(:v))
-
+@mget u v
 ```
 
 *Note:* There can be multiple (reasonable) ways to convert a MATLAB variable to Julia array. For example, MATLAB represents a scalar using a 1-by-1 matrix. Here we have two choice in terms of converting such a matrix back to Julia: (1) convert to a scalar number, or (2) convert to a matrix of size 1-by-1.

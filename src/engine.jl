@@ -144,6 +144,12 @@ end
 
 get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
 
+get_variable(name::Symbol) = to_julia(get_mvariable(name))
+
+function get_variable(name::Symbol, kind)
+    to_julia(get_mvariable(name), kind)
+end
+
 
 ###########################################################
 #
@@ -168,6 +174,28 @@ end
 
 macro mput(vs...)
     esc( _mput_multi(vs...) )
+end
+
+
+function make_getvar_statement(v::Symbol)
+    :( $(v) = MATLAB.get_variable($(Meta.quot(v))) )
+end
+
+function _mget_multi(vs::Union(Symbol, Expr)...)
+    nv = length(vs)
+    if nv == 1
+        make_getvar_statement(vs[1])
+    else
+        stmts = Array(Expr, nv)
+        for i = 1 : nv
+            stmts[i] = make_getvar_statement(vs[i])
+        end
+        Expr(:block, stmts...)
+    end
+end
+
+macro mget(vs...)
+    esc( _mget_multi(vs...) )
 end
 
 macro matlab(ex)

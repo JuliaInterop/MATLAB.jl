@@ -5,8 +5,8 @@ type MxArray
     
     function MxArray(p::Ptr{Void})
         mx = new(p)
-        #finalizer(mx, delete)
-        #mx
+        finalizer(mx, delete)
+        mx
     end
 end
 
@@ -281,9 +281,8 @@ function mxarray{T<:MxNumOrBool}(a::Matrix{T})
     mx
 end
 
-# conversion from MATLAB variable to Julia array
-# jarray returns a light-weight wrapper using pointer_to_array
-# The resultant array is valid until mx is explicitly deleted
+
+# shallow conversion from MATLAB variable to Julia array
 
 function jarray(mx::MxArray)
     pointer_to_array(data_ptr(mx), size(mx), false)
@@ -293,6 +292,13 @@ function jvector(mx::MxArray)
     pointer_to_array(data_ptr(mx), (nelems(mx),), false)
 end
 
+function jmatrix(mx::MxArray)
+    if ndims(mx) != 2
+        throw(ArgumentError("jmatrix only applies to MATLAB arrays with ndims == 2."))
+    end
+    jarray(mx)
+end
+
 function jscalar(mx::MxArray)
     if nelems(mx) != 1
         throw(ArgumentError("jscalar only applies to MATLAB arrays with exactly one element."))
@@ -300,4 +306,15 @@ function jscalar(mx::MxArray)
     pointer_to_array(data_ptr(mx), (1,), false)[1]
 end
 
+
+# deep conversion from MATLAB variable to Julia array
+
+function to_julia(mx::MxArray)
+    copy(jarray(mx))
+end
+
+to_julia(mx::MxArray, ty::Type{Array}) = copy(jarray(mx))
+to_julia(mx::MxArray, ty::Type{Vector}) = copy(jvector(mx))
+to_julia(mx::MxArray, ty::Type{Matrix}) = copy(jmatrix(mx))
+to_julia(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
 
