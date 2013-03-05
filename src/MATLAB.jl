@@ -15,7 +15,7 @@ module MATLAB
     export eval_string, put_variable, get_mvariable
     export @mput, @mget, @matlab
 
-    import Base.eltype, Base.close
+    import Base.eltype, Base.close, Base.size
 
     include("exceptions.jl")
     include("mxbase.jl")

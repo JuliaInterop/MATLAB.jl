@@ -89,21 +89,62 @@ end
 #
 ###########################################################
 
-mxget_attr(mx::MxArray, fun::Symbol, ret::Type) = ccall(mxfunc(fun), ret, (Ptr{Void},), mx.ptr)
+# pre-cached some useful functions
 
-classid(mx::MxArray) = mxget_attr(mx, :mxGetClassID, mxClassID)
-nrows(mx::MxArray)   = mxget_attr(mx, :mxGetM, Uint)
-ncols(mx::MxArray)   = mxget_attr(mx, :mxGetN, Uint)
-nelems(mx::MxArray)  = mxget_attr(mx, :mxGetNumberOfElements, Uint)
-ndims(mx::MxArray)   = mxget_attr(mx, :mxGetNumberOfDimensions_730, mwSize)
+const _mx_get_classid = mxfunc(:mxGetClassID)
+const _mx_get_m = mxfunc(:mxGetM)
+const _mx_get_n = mxfunc(:mxGetN)
+const _mx_get_nelems = mxfunc(:mxGetNumberOfElements)
+const _mx_get_ndims  = mxfunc(:mxGetNumberOfDimensions_730)
+const _mx_get_elemsize = mxfunc(:mxGetElementSize)
+const _mx_get_data = mxfunc(:mxGetData)
+const _mx_get_dims = mxfunc(:mxGetDimensions_730)
+
+# getting simple attributes
+
+macro mxget_attr(fun, ret)
+    :( ccall($(fun)::Ptr{Void}, $(ret), (Ptr{Void},), mx.ptr) )
+end
+
+classid(mx::MxArray) = @mxget_attr(_mx_get_classid, mxClassID)
+nrows(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_m, Uint))
+ncols(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_n, Uint))
+nelems(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_nelems, Uint))
+ndims(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_ndims, mwSize))
 
 eltype(mx::MxArray)  = mxclassid_to_type(classid(mx))
-elsize(mx::MxArray)  = mxget_attr(mx, :mxGetElementSize, Uint)
+elsize(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_elemsize, Uint))
+data_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_data, Ptr{Void}))
 
-function data_ptr(mx::MxArray)
-    p0::Ptr{Void} = mxget_attr(mx, :mxGetData, Ptr{Void})
-    convert(Ptr{eltype(mx)}, p0)
+# size function
+
+function size(mx::MxArray)
+    nd = ndims(mx)
+    pdims::Ptr{mwSize} = @mxget_attr(_mx_get_dims, Ptr{mwSize})
+    _dims = pointer_to_array(pdims, (nd,), false)
+    dims = Array(Int, nd)
+    for i = 1 : nd
+        dims[i] = convert(Int, _dims[i])
+    end
+    tuple(dims...)
 end
+
+function size(mx::MxArray, d::Integer)
+    nd = ndims(mx)
+    if d <= 0
+        throw(ArgumentError("The dimension must be a positive integer."))
+    end
+    
+    if nd == 2
+        d == 1 ? nrows(mx) : 
+        d == 2 ? ncols(mx) : 1
+    else
+        pdims::Ptr{mwSize} = @mxget_attr(_mx_get_dims, Ptr{mwSize})
+        _dims = pointer_to_array(pdims, (nd,), false)
+        d <= nd ? convert(Int, _dims[d]) : 1
+    end    
+end
+
 
 
 ###########################################################
@@ -112,31 +153,34 @@ end
 #
 ###########################################################
 
+# pre-cached functions
+
+const _mx_create_numeric_mat = mxfunc(:mxCreateNumericMatrix_730)
+const _mx_create_logical_mat = mxfunc(:mxCreateLogicalMatrix_730)
+
 # create zero arrays
 
 function mxarray{T<:MxNumerics}(ty::Type{T}, n::Integer)
-    pm = ccall(mxfunc(:mxCreateNumericMatrix_730),
-        Ptr{Void}, (mwSize, mwSize, mxClassID, mxComplexity),
+    pm = ccall(_mx_create_numeric_mat, Ptr{Void}, 
+        (mwSize, mwSize, mxClassID, mxComplexity),
         n, 1, mxclassid(T), mxREAL)
     MxArray(pm)
 end
 
 function mxarray{T<:MxNumerics}(ty::Type{T}, m::Integer, n::Integer)
-    pm = ccall(mxfunc(:mxCreateNumericMatrix_730),
-        Ptr{Void}, (mwSize, mwSize, mxClassID, mxComplexity),
+    pm = ccall(_mx_create_numeric_mat, Ptr{Void}, 
+        (mwSize, mwSize, mxClassID, mxComplexity),
         m, n, mxclassid(T), mxREAL)
     MxArray(pm)
 end
 
 function mxarray(ty::Type{Bool}, n::Integer)
-    pm = ccall(mxfunc(:mxCreateLogicalMatrix_730),
-        Ptr{Void}, (mwSize, mwSize), n, 1)
+    pm = ccall(_mx_create_logical_mat, Ptr{Void}, (mwSize, mwSize), n, 1)
     MxArray(pm)
 end
 
 function mxarray(ty::Type{Bool}, m::Integer, n::Integer)
-    pm = ccall(mxfunc(:mxCreateLogicalMatrix_730),
-        Ptr{Void}, (mwSize, mwSize), m, n)
+    pm = ccall(_mx_create_logical_mat, Ptr{Void}, (mwSize, mwSize), m, n)
     MxArray(pm)
 end
 
@@ -177,23 +221,11 @@ end
 # The resultant array is valid until mx is explicitly deleted
 
 function jarray(mx::MxArray)
-    T = eltype(mx)
-    if !(ndims(mx) == 2 && (T <: MxNumOrBool))
-        error("jarray currenly only supports 2D arrays of primitive types.")
-    end
-    m = convert(Int, nrows(mx))
-    n = convert(Int, ncols(mx))
-    pointer_to_array(data_ptr(mx), (m, n), false)
+    pointer_to_array(data_ptr(mx), size(mx), false)
 end
 
 function jvector(mx::MxArray)
-    T = eltype(mx)
-    m = convert(Int, nrows(mx))
-    n = convert(Int, ncols(mx))
-    if !(ndims(mx) == 2 && (m == 1 || n == 1))
-        throw(ArgumentError("jvector only applies to vectors."))
-    end
-    pointer_to_array(data_ptr(mx), (m * n,), false)
+    pointer_to_array(data_ptr(mx), (nelems(mx),), false)
 end
 
 function jscalar(mx::MxArray)
