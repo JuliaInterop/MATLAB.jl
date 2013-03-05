@@ -5,8 +5,8 @@ type MxArray
     
     function MxArray(p::Ptr{Void})
         mx = new(p)
-        finalizer(mx, delete)
-        mx
+        #finalizer(mx, delete)
+        #mx
     end
 end
 
@@ -224,17 +224,17 @@ end
 
 # create scalars
 
-function mxscalar(x::Float64)
+function mxarray(x::Float64)
     pm = ccall(_mx_create_double_scalar, Ptr{Void}, (Cdouble,), x)
     MxArray(pm)
 end
 
-function mxscalar(x::Bool)
+function mxarray(x::Bool)
     pm = ccall(_mx_create_logical_scalar, Ptr{Void}, (Bool,), x)
     MxArray(pm)
 end
 
-function mxscalar{T<:MxNumerics}(x::T)
+function mxarray{T<:MxNumerics}(x::T)
     pm = ccall(_mx_create_numeric_mat, Ptr{Void}, 
         (mwSize, mwSize, mxClassID, mxComplexity),
         1, 1, mxclassid(T), mxREAL)

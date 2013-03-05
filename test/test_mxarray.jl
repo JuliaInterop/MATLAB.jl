@@ -24,16 +24,16 @@ macro mx_test_basic_types(ty)
         delete(a)
 
         b = mxarray($(ty), m, n)
-        @test elsize(a) == sizeof($(ty))
-        @test eltype(a) === $(ty)
-        @test nrows(a) == m
-        @test ncols(a) == n
-        @test nelems(a) == m * n
-        @test ndims(a) == 2
-        @test size(a) == (m, n)
-        @test size(a, 1) == m
-        @test size(a, 2) == n
-        @test size(a, 3) == 1
+        @test elsize(b) == sizeof($(ty))
+        @test eltype(b) === $(ty)
+        @test nrows(b) == m
+        @test ncols(b) == n
+        @test nelems(b) == m * n
+        @test ndims(b) == 2
+        @test size(b) == (m, n)
+        @test size(b, 1) == m
+        @test size(b, 2) == n
+        @test size(b, 3) == 1
         delete(b)
     end
 end
@@ -74,25 +74,25 @@ a = mxarray(Bool, (6, 5, 4))
 
 # scalars
 
-a_mx = mxscalar(3.25)
+a_mx = mxarray(3.25)
 @test eltype(a_mx) == Float64
 @test size(a_mx) == (1, 1)
 @test jscalar(a_mx) == 3.25
 delete(a_mx)
 
-a_mx = mxscalar(int32(12))
+a_mx = mxarray(int32(12))
 @test eltype(a_mx) == Int32
 @test size(a_mx) == (1, 1)
 @test jscalar(a_mx) == int32(12)
 delete(a_mx)
 
-a_mx = mxscalar(true)
+a_mx = mxarray(true)
 @test eltype(a_mx) == Bool
 @test size(a_mx) == (1, 1)
 @test jscalar(a_mx)
 delete(a_mx)
 
-a_mx = mxscalar(false)
+a_mx = mxarray(false)
 @test eltype(a_mx) == Bool
 @test size(a_mx) == (1, 1)
 @test !jscalar(a_mx)
