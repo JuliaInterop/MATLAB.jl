@@ -17,6 +17,10 @@ macro mx_test_basic_types(ty)
         @test ncols(a) == 1
         @test nelems(a) == n
         @test ndims(a) == 2
+        @test size(a) == (n, 1)
+        @test size(a, 1) == n
+        @test size(a, 2) == 1
+        @test size(a, 3) == 1
         delete(a)
 
         b = mxarray($(ty), m, n)
@@ -26,6 +30,10 @@ macro mx_test_basic_types(ty)
         @test ncols(a) == n
         @test nelems(a) == m * n
         @test ndims(a) == 2
+        @test size(a) == (m, n)
+        @test size(a, 1) == m
+        @test size(a, 2) == n
+        @test size(a, 3) == 1
         delete(b)
     end
 end
