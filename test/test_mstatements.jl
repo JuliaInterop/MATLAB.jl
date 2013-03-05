@@ -7,18 +7,18 @@ using Test
 
 @test mstatement(:(-a)) == "-(a)"
 
-@test mstatement(:(a + b)) == "(a) + (b)" 
-@test mstatement(:(a - b)) == "(a) - (b)" 
-@test mstatement(:(a * b)) == "(a) * (b)" 
-@test mstatement(:(a / b)) == "(a) / (b)" 
-@test mstatement(:(a \ b)) == "(a) \\ (b)" 
-@test mstatement(:(a ^ b)) == "(a) ^ (b)" 
+@test mstatement(:(a + b)) == "(a) + (b)"
+@test mstatement(:(a - b)) == "(a) - (b)"
+@test mstatement(:(a * b)) == "(a) * (b)"
+@test mstatement(:(a / b)) == "(a) / (b)"
+@test mstatement(:(a \ b)) == "(a) \\ (b)"
+@test mstatement(:(a ^ b)) == "(a) ^ (b)"
 
-@test mstatement(:(a .+ b)) == "(a) .+ (b)" 
-@test mstatement(:(a .- b)) == "(a) .- (b)" 
-@test mstatement(:(a .* b)) == "(a) .* (b)" 
-@test mstatement(:(a ./ b)) == "(a) ./ (b)" 
-@test mstatement(:(a .^ b)) == "(a) .^ (b)" 
+@test mstatement(:(a .+ b)) == "(a) .+ (b)"
+@test mstatement(:(a .- b)) == "(a) .- (b)"
+@test mstatement(:(a .* b)) == "(a) .* (b)"
+@test mstatement(:(a ./ b)) == "(a) ./ (b)"
+@test mstatement(:(a .^ b)) == "(a) .^ (b)"
 
 @test mstatement(:(sin(x))) == "sin(x)"
 @test mstatement(:(hypot(x, y))) == "hypot(x, y)"
@@ -33,7 +33,7 @@ using Test
 @test mstatement(:([1 2 3; 4 5 6])) == "[[1, 2, 3]; [4, 5, 6]]"
 
 @test mstatement(:(x')) == "(x)'"
-@test mstatement(:(x.')) == "(x).'" 
+@test mstatement(:(x.')) == "(x).'"
 
 @test mstatement(:(plot(x, y, 'r'))) == "plot(x, y, 'r')"
 @test mstatement(:(plot(x, y, "r"))) == "plot(x, y, 'r')"

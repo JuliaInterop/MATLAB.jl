@@ -9,25 +9,25 @@ n = 6
 # test basic types in 1D & 2D
 
 macro mx_test_basic_types(ty)
-	quote
-		a = mxarray($(ty), n)
-		@test elsize(a) == sizeof($(ty))
-		@test eltype(a) === $(ty)
-		@test nrows(a) == n
-		@test ncols(a) == 1
-		@test nelems(a) == n
-		@test ndims(a) == 2
-		delete(a)
-		
-		b = mxarray($(ty), m, n)
-		@test elsize(a) == sizeof($(ty))
-		@test eltype(a) === $(ty)
-		@test nrows(a) == m
-		@test ncols(a) == n
-		@test nelems(a) == m * n
-		@test ndims(a) == 2
-		delete(b)
-	end
+    quote
+        a = mxarray($(ty), n)
+        @test elsize(a) == sizeof($(ty))
+        @test eltype(a) === $(ty)
+        @test nrows(a) == n
+        @test ncols(a) == 1
+        @test nelems(a) == n
+        @test ndims(a) == 2
+        delete(a)
+
+        b = mxarray($(ty), m, n)
+        @test elsize(a) == sizeof($(ty))
+        @test eltype(a) === $(ty)
+        @test nrows(a) == m
+        @test ncols(a) == n
+        @test nelems(a) == m * n
+        @test ndims(a) == 2
+        delete(b)
+    end
 end
 
 @mx_test_basic_types Float64
