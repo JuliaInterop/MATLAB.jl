@@ -2,6 +2,12 @@
 
 type MxArray
     ptr::Ptr{Void}
+    
+    function MxArray(p::Ptr{Void})
+        mx = new(p)
+        finalizer(mx, delete)
+        mx
+    end
 end
 
 # functions to create mxArray from Julia values/arrays
@@ -243,7 +249,10 @@ end
 # delete & duplicate
 
 function delete(mx::MxArray)
-    ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx.ptr)
+    if !(mx.ptr == C_NULL)
+        ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx.ptr)
+    end
+    mx.ptr = C_NULL
 end
 
 function duplicate(mx::MxArray)
