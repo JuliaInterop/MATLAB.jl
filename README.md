@@ -72,7 +72,7 @@ x = mxarray(a)      # converts a to a MATLAB variable
 
 MATLAB has its own memory management mechanism, and a MATLAB array is not able to use Julia's memory. Hence, the conversion from a Julia array to a MATLAB array involves deep-copy.
 
-When you finish using a MATLAB variable, you can call ``delete`` to reclaim the memory as
+When you finish using a MATLAB variable, you may call ``delete`` to free the memory. But this is optional, it will be deleted when reclaimed by the garbage collector.
 
 ```julia
 delete(x)
@@ -91,6 +91,9 @@ nrows(x)    # returns number of rows in x
 ncols(x)    # returns number of columns in x 
 nelems(x)   # returns number of elements in x
 ndims(x)    # returns number of dimensions in x
+size(x)     # returns the size of x as a tuple
+size(x, d)  # returns the size of x along a specific dimension
+
 eltype(x)   # returns element type of x (in Julia Type)
 elsize(x)   # return number of bytes per element
 
@@ -203,9 +206,6 @@ r1 = jarray(r1_mx)
 r2 = jarray(r2_mx)
 
 ...  # do other stuff on r1 and r2
-
-delete r1_mx
-delete r2_mx
 
 close(s1)  # close session s1
 close(s2)  # close session s2
