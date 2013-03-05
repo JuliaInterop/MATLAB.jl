@@ -17,4 +17,7 @@ end
 @test isequal(r1, a .* b)
 @test isequal(r2, a + b)
 
+@mget r1::Vector
+@test isequal(r1, vec(a .* b))
+
 close_default_msession()

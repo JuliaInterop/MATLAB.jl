@@ -181,6 +181,17 @@ function make_getvar_statement(v::Symbol)
     :( $(v) = MATLAB.get_variable($(Meta.quot(v))) )
 end
 
+function make_getvar_statement(ex::Expr)
+    if !(ex.head == :(::))
+        error("Invalid expression for @mget.")
+    end
+    v::Symbol = ex.args[1]
+    k::Symbol = ex.args[2]
+    
+    :( $(v) = MATLAB.get_variable($(Meta.quot(v)), $(k)) )
+end
+
+
 function _mget_multi(vs::Union(Symbol, Expr)...)
     nv = length(vs)
     if nv == 1
