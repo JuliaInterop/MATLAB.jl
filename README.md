@@ -69,9 +69,8 @@ You may also convert a Julia variable to MATLAB variable
 
 ```julia
 a = rand(m, n)
-x = mxarray(a)      # converts v to a MATLAB array
-
-x = mxscalar(1.2)   # creates a MATLAB scalar of value 1.2
+x = mxarray(a)     # converts v to a MATLAB array
+x = mxarray(1.2)   # cobverts a scalar 1.2 to a MATLAB variable
 ```
 
 MATLAB has its own memory management mechanism, and a MATLAB array is not able to use Julia's memory. Hence, the conversion from a Julia array to a MATLAB array involves deep-copy.
