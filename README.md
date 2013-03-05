@@ -24,16 +24,16 @@ The procedure to setup this package consists of three steps.
 	
 	To install ``csh`` in Debian/Ubuntu/Linux Mint, you may type in the following command in terminal:
 	
-```
-sudo apt-get install csh
-```
+	```
+	sudo apt-get install csh
+	```
 
 3. Clone this package from the GitHub repo to your Julia package directory, as
 
-```
-cd <your/julia/package/path>
-git clone https://github.com/lindahua/MATLAB.jl.git MATLAB
-```
+	```
+	cd <your/julia/package/path>
+	git clone https://github.com/lindahua/MATLAB.jl.git MATLAB
+	```
 
 ##### Mac OS X
 
@@ -41,9 +41,9 @@ git clone https://github.com/lindahua/MATLAB.jl.git MATLAB
 
 2. Export an environment variable ``MATLAB_HOME``. For example, if you are using MATLAB R2012b, you may add the following command to ``.profile``:
 	
-```
-export MATLAB_HOME=/Applications/MATLAB_R2012b.app
-```
+	```
+	export MATLAB_HOME=/Applications/MATLAB_R2012b.app
+	```
 
 3. Clone this package from the GitHub repo to your Julia package directory, as
 
