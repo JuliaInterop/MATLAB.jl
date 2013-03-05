@@ -158,6 +158,12 @@ end
 const _mx_create_numeric_mat = mxfunc(:mxCreateNumericMatrix_730)
 const _mx_create_logical_mat = mxfunc(:mxCreateLogicalMatrix_730)
 
+const _mx_create_numeric_arr = mxfunc(:mxCreateNumericArray_730)
+const _mx_create_logical_arr = mxfunc(:mxCreateLogicalArray_730)
+
+const _mx_create_double_scalar = mxfunc(:mxCreateDoubleScalar)
+const _mx_create_logical_scalar = mxfunc(:mxCreateLogicalScalar)
+
 # create zero arrays
 
 function mxarray{T<:MxNumerics}(ty::Type{T}, n::Integer)
@@ -183,6 +189,56 @@ function mxarray(ty::Type{Bool}, m::Integer, n::Integer)
     pm = ccall(_mx_create_logical_mat, Ptr{Void}, (mwSize, mwSize), m, n)
     MxArray(pm)
 end
+
+function mxarray{T<:MxNumerics}(ty::Type{T}, dims::Tuple)
+    ndim = length(dims)
+    _dims = Array(mwSize, ndim)
+    for i = 1 : ndim
+        _dims[i] = convert(mwSize, dims[i])
+    end
+        
+    pm = ccall(_mx_create_numeric_arr, Ptr{Void}, 
+        (mwSize, Ptr{mwSize}, mxClassID, mxComplexity), 
+        ndim, _dims, mxclassid(ty), mxREAL)
+        
+    MxArray(pm)
+end
+
+function mxarray(ty::Type{Bool}, dims::Tuple)
+    ndim = length(dims)
+    _dims = Array(mwSize, ndim)
+    for i = 1 : ndim
+        _dims[i] = convert(mwSize, dims[i])
+    end
+        
+    pm = ccall(_mx_create_numeric_arr, Ptr{Void}, 
+        (mwSize, Ptr{mwSize}), ndim, _dims)
+    MxArray(pm)
+end
+
+# create scalars
+
+function mxscalar(x::Float64)
+    pm = ccall(_mx_create_double_scalar, Ptr{Void}, (Cdouble,), x)
+    MxArray(pm)
+end
+
+function mxscalar(x::Bool)
+    pm = ccall(_mx_create_logical_scalar, Ptr{Void}, (Bool,), x)
+    MxArray(pm)
+end
+
+function mxscalar{T<:MxNumerics}(x::T)
+    pm = ccall(_mx_create_numeric_mat, Ptr{Void}, 
+        (mwSize, mwSize, mxClassID, mxComplexity),
+        1, 1, mxclassid(T), mxREAL)
+        
+    pdat = convert(Ptr{T}, ccall(_mx_get_data, Ptr{Void}, (Ptr{Void},), pm))
+    
+    pointer_to_array(pdat, (1,), false)[1] = x
+    MxArray(pm)
+end
+
 
 # delete & duplicate
 
@@ -232,8 +288,7 @@ function jscalar(mx::MxArray)
     if nelems(mx) != 1
         throw(ArgumentError("jscalar only applies to MATLAB arrays with exactly one element."))
     end
-    a = pointer_to_array(data_ptr(mx), (1, 1), false)
-    a[1]
+    pointer_to_array(data_ptr(mx), (1,), false)[1]
 end
 
 

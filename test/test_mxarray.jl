@@ -50,20 +50,61 @@ end
 @mx_test_basic_types Uint8
 @mx_test_basic_types Bool
 
+# test creating multi-dimensional arrays
+
+a = mxarray(Float64, (6, 5, 4))
+@test elsize(a) == sizeof(Float64)
+@test eltype(a) === Float64
+@test size(a) == (6, 5, 4)
+@test size(a, 1) == 6
+@test size(a, 2) == 5
+@test size(a, 3) == 4
+@test size(a, 4) == 1
+@test nelems(a) == 6 * 5 * 4
+
+a = mxarray(Bool, (6, 5, 4))
+@test elsize(a) == 1
+@test eltype(a) === Bool
+@test size(a) == (6, 5, 4)
+@test size(a, 1) == 6
+@test size(a, 2) == 5
+@test size(a, 3) == 4
+@test size(a, 4) == 1
+@test nelems(a) == 6 * 5 * 4
+
+# scalars
+
+a_mx = mxscalar(3.25)
+@test eltype(a_mx) == Float64
+@test size(a_mx) == (1, 1)
+@test jscalar(a_mx) == 3.25
+delete(a_mx)
+
+a_mx = mxscalar(int32(12))
+@test eltype(a_mx) == Int32
+@test size(a_mx) == (1, 1)
+@test jscalar(a_mx) == int32(12)
+delete(a_mx)
+
+a_mx = mxscalar(true)
+@test eltype(a_mx) == Bool
+@test size(a_mx) == (1, 1)
+@test jscalar(a_mx)
+delete(a_mx)
+
+a_mx = mxscalar(false)
+@test eltype(a_mx) == Bool
+@test size(a_mx) == (1, 1)
+@test !jscalar(a_mx)
+delete(a_mx)
+
+
 # test conversion between Julia and MATLAB array
 
 a = rand(5, 6)
 a_mx = mxarray(a)
 a2 = jarray(a_mx)
-
 @test isequal(a, a2)
-delete(a_mx)
-
-a = rand(1)
-a_mx = mxarray(a)
-av = jscalar(a_mx)
-
-@test av == a[1]
 delete(a_mx)
 
 a = rand(5)
