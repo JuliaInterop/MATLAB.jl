@@ -20,7 +20,15 @@ load_libmx()
 
 function get_default_startcmd()
     if OS_NAME == :Darwin
-        "/Applications/MATLAB_R2012b.app/bin/matlab"
+        matlab_homepath = get(ENV, "MATLAB_HOME", "")
+		if isempty(matlab_homepath)
+			error("The environment variable MATLAB_HOME must be set to specify the MATLAB path.")
+		end
+		binfile = joinpath(matlab_homepath, "bin/matlab")
+		if !isfile(binfile)
+			error("$(matlab_homepath) seems not a valid MATLAB home path.")
+		end
+		binfile
     else
         C_NULL        
     end    
