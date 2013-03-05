@@ -61,13 +61,17 @@ One can use the function ``mxarray`` to create MATLAB variables (of type ``MxArr
 mxarray(Float64, n)   # creates an n-by-1 MATLAB zero array of double valued type
 mxarray(Int32, m, n)  # creates an m-by-n MATLAB zero array of int32 valued type 
 mxarray(Bool, m, n)   # creates a MATLAB logical array of size m-by-n
+
+mxarray(Float64, (n1, n2, n3))  # creates a MATLAB array of size n1-by-n2-by-n3
 ```
 
 You may also convert a Julia variable to MATLAB variable
 
 ```julia
 a = rand(m, n)
-x = mxarray(a)      # converts a to a MATLAB variable
+x = mxarray(a)      # converts v to a MATLAB array
+
+x = mxscalar(1.2)   # creates a MATLAB scalar of value 1.2
 ```
 
 MATLAB has its own memory management mechanism, and a MATLAB array is not able to use Julia's memory. Hence, the conversion from a Julia array to a MATLAB array involves deep-copy.
