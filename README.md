@@ -37,13 +37,17 @@ The procedure to setup this package consists of three steps.
 
 ##### Mac OS X
 
-1. Make sure ``matlab`` is in executable path. 
-
-2. Export an environment variable ``MATLAB_HOME``. For example, if you are using MATLAB R2012b, you may add the following command to ``.profile``:
+1. Export an environment variable ``MATLAB_HOME``. For example, if you are using MATLAB R2012b, you may add the following command to ``.profile``:
 	
 	```
 	export MATLAB_HOME=/Applications/MATLAB_R2012b.app
 	```
+    
+2. Add MATLAB library path to your dynamic library loading path. For this, you may add the following command to ``.profile``:
+
+    ```
+    export DYLD_FALLBACK_LIBRARY_PATH="${MATLAB_HOME}/bin/maci64:${DYLD_FALLBACK_LIBRARY_PATH}"
+    ```
 
 3. Clone this package from the GitHub repo to your Julia package directory, as
 
