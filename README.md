@@ -51,6 +51,135 @@ The procedure to setup this package consists of three steps.
 
 ### MxArray class
 
+An instance of ``MxArray`` encapsulates a MATLAB variable. This package provides a series of functions to manipulate such instances.
+
+#### Create MATLAB variables in Julia
+
+One can use the function ``mxarray`` to create MATLAB variables (of type ``MxArray``), as follows
+
+```julia
+mxarray(Float64, n)   # creates an n-by-1 MATLAB zero array of double valued type
+mxarray(Int32, m, n)  # creates an m-by-n MATLAB zero array of int32 valued type 
+mxarray(Bool, m, n)   # creates a MATLAB logical array of size m-by-n
+```
+
+You may also convert a Julia variable to MATLAB variable
+
+```julia
+a = rand(m, n)
+x = mxarray(a)      # converts a to a MATLAB variable
+```
+
+MATLAB has its own memory management mechanism, and a MATLAB array is not able to use Julia's memory. Hence, the conversion from a Julia array to a MATLAB array involves deep-copy.
+
+When you finish using a MATLAB variable, you can call ``delete`` to reclaim the memory as
+
+```julia
+delete(x)
+```
+
+*Note:* if you put a MATLAB variable ``x`` to MATLAB engine session, then the MATLAB engine will take over the management of its life cylce, and you don't have to delete it explicitly.
 
 
+#### Access MATLAB variables
+
+You may access attributes and data of a MATLAB variable through the functions provided by this package.
+
+```julia
+ # suppose x is of type MxArray
+nrows(x)    # returns number of rows in x
+ncols(x)    # returns number of columns in x 
+nelems(x)   # returns number of elements in x
+ndims(x)    # returns number of dimensions in x
+eltype(x)   # returns element type of x (in Julia Type)
+elsize(x)   # return number of bytes per element
+
+data_ptr(x)   # returns pointer to data (in Ptr{T}), where T is eltype(x)
+```
+
+Many more to be added soon. (We aim at full coverage of mex C interface)
+
+#### Convert MATLAB variables to Julia
+
+```julia
+a = jarray(x)   # converts x to a Julia array
+```
+
+*Note:* Unlike the conversion from Julia to MATLAB, ``a`` is actually a view of ``x`` (created through ``pointer_to_array``), and does not own the memory. 
+
+
+### Use MATLAB Engine
+
+
+To evaluate expressions in MATLAB, one may open a MATLAB engine session and communicate with it.
+
+Below is a simple example that illustrates how one can use MATLAB from within Julia:
+
+```julia
+using MATLAB
+
+restart_default_msession()   # Open a default MATLAB session
+
+x = linspace(-10., 10., 500)
+
+@mput x                  # put x to MATLAB's workspace
+@matlab plot(x, sin(x))  # evaluate a MATLAB function
+
+close_default_msession()    # close the default session (optional)
+```
+
+You can put multiple variable and evaluate multiple statement by calling ``@mput`` and ``@matlab`` once:
+```julia
+
+x = linspace(-10., 10., 500)
+y = linspace(2., 3., 500)
+
+@mput x y
+@matlab begin
+    u = x + y
+	v = x - y
+end
+
+u = jarray(get_mvariable(:u))  # retrieve the result from MATLAB session
+v = jarray(get_mvariable(:v))
+
+```
+
+*Note:* There can be multiple (reasonable) ways to convert a MATLAB variable to Julia array. For example, MATLAB represents a scalar using a 1-by-1 matrix. Here we have two choice in terms of converting such a matrix back to Julia: (1) convert to a scalar number, or (2) convert to a matrix of size 1-by-1.
+
+Here, ``get_mvariable`` returns an instance of ``MxArray``, and the user can make his own choice by calling ``jarray`` or ``jscalar`` to convert it to a Julia variable.
+
+### Advanced use of MATLAB Engines
+
+This package provides a series of functions for users to control the communication with MATLAB sessions.
+
+Here is an example:
+
+```julia
+s1 = MSession()    # creates a MATLAB session
+s2 = MSession(0)   # creates a MATLAB session without recording output
+
+x = rand(3, 4)
+put_variable(s1, :x, x)  # put x to session s1
+
+y = rand(2, 3)
+put_variable(s2, :y, y)  # put y to session s2
+
+eval_string(s1, "r = sin(x)")  # evaluate sin(x) in session s1
+eval_string(s2, "r = sin(y)")  # evaluate sin(y) in session s2
+
+r1_mx = get_mvariable(s1, :r)  # get r from s1
+r2_mx = get_mvariable(s2, :r)  # get r from s2
+
+r1 = jarray(r1_mx)
+r2 = jarray(r2_mx)
+
+...  # do other stuff on r1 and r2
+
+delete r1_mx
+delete r2_mx
+
+close(s1)  # close session s1
+close(s2)  # close session s2
+```
 
