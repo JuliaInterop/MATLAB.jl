@@ -37,3 +37,5 @@ using Test
 
 @test mstatement(:(plot(x, y, 'r'))) == "plot(x, y, 'r')"
 @test mstatement(:(plot(x, y, "r"))) == "plot(x, y, 'r')"
+
+@test mstatement(:((x, y) = fun(z))) == "[x, y] = fun(z)"

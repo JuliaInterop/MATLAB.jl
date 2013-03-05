@@ -77,7 +77,7 @@ function write_mstatement(io::IO, ex::Expr)
 			print(io, ")")
 		end
 		
-	elseif h == (:vcat) || h == (:hcat) || h == (:row)
+	elseif h == (:vcat) || h == (:hcat) || h == (:row) || h == (:tuple)
 		print(io, "[")
 		na = length(a)
 		if na > 0

@@ -4,7 +4,7 @@ module MATLAB
 	export MxArray, mxClassID, mxComplexity
 	export mxclassid
 	export classid, nrows, ncols, nelems, ndims, elsize
-	export mxarray, delete, duplicate, jarray
+	export mxarray, delete, duplicate, jarray, jscalar, jvector
 	
 	# mstatments
 	export mstatement

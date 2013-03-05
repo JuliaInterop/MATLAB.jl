@@ -186,6 +186,22 @@ function jarray(mx::MxArray)
 	pointer_to_array(data_ptr(mx), (m, n), false)
 end
 
+function jvector(mx::MxArray)
+	T = eltype(mx)
+	m = convert(Int, nrows(mx))
+	n = convert(Int, ncols(mx))
+	if !(ndims(mx) == 2 && (m == 1 || n == 1))
+		throw(ArgumentError("jvector only applies to vectors."))
+	end
+	pointer_to_array(data_ptr(mx), (m * n,), false)
+end
 
+function jscalar(mx::MxArray)
+	if nelems(mx) != 1
+		throw(ArgumentError("jscalar only applies to MATLAB arrays with exactly one element."))
+	end
+	a = pointer_to_array(data_ptr(mx), (1, 1), false)
+	a[1]
+end
 
 

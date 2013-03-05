@@ -103,6 +103,8 @@ Many more to be added soon. (We aim at full coverage of mex C interface)
 
 ```julia
 a = jarray(x)   # converts x to a Julia array
+a = jvector(x)  # converts x to a Julia vector (1D array) when x is a vector
+a = jscalar(x)  # converts x to a Julia scalar
 ```
 
 *Note:* Unlike the conversion from Julia to MATLAB, ``a`` is actually a view of ``x`` (created through ``pointer_to_array``), and does not own the memory. 
@@ -110,6 +112,7 @@ a = jarray(x)   # converts x to a Julia array
 
 ### Use MATLAB Engine
 
+#### Basic Use
 
 To evaluate expressions in MATLAB, one may open a MATLAB engine session and communicate with it.
 
@@ -147,9 +150,34 @@ v = jarray(get_mvariable(:v))
 
 *Note:* There can be multiple (reasonable) ways to convert a MATLAB variable to Julia array. For example, MATLAB represents a scalar using a 1-by-1 matrix. Here we have two choice in terms of converting such a matrix back to Julia: (1) convert to a scalar number, or (2) convert to a matrix of size 1-by-1.
 
-Here, ``get_mvariable`` returns an instance of ``MxArray``, and the user can make his own choice by calling ``jarray`` or ``jscalar`` to convert it to a Julia variable.
+Here, ``get_mvariable`` returns an instance of ``MxArray``, and the user can make his own choice by calling ``jarray``, ``jvector``, or ``jscalar`` to convert it to a Julia variable.
 
-### Advanced use of MATLAB Engines
+#### Caveats of @matlab
+
+Note that some MATLAB expressions is not a valid Julia expression. This package provides some ways to work around this in the ``@matlab`` macro:
+
+```julia
+ # MATLAB uses single-quote for strings, while Julia uses double-quote. 
+@matlab sprintf("%d", 10)   # ==> MATLAB: sprintf('%d', 10)
+
+ # MATLAB does not allow [x, y] on the left hand side
+x = linspace(-5., 5. 100)
+y = x
+@mput x y
+@matlab begin
+    (xx, yy) = meshgrid(x, y)  # ==> MATLAB: [xx, yy] = meshgrid(x, y)
+	mesh(xx, yy, xx.^2 + yy.^2)
+end
+```
+
+While we try to cover most MATLAB statements, some valid MATLAB statements remain unsupported by ``@matlab``. For this case, one may always call the ``eval_string`` function, as follows
+
+```julia
+eval_string("[u, v] = myfun(x, y);")
+```
+
+
+#### Advanced use of MATLAB Engines
 
 This package provides a series of functions for users to control the communication with MATLAB sessions.
 

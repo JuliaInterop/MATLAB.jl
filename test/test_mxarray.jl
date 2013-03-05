@@ -48,9 +48,26 @@ a = rand(5, 6)
 a_mx = mxarray(a)
 a2 = jarray(a_mx)
 
-println(a_mx)
-println(a)
-println(a2)
-
 @test isequal(a, a2)
 delete(a_mx)
+
+a = rand(1)
+a_mx = mxarray(a)
+av = jscalar(a_mx)
+
+@test av == a[1]
+delete(a_mx)
+
+a = rand(5)
+a_mx = mxarray(a)
+a2 = jvector(a_mx)
+@test isequal(a, a2)
+delete(a_mx)
+
+a_t = reshape(a, 1, 5)
+a_mx = mxarray(a_t)
+a2 = jvector(a_mx)
+@test isequal(a, a2)
+delete(a_mx)
+
+
