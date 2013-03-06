@@ -8,7 +8,7 @@ n = 6
 
 # test basic types in 1D & 2D
 
-macro mx_test_basic_types(ty)
+macro mx_test_basic_types(ty, testfun)
     quote
         a = mxarray($(ty), n)
         @test elsize(a) == sizeof($(ty))
@@ -21,6 +21,7 @@ macro mx_test_basic_types(ty)
         @test size(a, 1) == n
         @test size(a, 2) == 1
         @test size(a, 3) == 1
+        @test $(testfun)(a)
         delete(a)
 
         b = mxarray($(ty), m, n)
@@ -34,21 +35,34 @@ macro mx_test_basic_types(ty)
         @test size(b, 1) == m
         @test size(b, 2) == n
         @test size(b, 3) == 1
+        @test $(testfun)(b)
         delete(b)
     end
 end
 
-@mx_test_basic_types Float64
-@mx_test_basic_types Float32
-@mx_test_basic_types Int64
-@mx_test_basic_types Uint64
-@mx_test_basic_types Int32
-@mx_test_basic_types Uint32
-@mx_test_basic_types Int16
-@mx_test_basic_types Uint16
-@mx_test_basic_types Int8
-@mx_test_basic_types Uint8
-@mx_test_basic_types Bool
+# empty array
+
+a = mxempty()
+@test nrows(a) == 0
+@test ncols(a) == 0
+@test nelems(a) == 0
+@test ndims(a) == 2
+@test eltype(a) == Float64
+@test is_empty(a)
+
+# basic arrays
+
+@mx_test_basic_types Float64 is_double
+@mx_test_basic_types Float32 is_single
+@mx_test_basic_types Int64   is_int64
+@mx_test_basic_types Uint64  is_uint64
+@mx_test_basic_types Int32   is_int32
+@mx_test_basic_types Uint32  is_uint32
+@mx_test_basic_types Int16   is_int16
+@mx_test_basic_types Uint16  is_uint16
+@mx_test_basic_types Int8    is_int8
+@mx_test_basic_types Uint8   is_uint8
+@mx_test_basic_types Bool    is_logical
 
 # test creating multi-dimensional arrays
 
@@ -61,6 +75,8 @@ a = mxarray(Float64, (6, 5, 4))
 @test size(a, 3) == 4
 @test size(a, 4) == 1
 @test nelems(a) == 6 * 5 * 4
+@test is_numeric(a)
+@test !is_sparse(a)
 
 a = mxarray(Bool, (6, 5, 4))
 @test elsize(a) == 1
@@ -71,6 +87,8 @@ a = mxarray(Bool, (6, 5, 4))
 @test size(a, 3) == 4
 @test size(a, 4) == 1
 @test nelems(a) == 6 * 5 * 4
+@test is_logical(a)
+@test !is_sparse(a)
 
 # scalars
 
@@ -127,15 +145,9 @@ s_mx = mxarray(s)
 @test ncols(s_mx) == length(s)
 @test nelems(s_mx) == length(s)
 @test ndims(s_mx) == 2
+@test is_char(s_mx)
 
 s2 = jstring(s_mx)
 @test s == s2
 delete(s_mx)
-
-
-
-
-
-
-
 

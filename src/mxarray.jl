@@ -24,7 +24,7 @@ function duplicate(mx::MxArray)
     MxArray(pm)
 end
 
-copy(mx::Array) = duplicate(mx)
+copy(mx::MxArray) = duplicate(mx)
 
 # functions to create mxArray from Julia values/arrays
 
@@ -121,6 +121,27 @@ const _mx_get_elemsize = mxfunc(:mxGetElementSize)
 const _mx_get_data = mxfunc(:mxGetData)
 const _mx_get_dims = mxfunc(:mxGetDimensions_730)
 
+const _mx_is_double = mxfunc(:mxIsDouble)
+const _mx_is_single = mxfunc(:mxIsSingle)
+const _mx_is_int64  = mxfunc(:mxIsInt64)
+const _mx_is_uint64 = mxfunc(:mxIsUint64)
+const _mx_is_int32  = mxfunc(:mxIsInt32)
+const _mx_is_uint32 = mxfunc(:mxIsUint32)
+const _mx_is_int16  = mxfunc(:mxIsInt16)
+const _mx_is_uint16 = mxfunc(:mxIsUint16)
+const _mx_is_int8   = mxfunc(:mxIsInt8)
+const _mx_is_uint8  = mxfunc(:mxIsUint8)
+const _mx_is_char   = mxfunc(:mxIsChar)
+
+const _mx_is_numeric = mxfunc(:mxIsNumeric)
+const _mx_is_logical = mxfunc(:mxIsLogical)
+const _mx_is_complex = mxfunc(:mxIsComplex)
+const _mx_is_sparse  = mxfunc(:mxIsSparse)
+const _mx_is_empty   = mxfunc(:mxIsEmpty)
+const _mx_is_struct  = mxfunc(:mxIsStruct)
+const _mx_is_cell    = mxfunc(:mxIsCell) 
+
+
 # getting simple attributes
 
 macro mxget_attr(fun, ret)
@@ -136,6 +157,32 @@ ndims(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_ndims, mwSize))
 eltype(mx::MxArray)  = mxclassid_to_type(classid(mx))
 elsize(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_elemsize, Uint))
 data_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_data, Ptr{Void}))
+
+# validation functions
+
+macro mx_test_is(fun)
+    :( ccall($(fun)::Ptr{Void}, Bool, (Ptr{Void},), mx.ptr) )
+end
+
+is_double(mx::MxArray) = @mx_test_is(_mx_is_double)
+is_single(mx::MxArray) = @mx_test_is(_mx_is_single)
+is_int64(mx::MxArray)  = @mx_test_is(_mx_is_int64)
+is_uint64(mx::MxArray) = @mx_test_is(_mx_is_uint64)
+is_int32(mx::MxArray)  = @mx_test_is(_mx_is_int32)
+is_uint32(mx::MxArray) = @mx_test_is(_mx_is_uint32)
+is_int16(mx::MxArray)  = @mx_test_is(_mx_is_int16)
+is_uint16(mx::MxArray) = @mx_test_is(_mx_is_uint16)
+is_int8(mx::MxArray)   = @mx_test_is(_mx_is_int8)
+is_uint8(mx::MxArray)  = @mx_test_is(_mx_is_uint8)
+
+is_numeric(mx::MxArray) = @mx_test_is(_mx_is_numeric)
+is_logical(mx::MxArray) = @mx_test_is(_mx_is_logical)
+is_complex(mx::MxArray) = @mx_test_is(_mx_is_complex)
+is_sparse(mx::MxArray)  = @mx_test_is(_mx_is_sparse)
+is_struct(mx::MxArray)  = @mx_test_is(_mx_is_struct)
+is_cell(mx::MxArray)    = @mx_test_is(_mx_is_cell)
+is_char(mx::MxArray)    = @mx_test_is(_mx_is_char)
+is_empty(mx::MxArray)   = @mx_test_is(_mx_is_empty)
 
 # size function
 
@@ -210,6 +257,8 @@ function mxarray{T<:MxNumerics}(ty::Type{T}, m::Integer, n::Integer)
         m, n, mxclassid(T), mxREAL)
     MxArray(pm)
 end
+
+mxempty() = mxarray(Float64, 0, 0)
 
 function mxarray(ty::Type{Bool}, n::Integer)
     pm = ccall(_mx_create_logical_mat, Ptr{Void}, (mwSize, mwSize), n, 1)
@@ -345,11 +394,15 @@ end
 # deep conversion from MATLAB variable to Julia array
 
 function to_julia(mx::MxArray)
-    copy(jarray(mx))
+    is_char(mx) ? jstring(mx) : jarray(mx)
 end
 
 to_julia(mx::MxArray, ty::Type{Array}) = copy(jarray(mx))
 to_julia(mx::MxArray, ty::Type{Vector}) = copy(jvector(mx))
 to_julia(mx::MxArray, ty::Type{Matrix}) = copy(jmatrix(mx))
 to_julia(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
+to_julia(mx::MxArray, ty::Type{String}) = jstring(mx)
+to_julia(mx::MxArray, ty::Type{ASCIIString}) = jstring(mx)
+
+
 
