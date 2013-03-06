@@ -501,28 +501,45 @@ mxstruct(d::Associative) = mxstruct(collect(d)...)
 ###########################################################
 
 const _mx_get_string = mxfunc(:mxGetString_730)
+const _mx_get_field_bynum = mxfunc(:mxGetFieldByNumber_730)
 
 # shallow conversion from MATLAB variable to Julia array
 
-function jarray(mx::MxArray)
-    pointer_to_array(data_ptr(mx), size(mx), false)
+function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
+    if is_numeric(mx) || is_logical(mx)
+        @assert !is_sparse(mx)
+        T = eltype(mx)
+        a = Array(T, siz)
+        ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint), 
+            a, data_ptr(mx), sizeof(T) * length(a))
+        a
+        #pointer_to_array(data_ptr(mx), siz, false)
+    elseif is_cell(mx)
+        a = Array(Any, siz)
+        for i = 1 : n
+            a[i] = jvariable(get_cell(a, i))
+        end
+        a
+    else
+        throw(ArgumentError("$(fun) only applies to numeric, logical or cell arrays."))
+    end
 end
 
-function jvector(mx::MxArray)
-    pointer_to_array(data_ptr(mx), (nelems(mx),), false)
-end
+jarray(mx::MxArray) = _jarrayx("jarray", mx, size(mx))
+jvector(mx::MxArray) = _jarrayx("jvector", mx, (nelems(mx),))
 
 function jmatrix(mx::MxArray)
     if ndims(mx) != 2
         throw(ArgumentError("jmatrix only applies to MATLAB arrays with ndims == 2."))
     end
-    jarray(mx)
+    _jarrayx("jmatrix", mx, (nrows(mx), ncols(mx)))
 end
 
 function jscalar(mx::MxArray)
-    if nelems(mx) != 1
-        throw(ArgumentError("jscalar only applies to MATLAB arrays with exactly one element."))
+    if !(nelems(mx) == 1 && (is_logical(mx) || is_numeric(mx)))
+        throw(ArgumentError("jscalar only applies to numeric or logical arrays with exactly one element."))
     end
+    @assert !is_sparse(mx)
     pointer_to_array(data_ptr(mx), (1,), false)[1]
 end
 
@@ -537,19 +554,49 @@ function jstring(mx::MxArray)
     bytestring(pointer(tmp))
 end
 
+function jdict(mx::MxArray)
+    if !(is_struct(mx) && nelems(mx) == 1)
+        throw(ArgumentError("jdict only applies to a single struct."))
+    end
+    nf = nfields(mx)
+    fnames = Array(String, nf)
+    fvals = Array(Any, nf)
+    for i = 1 : nf
+        fnames[i] = get_fieldname(mx, 1)
+        pv::Ptr{Void} = ccall(_mx_get_field_bynum, 
+            Ptr{Void}, (Ptr{Void}, mwIndex, Cint),
+            mx.ptr, 0, i-1)
+        fx = MxArray(pv)
+        fvals[i] = jvariable(fx)
+    end
+    Dict(fnames, fvals)
+end
+
+function jvariable(mx::MxArray)
+    if is_numeric(mx) || is_logical(mx)
+        nelems(mx) == 1 ? jscalar(mx) :
+        ndims(mx) == 2 ? (ncols(mx) == 1 ? jvector(mx) : jmatrix(mx)) :
+        jarray(mx)
+    elseif ischar(mx) && nrows(mx) == 1
+        jstring(mx)
+    elseif is_cell(mx)
+        ndims(mx) == 2 ? (ncols(mx) == 1 ? jvector(mx) : jmatrix(mx)) :
+        jarray(mx)
+    elseif is_struct(mx) && nelems(mx) == 1
+        jdict(mx)    
+    else
+        throw(ArgumentError("Unsupported kind of variable."))
+    end
+end
 
 # deep conversion from MATLAB variable to Julia array
 
-function to_julia(mx::MxArray)
-    is_char(mx) ? jstring(mx) : jarray(mx)
-end
-
-to_julia(mx::MxArray, ty::Type{Array}) = copy(jarray(mx))
-to_julia(mx::MxArray, ty::Type{Vector}) = copy(jvector(mx))
-to_julia(mx::MxArray, ty::Type{Matrix}) = copy(jmatrix(mx))
-to_julia(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
-to_julia(mx::MxArray, ty::Type{String}) = jstring(mx)
-to_julia(mx::MxArray, ty::Type{ASCIIString}) = jstring(mx)
-
+jvariable(mx::MxArray, ty::Type{Array})  = jarray(mx)
+jvariable(mx::MxArray, ty::Type{Vector}) = jvector(mx)
+jvariable(mx::MxArray, ty::Type{Matrix}) = jmatrix(mx)
+jvariable(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
+jvariable(mx::MxArray, ty::Type{String}) = jstring(mx)::ASCIIString
+jvariable(mx::MxArray, ty::Type{ASCIIString}) = jstring(mx)::ASCIIString
+jvariable(mx::MxArray, ty::Type{Dict}) = jdict(mx)
 
 

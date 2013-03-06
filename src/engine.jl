@@ -144,11 +144,8 @@ end
 
 get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
 
-get_variable(name::Symbol) = to_julia(get_mvariable(name))
-
-function get_variable(name::Symbol, kind)
-    to_julia(get_mvariable(name), kind)
-end
+get_variable(name::Symbol) = jvariable(get_mvariable(name))
+get_variable(name::Symbol, kind) = jvariable(get_mvariable(name), kind)
 
 
 ###########################################################
