@@ -20,4 +20,9 @@ end
 @mget r1::Vector
 @test isequal(r1, vec(a .* b))
 
+s = sparse([1. 0. 0.; 2. 3. 0.; 0. 4. 5.])
+put_variable(:s, s)
+s2 = get_variable(:s)
+@test isequal(s, s2)
+
 close_default_msession()

@@ -188,7 +188,6 @@ function make_getvar_statement(ex::Expr)
     :( $(v) = MATLAB.get_variable($(Meta.quot(v)), $(k)) )
 end
 
-
 function _mget_multi(vs::Union(Symbol, Expr)...)
     nv = length(vs)
     if nv == 1
@@ -209,4 +208,12 @@ end
 macro matlab(ex)
     :( MATLAB.eval_string($(mstatement(ex))) )
 end
+
+
+
+
+
+
+
+
 

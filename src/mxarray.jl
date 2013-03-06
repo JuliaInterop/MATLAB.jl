@@ -127,6 +127,10 @@ const _mx_get_elemsize = mxfunc(:mxGetElementSize)
 const _mx_get_data = mxfunc(:mxGetData)
 const _mx_get_dims = mxfunc(:mxGetDimensions_730)
 const _mx_get_nfields = mxfunc(:mxGetNumberOfFields)
+const _mx_get_pr = mxfunc(:mxGetPr)
+const _mx_get_pi = mxfunc(:mxGetPi)
+const _mx_get_ir = mxfunc(:mxGetIr_730)
+const _mx_get_jc = mxfunc(:mxGetJc_730)
 
 const _mx_is_double = mxfunc(:mxIsDouble)
 const _mx_is_single = mxfunc(:mxIsSingle)
@@ -240,6 +244,9 @@ const _mx_create_logical_arr = mxfunc(:mxCreateLogicalArray_730)
 
 const _mx_create_double_scalar = mxfunc(:mxCreateDoubleScalar)
 const _mx_create_logical_scalar = mxfunc(:mxCreateLogicalScalar)
+
+const _mx_create_sparse = mxfunc(:mxCreateSparse_730)
+const _mx_create_sparse_logical = mxfunc(:mxCreateSparseLogicalMatrix_730)
 
 const _mx_create_string = mxfunc(:mxCreateString)
 #const _mx_create_char_array = mxfunc(:mxCreateCharArray_730)
@@ -364,6 +371,60 @@ function mxarray{T<:MxNumOrBool}(a::Array{T})
 end
 
 mxarray(a::BitArray) = mxarray(convert(Array{Bool}, a))
+
+# sparse matrix
+
+function mxsparse(ty::Type{Float64}, m::Integer, n::Integer, nzmax::Integer)
+    pm = ccall(_mx_create_sparse, Ptr{Void},
+        (mwSize, mwSize, mwSize, mxComplexity), m, n, nzmax, mxREAL)
+    MxArray(pm)
+end
+
+function mxsparse(ty::Type{Bool}, m::Integer, n::Integer, nzmax::Integer)
+    pm = ccall(_mx_create_sparse_logical, Ptr{Void},
+        (mwSize, mwSize, mwSize), m, n, nzmax)
+    MxArray(pm)
+end
+
+function _copy_sparse_mat{V,I}(a::SparseMatrixCSC{V,I}, 
+    ir_p::Ptr{mwIndex}, jc_p::Ptr{mwIndex}, pr_p::Ptr{V})
+    
+    colptr::Vector{I} = a.colptr
+    rinds::Vector{I} = a.rowval
+    v::Vector{V} = a.nzval
+    n::Int = a.n
+    nnz::Int = length(v)
+    
+    # Note: ir and jc contain zero-based indices
+    
+    ir = pointer_to_array(ir_p, (nnz,), false)
+    for i = 1 : nnz    
+        ir[i] = rinds[i] - 1
+    end
+    
+    jc = pointer_to_array(jc_p, (n+1,), false)
+    for i = 1 : n+1
+        jc[i] = colptr[i] - 1
+    end
+    
+    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint), pr_p, v, nnz * sizeof(V))
+end
+
+function mxarray{V<:Union(Float64,Bool),I}(a::SparseMatrixCSC{V,I})
+    m::Int = a.m
+    n::Int = a.n
+    nnz = length(a.nzval)
+    @assert nnz == a.colptr[n+1]-1
+    
+    mx = mxsparse(V, m, n, nnz)
+    
+    ir_p = ccall(_mx_get_ir, Ptr{mwIndex}, (Ptr{Void},), mx.ptr)
+    jc_p = ccall(_mx_get_jc, Ptr{mwIndex}, (Ptr{Void},), mx.ptr)
+    pr_p = ccall(_mx_get_pr, Ptr{V}, (Ptr{Void},), mx.ptr)
+
+    _copy_sparse_mat(a, ir_p, jc_p, pr_p)
+    mx
+end
 
 
 # char arrays and string
@@ -569,6 +630,42 @@ function jscalar(mx::MxArray)
     pointer_to_array(data_ptr(mx), (1,), false)[1]
 end
 
+function _jsparse{T<:MxNumOrBool}(ty::Type{T}, mx::MxArray)
+    m = nrows(mx)
+    n = ncols(mx)
+    ir_ptr = ccall(_mx_get_ir, Ptr{mwIndex}, (Ptr{Void},), mx.ptr)
+    jc_ptr = ccall(_mx_get_jc, Ptr{mwIndex}, (Ptr{Void},), mx.ptr)
+    pr_ptr = ccall(_mx_get_pr, Ptr{T}, (Ptr{Void},), mx.ptr)
+    
+    jc_a::Vector{mwIndex} = pointer_to_array(jc_ptr, (n+1,), false)
+    nnz = jc_a[n+1]
+    
+    ir = Array(Int, nnz)
+    jc = Array(Int, n+1)
+    
+    ir_x = pointer_to_array(ir_ptr, (nnz,), false)
+    for i = 1 : nnz
+        ir[i] = ir_x[i] + 1
+    end
+    
+    jc_x = pointer_to_array(jc_ptr, (n+1,), false)
+    for i = 1 : n+1
+        jc[i] = jc_x[i] + 1
+    end
+    
+    pr::Vector{T} = copy(pointer_to_array(pr_ptr, (nnz,), false))
+    SparseMatrixCSC(m, n, jc, ir, pr)
+end
+
+
+function jsparse(mx::MxArray)
+    if !is_sparse(mx)
+        throw(ArgumentError("jsparse only applies to sparse matrices."))
+    end
+    _jsparse(eltype(mx), mx)
+end
+
+
 function jstring(mx::MxArray)
     if !(classid(mx) == mxCHAR_CLASS && ndims(mx) == 2 && nrows(mx) == 1)
         throw(ArgumentError("jstring only applies to strings (i.e. char vectors)."))
@@ -600,9 +697,13 @@ end
 
 function jvariable(mx::MxArray)
     if is_numeric(mx) || is_logical(mx)
-        nelems(mx) == 1 ? jscalar(mx) :
-        ndims(mx) == 2 ? (ncols(mx) == 1 ? jvector(mx) : jmatrix(mx)) :
-        jarray(mx)
+        if !is_sparse(mx)
+            nelems(mx) == 1 ? jscalar(mx) :
+            ndims(mx) == 2 ? (ncols(mx) == 1 ? jvector(mx) : jmatrix(mx)) :
+            jarray(mx)
+        else
+            jsparse(mx)
+        end
     elseif is_char(mx) && nrows(mx) == 1
         jstring(mx)
     elseif is_cell(mx)
@@ -624,5 +725,5 @@ jvariable(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
 jvariable(mx::MxArray, ty::Type{String}) = jstring(mx)::ASCIIString
 jvariable(mx::MxArray, ty::Type{ASCIIString}) = jstring(mx)::ASCIIString
 jvariable(mx::MxArray, ty::Type{Dict}) = jdict(mx)
-
+jvariable(mx::MxArray, ty::Type{SparseMatrixCSC}) = jsparse(mx)
 

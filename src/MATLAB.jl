@@ -14,7 +14,7 @@ module MATLAB
     export mxarray, mxempty, delete, duplicate
     export mxcellarray, get_cell, set_cell
     export mxstruct, nfields, get_fieldname, get_field, set_field
-    export jvariable, jarray, jscalar, jvector, jmatrix, jstring, jdict
+    export jvariable, jarray, jscalar, jvector, jmatrix, jsparse, jstring, jdict
 
     # mstatments
     export mstatement

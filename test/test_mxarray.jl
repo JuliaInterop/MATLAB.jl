@@ -136,6 +136,34 @@ a2 = jvector(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
+# sparse matrices
+
+a = sprand(8, 9, 0.2)
+a_mx = mxarray(a)
+@test is_double(a_mx)
+@test is_sparse(a_mx)
+@test nrows(a_mx) == 8
+@test ncols(a_mx) == 9
+
+a2 = jsparse(a_mx)
+@test size(a2) == (8, 9)
+@test nnz(a2) == nnz(a)
+@test isequal(a2, a)
+delete(a_mx)
+
+a = sparse(convert(Array{Bool}, rand(8, 9) .< 0.3))
+a_mx = mxarray(a)
+@test is_logical(a_mx)
+@test is_sparse(a_mx)
+@test nrows(a_mx) == 8
+@test ncols(a_mx) == 9
+
+a2 = jsparse(a_mx)
+@test size(a2) == (8, 9)
+@test nnz(a2) == nnz(a)
+@test isequal(a2, a)
+delete(a_mx)
+
 # strings
 
 s = "MATLAB.jl"
