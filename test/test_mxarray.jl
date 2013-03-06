@@ -182,6 +182,30 @@ s_mx = mxcellarray(s)
 @test jstring(get_cell(s_mx, 2)) == "efg"
 delete(s_mx)
 
-gc()
+# struct 
+
+a = mxstruct("abc", "efg", "xyz")
+@test is_struct(a)
+@test nfields(a) == 3
+@test nrows(a) == 1
+@test ncols(a) == 1
+@test nelems(a) == 1
+@test ndims(a) == 2
+
+@test get_fieldname(a, 1) == "abc"
+@test get_fieldname(a, 2) == "efg"
+@test get_fieldname(a, 3) == "xyz"
+delete(a)
+
+s = {"name"=>"MATLAB", "version"=>12.0, "data"=>[1,2,3]}
+a = mxstruct(s)
+# @test is_struct(a)
+# @test nfields(a) == 3
+# @test jstring(get_field(a, "name")) == "MATLAB"
+# @test jscalar(get_field(a, "version")) == 12.0
+# @test isequal(jvector(get_field(a, "data")), [1,2,3])
+# delete(a)
+
+#gc()
 
 

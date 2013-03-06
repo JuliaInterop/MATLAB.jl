@@ -126,6 +126,7 @@ const _mx_get_ndims  = mxfunc(:mxGetNumberOfDimensions_730)
 const _mx_get_elemsize = mxfunc(:mxGetElementSize)
 const _mx_get_data = mxfunc(:mxGetData)
 const _mx_get_dims = mxfunc(:mxGetDimensions_730)
+const _mx_get_nfields = mxfunc(:mxGetNumberOfFields)
 
 const _mx_is_double = mxfunc(:mxIsDouble)
 const _mx_is_single = mxfunc(:mxIsSingle)
@@ -163,6 +164,8 @@ ndims(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_ndims, mwSize))
 eltype(mx::MxArray)  = mxclassid_to_type(classid(mx))
 elsize(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_elemsize, Uint))
 data_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_data, Ptr{Void}))
+
+nfields(mx::MxArray) = convert(Int, @mxget_attr(_mx_get_nfields, Cint))
 
 # validation functions
 
@@ -250,6 +253,9 @@ const _mx_create_struct_array = mxfunc(:mxCreateStructArray_730)
 const _mx_get_cell = mxfunc(:mxGetCell_730)
 const _mx_set_cell = mxfunc(:mxSetCell_730)
 
+const _mx_get_field = mxfunc(:mxGetField_730)
+const _mx_set_field = mxfunc(:mxSetField_730)
+const _mx_get_fieldname = mxfunc(:mxGetFieldNameByNumber)
 
 # create zero arrays
 
@@ -387,6 +393,7 @@ function get_cell(mx::MxArray, i::Integer)
 end
 
 function set_cell(mx::MxArray, i::Integer, v::MxArray)    
+    v.own = false
     ccall(_mx_set_cell, Void, (Ptr{Void}, mwIndex, Ptr{Void}), 
         mx.ptr, i - 1, v.ptr)
 end
@@ -419,6 +426,72 @@ function mxcellarray(a::Array)
 end
 
 mxarray(a::Array) = mxcellarray(a)
+
+# struct arrays
+
+function _fieldname_array(fieldnames::ASCIIString...)
+    n = length(fieldnames)
+    a = Array(Ptr{Uint8}, n)
+    for i = 1 : n
+        a[i] = convert(Ptr{Uint8}, fieldnames[i])
+    end
+    a
+end
+
+function mxstruct(fns::Vector{ASCIIString})
+    a = _fieldname_array(fns...)
+    pm = ccall(_mx_create_struct_matrix, Ptr{Void}, 
+        (mwSize, mwSize, Cint, Ptr{Ptr{Uint8}}), 
+        1, 1, length(a), a)
+    MxArray(pm)
+end
+
+function mxstruct(fn1::ASCIIString, fnr::ASCIIString...)
+    a = _fieldname_array(fn1, fnr...)
+    pm = ccall(_mx_create_struct_matrix, Ptr{Void}, 
+        (mwSize, mwSize, Cint, Ptr{Ptr{Uint8}}), 
+        1, 1, length(a), a)
+    MxArray(pm)
+end
+
+function set_field(mx::MxArray, i::Integer, f::ASCIIString, v::MxArray)
+    v.ptr = false
+    ccall(_mx_set_field, Void, 
+        (Ptr{Void}, mwIndex, Ptr{Uint8}, Ptr{Void}), 
+        mx.ptr, i-1, f, v.ptr)
+end
+
+set_field(mx::MxArray, f::ASCIIString, v::MxArray) = set_field(mx, 1, f, v)
+
+function get_field(mx::MxArray, i::Integer, f::ASCIIString)
+    pm = ccall(_mx_get_field, Ptr{Void}, (Ptr{Void}, mwIndex, Ptr{Uint8}), 
+        mx.ptr, i-1, f)
+    MxArray(pm, false)
+end
+
+get_field(mx::MxArray, f::ASCIIString) = get_field(mx, 1, f)
+
+function get_fieldname(mx::MxArray, i::Integer)
+    p = ccall(_mx_get_fieldname, Ptr{Uint8}, (Ptr{Void}, Cint), 
+        mx.ptr, i-1)
+    bytestring(p)
+end
+
+function mxstruct(pairs::NTuple{2}...)
+    nf = length(pairs)
+    fieldnames = Array(ASCIIString, nf)
+    for i = 1 : nf
+        fn = pairs[i][1]
+        fieldnames[i] = string(fn)
+    end
+    mx = mxstruct(fieldnames)
+    for i = 1 : nf
+        set_field(mx, fieldnames[i], mxarray(pairs[i][2]))
+    end
+    mx
+end
+
+mxstruct(d::Associative) = mxstruct(collect(d)...)
 
 
 ###########################################################
