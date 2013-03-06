@@ -11,7 +11,7 @@ module MATLAB
     export is_numeric, is_complex, is_sparse, is_empty
     export is_logical, is_char, is_struct, is_cell
     
-    export mxarray, mxempty, delete, duplicate
+    export mxarray, mxempty, mxsparse, delete, duplicate
     export mxcellarray, get_cell, set_cell
     export mxstruct, nfields, get_fieldname, get_field, set_field
     export jvariable, jarray, jscalar, jvector, jmatrix, jsparse, jstring, jdict
@@ -23,6 +23,7 @@ module MATLAB
     export MSession
     export get_default_msession, restart_default_msession, close_default_msession
     export eval_string, put_variable, get_mvariable, get_variable
+    export mxcall
     export @mput, @mget, @matlab
 
     import Base.eltype, Base.close, Base.size, Base.copy

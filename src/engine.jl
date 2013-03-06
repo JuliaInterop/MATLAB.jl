@@ -210,10 +210,92 @@ macro matlab(ex)
 end
 
 
+###########################################################
+#
+#   mxcall
+#
+###########################################################
 
+# MATLAB does not allow underscore as prefix of a variable name
+_gen_marg_name(mfun::Symbol, prefix::ASCIIString, i::Int) = "jx_$(mfun)_arg_$(prefix)_$(i)"
+ 
+function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
+    nin = length(in_args)
+    
+    # generate tempoary variable names
+    
+    in_arg_names = Array(ASCIIString, nin)
+    out_arg_names = Array(ASCIIString, nout)
+     
+    for i = 1 : nin
+        in_arg_names[i] = _gen_marg_name(mfun, "in", i)
+    end
+    
+    for i = 1 : nout
+        out_arg_names[i] = _gen_marg_name(mfun, "out", i)
+    end
+    
+    # generate MATLAB statement
+    
+    buf = IOBuffer()
+    if nout > 0
+        if nout > 1
+            print(buf, "[")
+        end
+        print(buf, join(out_arg_names, ", "))
+        if nout > 1
+            print(buf, "]")
+        end
+        print(buf, " = ")
+    end
+    
+    print(buf, string(mfun))
+    print(buf, "(")
+    if nin > 0
+        print(buf, join(in_arg_names, ", "))
+    end
+    print(buf, ");")
+    
+    stmt = bytestring(buf)
+    
+    # put variables to MATLAB
+    
+    for i = 1 : nin
+        put_variable(session, symbol(in_arg_names[i]), in_args[i])
+    end
+    
+    # execute MATLAB statement
+    
+    eval_string(session, stmt)
+    
+    # get results from MATLAB
+    
+    ret = if nout == 1
+        jvariable(get_mvariable(session, symbol(out_arg_names[1])))
+    elseif nout >= 2
+        results = Array(Any, nout)
+        for i = 1 : nout
+            results[i] = jvariable(get_mvariable(session, symbol(out_arg_names[i])))
+        end
+        tuple(results...)
+    else
+        nothing
+    end
+    
+    # clear temporaries from MATLAB workspace
+    
+    for i = 1 : nin
+        eval_string(session, string("clear ", in_arg_names[i], ";"))
+    end
+    
+    for i = 1 : nout
+        eval_string(session, string("clear ", out_arg_names[i], ";"))
+    end
+    
+    # return 
+    ret
+end
 
-
-
-
+mxcall(mfun::Symbol, nout::Integer, in_args...) = mxcall(get_default_msession(), mfun, nout, in_args...)
 
 

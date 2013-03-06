@@ -25,4 +25,13 @@ put_variable(:s, s)
 s2 = get_variable(:s)
 @test isequal(s, s2)
 
+# mxcall
+
+r = mxcall(:plus, 1, a, b)
+@test isequal(r, a + b)
+
+(xx, yy) = mxcall(:meshgrid, 2, [1., 2.], [3., 4.])
+@test isequal(xx, [1. 2.; 1. 2.])
+@test isequal(yy, [3. 3.; 4. 4.])
+
 close_default_msession()
