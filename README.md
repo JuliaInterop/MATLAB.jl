@@ -67,14 +67,27 @@ mxarray(Int32, m, n)  # creates an m-by-n MATLAB zero array of int32 valued type
 mxarray(Bool, m, n)   # creates a MATLAB logical array of size m-by-n
 
 mxarray(Float64, (n1, n2, n3))  # creates a MATLAB array of size n1-by-n2-by-n3
+
+mxcellarray(m, n)        # creates a MATLAB cell array
+mxstruct("a", "b", "c")  # creates a MATLAB struct with given fields
 ```
 
 You may also convert a Julia variable to MATLAB variable
 
 ```julia
 a = rand(m, n)
+
 x = mxarray(a)     # converts v to a MATLAB array
-x = mxarray(1.2)   # cobverts a scalar 1.2 to a MATLAB variable
+x = mxarray(1.2)   # converts a scalar 1.2 to a MATLAB variable
+
+a = sprand(m, n, 0.1)
+x = mxarray(a)     # converts a sparse matrix to a MATLAB sparse matrix
+
+x = mxarray("abc") # converts a string to a MATLAB char array
+
+x = mxarray(["a", 1, 2.3])  # converts a Julia array to a MATLAB cell array
+
+x = mxarray({"a"=>1, "b"=>"string", "c"=>[1,2,3]}) # converts a Julia dictionary to a MATLAB struct
 ```
 
 MATLAB has its own memory management mechanism, and a MATLAB array is not able to use Julia's memory. Hence, the conversion from a Julia array to a MATLAB array involves deep-copy.
@@ -107,7 +120,18 @@ elsize(x)   # return number of bytes per element
 data_ptr(x)   # returns pointer to data (in Ptr{T}), where T is eltype(x)
 ```
 
-Many more to be added soon. (We aim at full coverage of mex C interface)
+You may also make tests on a MATLAB variable.
+
+```julia
+is_double(x)   # returns whether x is a double array
+is_sparse(x)   # returns whether x is sparse
+is_complex(x)  # returns whether x is complex
+is_cell(x)     # returns whether x is a cell array
+is_struct(x)   # returns whether x is a struct
+is_empty(x)    # returns whether x is empty
+
+...            # there are many more there
+```
 
 #### Convert MATLAB variables to Julia
 
@@ -115,9 +139,12 @@ Many more to be added soon. (We aim at full coverage of mex C interface)
 a = jarray(x)   # converts x to a Julia array
 a = jvector(x)  # converts x to a Julia vector (1D array) when x is a vector
 a = jscalar(x)  # converts x to a Julia scalar
-```
+a = jmatrix(x)  # converts x to a Julia matrix
+a = jstring(x)  # converts x to a Julia string
+a = jdict(x)    # converts a MATLAB struct to a Julia dictionary (using fieldnames as keys)
 
-*Note:* Unlike the conversion from Julia to MATLAB, ``a`` is actually a view of ``x`` (created through ``pointer_to_array``), and does not own the memory. 
+a = jvariable(x)  # converts x to a Julia variable in default manner
+```
 
 
 ### Use MATLAB Engine
@@ -181,6 +208,19 @@ While we try to cover most MATLAB statements, some valid MATLAB statements remai
 ```julia
 eval_string("[u, v] = myfun(x, y);")
 ```
+
+#### mxcall
+
+You may also directly call a MATLAB function on Julia variables
+
+```julia
+x = [-10.:0.1:10.]
+y = [-10.:0.1:10.]
+xx, yy = mxcall(:meshgrid, 2, x, y)
+```
+*Note:* Since MATLAB functions behavior depends on the number of outputs, you have to specify the number of output arguments in ``mxcall`` as the second argument.
+
+``mxcall`` puts the input arguments to the MATLAB workspace (using mangled names), evaluates the function call in MATLAB, and retrievs the variable from the MATLAB session. This function is mainly provided for convenience. However, you should keep in mind that it may incur considerable overhead due to the communication between MATLAB and Julia domain.
 
 
 #### Advanced use of MATLAB Engines
