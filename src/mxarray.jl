@@ -255,6 +255,7 @@ const _mx_set_cell = mxfunc(:mxSetCell_730)
 
 const _mx_get_field = mxfunc(:mxGetField_730)
 const _mx_set_field = mxfunc(:mxSetField_730)
+const _mx_get_field_bynum = mxfunc(:mxGetFieldByNumber_730)
 const _mx_get_fieldname = mxfunc(:mxGetFieldNameByNumber)
 
 # create zero arrays
@@ -354,6 +355,16 @@ function mxarray{T<:MxNumOrBool}(a::Matrix{T})
         data_ptr(mx), a, m * n * sizeof(T))
     mx
 end
+
+function mxarray{T<:MxNumOrBool}(a::Array{T})
+    mx = mxarray(T, size(a))
+    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint),
+        data_ptr(mx), a, length(a) * sizeof(T))
+    mx
+end
+
+mxarray(a::BitArray) = mxarray(convert(Array{Bool}, a))
+
 
 # char arrays and string
 
@@ -455,7 +466,7 @@ function mxstruct(fn1::ASCIIString, fnr::ASCIIString...)
 end
 
 function set_field(mx::MxArray, i::Integer, f::ASCIIString, v::MxArray)
-    v.ptr = false
+    v.own = false
     ccall(_mx_set_field, Void, 
         (Ptr{Void}, mwIndex, Ptr{Uint8}, Ptr{Void}), 
         mx.ptr, i-1, f, v.ptr)
@@ -466,10 +477,25 @@ set_field(mx::MxArray, f::ASCIIString, v::MxArray) = set_field(mx, 1, f, v)
 function get_field(mx::MxArray, i::Integer, f::ASCIIString)
     pm = ccall(_mx_get_field, Ptr{Void}, (Ptr{Void}, mwIndex, Ptr{Uint8}), 
         mx.ptr, i-1, f)
+    if pm == C_NULL
+        throw(ArgumentError("Failed to get field."))
+    end
     MxArray(pm, false)
 end
 
 get_field(mx::MxArray, f::ASCIIString) = get_field(mx, 1, f)
+
+function get_field(mx::MxArray, i::Integer, fn::Integer)
+    pm = ccall(_mx_get_field_bynum, Ptr{Void}, (Ptr{Void}, mwIndex, Cint), 
+        mx.ptr, i-1, fn-1)
+    if pm == C_NULL
+        throw(ArgumentError("Failed to get field."))
+    end
+    MxArray(pm, false)
+end
+
+get_field(mx::MxArray, fn::Integer) = get_field(mx, 1, fn)
+
 
 function get_fieldname(mx::MxArray, i::Integer)
     p = ccall(_mx_get_fieldname, Ptr{Uint8}, (Ptr{Void}, Cint), 
@@ -492,6 +518,7 @@ function mxstruct(pairs::NTuple{2}...)
 end
 
 mxstruct(d::Associative) = mxstruct(collect(d)...)
+mxarray(d::Associative) = mxstruct(d)
 
 
 ###########################################################
@@ -501,7 +528,6 @@ mxstruct(d::Associative) = mxstruct(collect(d)...)
 ###########################################################
 
 const _mx_get_string = mxfunc(:mxGetString_730)
-const _mx_get_field_bynum = mxfunc(:mxGetFieldByNumber_730)
 
 # shallow conversion from MATLAB variable to Julia array
 
@@ -516,8 +542,8 @@ function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
         #pointer_to_array(data_ptr(mx), siz, false)
     elseif is_cell(mx)
         a = Array(Any, siz)
-        for i = 1 : n
-            a[i] = jvariable(get_cell(a, i))
+        for i = 1 : length(a)
+            a[i] = jvariable(get_cell(mx, i))
         end
         a
     else
@@ -562,11 +588,11 @@ function jdict(mx::MxArray)
     fnames = Array(String, nf)
     fvals = Array(Any, nf)
     for i = 1 : nf
-        fnames[i] = get_fieldname(mx, 1)
+        fnames[i] = get_fieldname(mx, i)
         pv::Ptr{Void} = ccall(_mx_get_field_bynum, 
             Ptr{Void}, (Ptr{Void}, mwIndex, Cint),
             mx.ptr, 0, i-1)
-        fx = MxArray(pv)
+        fx = MxArray(pv, false)
         fvals[i] = jvariable(fx)
     end
     Dict(fnames, fvals)
@@ -577,7 +603,7 @@ function jvariable(mx::MxArray)
         nelems(mx) == 1 ? jscalar(mx) :
         ndims(mx) == 2 ? (ncols(mx) == 1 ? jvector(mx) : jmatrix(mx)) :
         jarray(mx)
-    elseif ischar(mx) && nrows(mx) == 1
+    elseif is_char(mx) && nrows(mx) == 1
         jstring(mx)
     elseif is_cell(mx)
         ndims(mx) == 2 ? (ncols(mx) == 1 ? jvector(mx) : jmatrix(mx)) :

@@ -199,13 +199,69 @@ delete(a)
 
 s = {"name"=>"MATLAB", "version"=>12.0, "data"=>[1,2,3]}
 a = mxstruct(s)
-# @test is_struct(a)
-# @test nfields(a) == 3
-# @test jstring(get_field(a, "name")) == "MATLAB"
-# @test jscalar(get_field(a, "version")) == 12.0
-# @test isequal(jvector(get_field(a, "data")), [1,2,3])
-# delete(a)
+@test is_struct(a)
+@test nfields(a) == 3
+@test jstring(get_field(a, "name")) == "MATLAB"
+@test jscalar(get_field(a, "version")) == 12.0
+@test isequal(jvector(get_field(a, "data")), [1,2,3])
+delete(a)
 
-#gc()
+# bi-directional conversions
+
+x = mxarray(12.0)
+y = jvariable(x)
+delete(x)
+@test isa(y, Float64)
+@test y == 12.0
+
+a = rand(5)
+x = mxarray(a)
+y = jvariable(x)
+delete(x)
+@test isa(y, Vector{Float64})
+@test isequal(y, a)
+
+a = rand(3, 4)
+x = mxarray(a)
+y = jvariable(x)
+delete(x)
+@test isa(y, Matrix{Float64})
+@test isequal(y, a)
+
+a = rand(3, 4, 5)
+x = mxarray(a)
+y = jvariable(x)
+delete(x)
+@test isa(y, Array{Float64, 3})
+@test isequal(y, a)
+
+a = "MATLAB"
+x = mxarray(a)
+y = jvariable(x)
+delete(x)
+@test isa(y, ASCIIString)
+@test y == a
+
+a = ["abc", 3, "efg"]
+x = mxarray(a)
+y = jvariable(x)
+delete(x)
+@test isa(y, Vector{Any})
+@test length(y) == 3
+@test y[1] == a[1]
+@test y[2] == a[2]
+@test y[3] == a[3]
+
+a = {"abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB"}
+x = mxarray(a)
+y = jvariable(x)
+delete(x)
+@test isa(y, Dict{String, Any})
+
+@test y["abc"] == 10.0
+@test isequal(y["efg"], [1, 2, 3])
+@test y["xyz"] == "MATLAB"
+
+gc()
 
 

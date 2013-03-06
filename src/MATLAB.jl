@@ -2,7 +2,7 @@ module MATLAB
 
     # mxarray
     export MxArray, mxClassID, mxComplexity
-    export mxclassid
+    export mxclassid, data_ptr
     export classid, nrows, ncols, nelems, ndims, elsize
     
     export is_double, is_single
