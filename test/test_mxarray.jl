@@ -98,8 +98,7 @@ a_mx = mxarray(false)
 @test !jscalar(a_mx)
 delete(a_mx)
 
-
-# test conversion between Julia and MATLAB array
+# conversion between Julia and MATLAB numeric arrays
 
 a = rand(5, 6)
 a_mx = mxarray(a)
@@ -118,5 +117,25 @@ a_mx = mxarray(a_t)
 a2 = jvector(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
+
+# strings
+
+s = "MATLAB.jl"
+s_mx = mxarray(s)
+@test classid(s_mx) == MATLAB.mxCHAR_CLASS
+@test nrows(s_mx) == 1
+@test ncols(s_mx) == length(s)
+@test nelems(s_mx) == length(s)
+@test ndims(s_mx) == 2
+
+s2 = jstring(s_mx)
+@test s == s2
+delete(s_mx)
+
+
+
+
+
+
 
 

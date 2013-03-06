@@ -10,6 +10,22 @@ type MxArray
     end
 end
 
+# delete & duplicate
+
+function delete(mx::MxArray)
+    if !(mx.ptr == C_NULL)
+        ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx.ptr)
+    end
+    mx.ptr = C_NULL
+end
+
+function duplicate(mx::MxArray)
+    pm::Ptr{Void} = ccall(mxfunc(:mxDuplicateArray), Ptr{Void}, (Ptr{Void},), mx.ptr)
+    MxArray(pm)
+end
+
+copy(mx::Array) = duplicate(mx)
+
 # functions to create mxArray from Julia values/arrays
 
 MxNumerics = Union(Float64,Float32,Int32,Uint32,Int64,Uint64,Int16,Uint16,Int8,Uint8)
@@ -49,7 +65,6 @@ const mxREAL    = convert(mxComplexity, 0)
 const mxCOMPLEX = convert(mxComplexity, 1)
 
 mxclassid(ty::Type{Bool})    = mxCELL_CLASS::Cint
-mxclassid(ty::Type{Char})    = mxCHAR_CLASS::Cint
 mxclassid(ty::Type{Float64}) = mxDOUBLE_CLASS::Cint
 mxclassid(ty::Type{Float32}) = mxSINGLE_CLASS::Cint
 mxclassid(ty::Type{Int8})    = mxINT8_CLASS::Cint
@@ -170,6 +185,16 @@ const _mx_create_logical_arr = mxfunc(:mxCreateLogicalArray_730)
 const _mx_create_double_scalar = mxfunc(:mxCreateDoubleScalar)
 const _mx_create_logical_scalar = mxfunc(:mxCreateLogicalScalar)
 
+const _mx_create_string = mxfunc(:mxCreateString)
+#const _mx_create_char_array = mxfunc(:mxCreateCharArray_730)
+
+const _mx_create_cell_matrix = mxfunc(:mxCreateCellMatrix_730)
+const _mx_create_cell_array = mxfunc(:mxCreateCellArray_730)
+
+const _mx_create_struct_matrix = mxfunc(:mxCreateStructMatrix_730)
+const _mx_create_struct_array = mxfunc(:mxCreateStructArray_730)
+
+
 # create zero arrays
 
 function mxarray{T<:MxNumerics}(ty::Type{T}, n::Integer)
@@ -245,21 +270,6 @@ function mxarray{T<:MxNumerics}(x::T)
     MxArray(pm)
 end
 
-
-# delete & duplicate
-
-function delete(mx::MxArray)
-    if !(mx.ptr == C_NULL)
-        ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx.ptr)
-    end
-    mx.ptr = C_NULL
-end
-
-function duplicate(mx::MxArray)
-    pm::Ptr{Void} = ccall(mxfunc(:mxDuplicateArray), Ptr{Void}, (Ptr{Void},), mx.ptr)
-    MxArray(pm)
-end
-
 # conversion from Julia variables to MATLAB
 # Note: the conversion is deep-copy, as there is no way to let
 # mxArray use Julia array's memory
@@ -281,6 +291,20 @@ function mxarray{T<:MxNumOrBool}(a::Matrix{T})
     mx
 end
 
+# char arrays and string
+
+function mxarray(s::ASCIIString)
+    pm = ccall(_mx_create_string, Ptr{Void}, (Ptr{Uint8},), s)
+    MxArray(pm)
+end
+
+###########################################################
+#
+#  convert from MATLAB to Julia
+#
+###########################################################
+
+const _mx_get_string = mxfunc(:mxGetString_730)
 
 # shallow conversion from MATLAB variable to Julia array
 
@@ -304,6 +328,17 @@ function jscalar(mx::MxArray)
         throw(ArgumentError("jscalar only applies to MATLAB arrays with exactly one element."))
     end
     pointer_to_array(data_ptr(mx), (1,), false)[1]
+end
+
+function jstring(mx::MxArray)
+    if !(classid(mx) == mxCHAR_CLASS && ndims(mx) == 2 && nrows(mx) == 1)
+        throw(ArgumentError("jstring only applies to strings (i.e. char vectors)."))
+    end
+    len = ncols(mx) + 2
+    tmp = Array(Uint8, len)
+    ccall(_mx_get_string, Cint, (Ptr{Void}, Ptr{Uint8}, mwSize), 
+        mx.ptr, tmp, len)
+    bytestring(pointer(tmp))
 end
 
 
