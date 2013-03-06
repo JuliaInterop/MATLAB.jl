@@ -12,6 +12,7 @@ module MATLAB
     export is_logical, is_char, is_struct, is_cell
     
     export mxarray, mxempty, delete, duplicate
+    export mxcellarray, get_cell, set_cell
     export jarray, jscalar, jvector, jmatrix, jstring
 
     # mstatments

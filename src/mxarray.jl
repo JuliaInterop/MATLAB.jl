@@ -2,18 +2,23 @@
 
 type MxArray
     ptr::Ptr{Void}
+    own::Bool
     
-    function MxArray(p::Ptr{Void})
-        mx = new(p)
-        finalizer(mx, delete)
+    function MxArray(p::Ptr{Void}, own::Bool)
+        mx = new(p, own)
+        if own
+            finalizer(mx, delete)
+        end
         mx
     end
+    
+    MxArray(p::Ptr{Void}) = MxArray(p, true)
 end
 
 # delete & duplicate
 
 function delete(mx::MxArray)
-    if !(mx.ptr == C_NULL)
+    if mx.own && !(mx.ptr == C_NULL)
         ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx.ptr)
     end
     mx.ptr = C_NULL
@@ -38,6 +43,7 @@ MxNumOrBool = Union(MxNumerics, Bool)
 ###########################################################
 
 typealias mwSize Uint
+typealias mwIndex Int
 typealias mxClassID Cint
 typealias mxComplexity Cint
 
@@ -241,6 +247,9 @@ const _mx_create_cell_array = mxfunc(:mxCreateCellArray_730)
 const _mx_create_struct_matrix = mxfunc(:mxCreateStructMatrix_730)
 const _mx_create_struct_array = mxfunc(:mxCreateStructArray_730)
 
+const _mx_get_cell = mxfunc(:mxGetCell_730)
+const _mx_set_cell = mxfunc(:mxSetCell_730)
+
 
 # create zero arrays
 
@@ -346,6 +355,71 @@ function mxarray(s::ASCIIString)
     pm = ccall(_mx_create_string, Ptr{Void}, (Ptr{Uint8},), s)
     MxArray(pm)
 end
+
+# cell arrays
+
+function mxcellarray(n::Integer)
+    pm = ccall(_mx_create_cell_matrix, Ptr{Void}, (mwSize, mwSize), n, 1)
+    MxArray(pm)
+end
+
+function mxcellarray(m::Integer, n::Integer)
+    pm = ccall(_mx_create_cell_matrix, Ptr{Void}, (mwSize, mwSize), m, n)
+    MxArray(pm)
+end
+
+function mxcellarray(dims::Tuple)
+    nd = length(dims)
+    
+    _dims = Array(mwSize, nd)
+    for i = 1 : nd
+        _dims[i] = convert(mwSize, dims[i])
+    end
+    
+    pm = ccall(_mx_create_cell_array, Ptr{Void}, (mwSize, Ptr{mwSize}), 
+        nd, _dims)
+    MxArray(pm) 
+end
+
+function get_cell(mx::MxArray, i::Integer)
+    pm = ccall(_mx_get_cell, Ptr{Void}, (Ptr{Void}, mwIndex), mx.ptr, i-1)
+    MxArray(pm, false)
+end
+
+function set_cell(mx::MxArray, i::Integer, v::MxArray)    
+    ccall(_mx_set_cell, Void, (Ptr{Void}, mwIndex, Ptr{Void}), 
+        mx.ptr, i - 1, v.ptr)
+end
+
+function mxcellarray(a::Vector)
+    n = length(a)
+    pm = mxcellarray(n)
+    for i = 1 : n
+        set_cell(pm, i, mxarray(a[i]))
+    end
+    pm
+end
+
+function mxcellarray(a::Matrix)
+    m = size(a, 1)
+    n = size(a, 2)
+    pm = mxcellarray(m, n)
+    for i = 1 : m * n
+        set_cell(pm, i, mxarray(a[i]))
+    end
+    pm
+end
+
+function mxcellarray(a::Array)
+    pm = mxcellarray(size(a))
+    for i = 1 : length(a)
+        set_cell(pm, i, mxarray(a[i]))
+    end
+    pm
+end
+
+mxarray(a::Array) = mxcellarray(a)
+
 
 ###########################################################
 #

@@ -151,3 +151,37 @@ s2 = jstring(s_mx)
 @test s == s2
 delete(s_mx)
 
+# cell arrays
+
+a = mxcellarray(10)
+@test nrows(a) == 10
+@test ncols(a) == 1
+@test nelems(a) == 10
+@test classid(a) == MATLAB.mxCELL_CLASS
+@test is_cell(a)
+delete(a)
+
+a = mxcellarray(4, 5)
+@test nrows(a) == 4
+@test ncols(a) == 5
+@test nelems(a) == 20
+@test classid(a) == MATLAB.mxCELL_CLASS
+@test is_cell(a)
+delete(a)
+
+a = mxcellarray((3, 4, 5))
+@test size(a) == (3, 4, 5)
+@test nelems(a) == 60
+@test classid(a) == MATLAB.mxCELL_CLASS
+@test is_cell(a)
+delete(a)
+
+s = ["abc", "efg"]
+s_mx = mxcellarray(s)
+@test jstring(get_cell(s_mx, 1)) == "abc"
+@test jstring(get_cell(s_mx, 2)) == "efg"
+delete(s_mx)
+
+gc()
+
+
