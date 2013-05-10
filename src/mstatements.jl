@@ -118,10 +118,17 @@ function write_mstatement(io::IO, ex::Expr)
         write_mstatement(io, a[na])
         print(io, "}")
 
-    elseif h == :.
+    elseif h == :. 
         write_mstatement(io, a[1])
         print(io, ".")
         print(io, string(eval(a[2])))
+
+    elseif h == :(:)
+        write_mstatement(io, a[1])
+        for i = 2:na
+            print(io, ":")
+            write_mstatement(io, a[i])
+        end
 
     elseif h == symbol("'") || h == symbol(".'")
         print(io, "(")
