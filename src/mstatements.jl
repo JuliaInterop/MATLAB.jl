@@ -35,7 +35,7 @@ function write_mstatement(io::IO, ex::Expr)
         print(io, " = ")
         write_mstatement(io, a[2])
 
-    elseif h == (:call)
+    elseif h == :call || h == :ref
         f = a[1]
 
         if na == 1
