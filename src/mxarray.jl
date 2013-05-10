@@ -293,29 +293,26 @@ function mxarray(ty::Type{Bool}, m::Integer, n::Integer)
     MxArray(pm)
 end
 
-function mxarray{T<:MxNumerics}(ty::Type{T}, dims::Tuple)
+function _dims_to_mwSize(dims::(Int...))
     ndim = length(dims)
     _dims = Array(mwSize, ndim)
     for i = 1 : ndim
         _dims[i] = convert(mwSize, dims[i])
     end
-        
+    _dims
+end
+
+function mxarray{T<:MxNumerics}(ty::Type{T}, dims::(Int...))
     pm = ccall(_mx_create_numeric_arr, Ptr{Void}, 
         (mwSize, Ptr{mwSize}, mxClassID, mxComplexity), 
-        ndim, _dims, mxclassid(ty), mxREAL)
+        length(dims), _dims_to_mwSize(dims), mxclassid(ty), mxREAL)
         
     MxArray(pm)
 end
 
-function mxarray(ty::Type{Bool}, dims::Tuple)
-    ndim = length(dims)
-    _dims = Array(mwSize, ndim)
-    for i = 1 : ndim
-        _dims[i] = convert(mwSize, dims[i])
-    end
-        
+function mxarray(ty::Type{Bool}, dims::(Int...))
     pm = ccall(_mx_create_numeric_arr, Ptr{Void}, 
-        (mwSize, Ptr{mwSize}), ndim, _dims)
+        (mwSize, Ptr{mwSize}), length(dims), _dims_to_mwSize(dims))
     MxArray(pm)
 end
 
@@ -446,16 +443,9 @@ function mxcellarray(m::Integer, n::Integer)
     MxArray(pm)
 end
 
-function mxcellarray(dims::Tuple)
-    nd = length(dims)
-    
-    _dims = Array(mwSize, nd)
-    for i = 1 : nd
-        _dims[i] = convert(mwSize, dims[i])
-    end
-    
+function mxcellarray(dims::(Int...))
     pm = ccall(_mx_create_cell_array, Ptr{Void}, (mwSize, Ptr{mwSize}), 
-        nd, _dims)
+        length(dims), _dims_to_mwSize(dims))
     MxArray(pm) 
 end
 
@@ -578,8 +568,34 @@ function mxstruct(pairs::NTuple{2}...)
     mx
 end
 
+function mxstruct{T}(d::T)
+    fieldnames = T.names
+    fieldnames_str = map(string, fieldnames)
+    mx = mxstruct(fieldnames_str...)
+    for i = 1:length(fieldnames)
+        set_field(mx, fieldnames_str[i], mxarray(getfield(d, fieldnames[i])))
+    end
+    mx
+end
+
+function mxstructarray{T}(d::Array{T})
+    fieldnames = T.names
+    fieldnames_str = map(string, fieldnames)
+    a = _fieldname_array(fieldnames_str...)
+
+    pm = ccall(_mx_create_struct_array, Ptr{Void}, (mwSize, Ptr{mwSize}, Cint,
+        Ptr{Ptr{Uint8}}), ndims(d), _dims_to_mwSize(size(d)), length(a), a)
+    mx = MxArray(pm)
+
+    for i = 1:length(d), j = 1:length(fieldnames)
+        set_field(mx, i, fieldnames_str[j],
+            mxarray(getfield(d[i], fieldnames[j])))
+    end
+    mx
+end
+
 mxstruct(d::Associative) = mxstruct(collect(d)...)
-mxarray(d::Associative) = mxstruct(d)
+mxarray(d) = mxstruct(d)
 
 
 ###########################################################

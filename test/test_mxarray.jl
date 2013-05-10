@@ -1,7 +1,7 @@
 # Unit testing for MxArray
 
 using MATLAB
-using Test
+using Base.Test
 
 m = 5
 n = 6
@@ -233,6 +233,33 @@ a = mxstruct(s)
 @test jscalar(get_field(a, "version")) == 12.0
 @test isequal(jvector(get_field(a, "data")), [1,2,3])
 delete(a)
+
+type TestType
+    name::String
+    version::Float64
+    data::Vector{Int}
+end
+t = TestType("MATLAB", 12.0, [1,2,3])
+a = mxstruct(t)
+@test is_struct(a)
+@test nfields(a) == 3
+@test jstring(get_field(a, "name")) == "MATLAB"
+@test jscalar(get_field(a, "version")) == 12.0
+@test isequal(jvector(get_field(a, "data")), [1,2,3])
+delete(a)
+
+a = mxstructarray([TestType("MATLAB", 12.0, [1,2,3]),
+    TestType("Julia", 0.2, [4,5,6])])
+@test is_struct(a)
+@test nfields(a) == 3
+@test jstring(get_field(a, 1, "name")) == "MATLAB"
+@test jscalar(get_field(a, 1, "version")) == 12.0
+@test isequal(jvector(get_field(a, 1, "data")), [1,2,3])
+@test jstring(get_field(a, 2, "name")) == "Julia"
+@test jscalar(get_field(a, 2, "version")) == 0.2
+@test isequal(jvector(get_field(a, 2, "data")), [4,5,6])
+delete(a)
+
 
 # bi-directional conversions
 
