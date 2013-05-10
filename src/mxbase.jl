@@ -15,7 +15,7 @@ function get_paths()
             matlab_homepath = dirname(dirname(realpath(chomp(readall(`which matlab`)))))
         elseif OS_NAME == :Darwin
             apps = readdir("/Applications")
-            apps = apps[Bool[ismatch(r"^MATLAB_R[0-9]+[ab]\.app$", app) for app in apps]]
+            filter!(app -> ismatch(r"^MATLAB_R[0-9]+[ab]\.app$", app), apps)
             if ~isempty(apps)
                 matlab_homepath = joinpath("/Applications", min(apps))
             end
