@@ -118,7 +118,7 @@ function write_mstatement(io::IO, ex::Expr)
         write_mstatement(io, a[na])
         print(io, "}")
 
-    elseif h == :. 
+    elseif h == :.
         write_mstatement(io, a[1])
         print(io, ".")
         print(io, string(eval(a[2])))
