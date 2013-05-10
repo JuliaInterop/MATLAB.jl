@@ -37,6 +37,8 @@ using Base.Test
 @test mstatement(:(a{1})) == "a{1}"
 @test mstatement(:(a{1, 1})) == "a{1, 1}"
 
+@test mstatement(:(a.b)) == "a.b"
+
 @test mstatement(:(x')) == "(x)'"
 @test mstatement(:(x.')) == "(x).'"
 

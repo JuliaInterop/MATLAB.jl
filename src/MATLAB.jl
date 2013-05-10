@@ -3,7 +3,7 @@ module MATLAB
     # mxarray
     export MxArray, mxClassID, mxComplexity
     export mxclassid, data_ptr
-    export classid, nrows, ncols, nelems, ndims, elsize
+    export classid, nrows, ncols, nelems, elsize
     
     export is_double, is_single
     export is_int8, is_uint8, is_int16, is_uint16
@@ -13,7 +13,7 @@ module MATLAB
     
     export mxarray, mxempty, mxsparse, delete, duplicate
     export mxcellarray, get_cell, set_cell
-    export mxstruct, nfields, get_fieldname, get_field, set_field
+    export mxstruct, mxstructarray, nfields, get_fieldname, get_field, set_field
     export jvariable, jarray, jscalar, jvector, jmatrix, jsparse, jstring, jdict
 
     # mstatments
@@ -26,7 +26,7 @@ module MATLAB
     export mxcall
     export @mput, @mget, @matlab
 
-    import Base.eltype, Base.close, Base.size, Base.copy
+    import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims
 
     include("exceptions.jl")
     include("mxbase.jl")
