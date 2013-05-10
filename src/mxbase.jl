@@ -26,9 +26,12 @@ function get_paths()
         error("The MATLAB path could be found. Set the MATLAB_HOME environmental variable to specify the MATLAB path.")
     end
 
-    default_startcmd = joinpath(matlab_homepath, "bin", "matlab")
-    if !isexecutable(default_startcmd)
-        error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
+    if OS_NAME != :Windows
+        default_startcmd = joinpath(matlab_homepath, "bin", "matlab")
+        if !isexecutable(default_startcmd)
+            error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
+        end
+        default_startcmd *= " -nosplash"
     end
 
     # Get path to MATLAB libraries
