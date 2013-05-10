@@ -77,18 +77,46 @@ function write_mstatement(io::IO, ex::Expr)
             print(io, ")")
         end
 
-    elseif h == (:vcat) || h == (:hcat) || h == (:row) || h == (:tuple)
-        print(io, "[")
-        na = length(a)
+    elseif h == :vcat || h == :hcat || h == :row || h == :tuple || h == :cell1d
+        print(io, h == :cell1d ? "{" : "[")
         if na > 0
-            sep = h == (:vcat) ? "; " : ", "
+            sep = h == :vcat ? "; " : ", "
             for i = 1 : na-1
                 write_mstatement(io, a[i])
                 print(io, sep)
             end
             write_mstatement(io, a[na])
         end
-        print(io, "]")
+        print(io, h == :cell1d ? "}" : "]")
+
+    elseif h == :cell2d
+        print(io, "{")
+        if na > 0
+            rows = a[1]
+            cols = a[2]
+            for i = 1:rows
+                if i != 1
+                    print(io, "; ")
+                end
+                for j = 0:cols-1
+                    if j != 0
+                        print(io, " ")
+                    end
+                    write_mstatement(io, a[2+j*rows+i])
+                end
+            end
+        end
+        print(io, "}")
+
+    elseif h == :curly
+        write_mstatement(io, a[1])
+        print(io, "{")
+        for i = 2 : na - 1
+            write_mstatement(io, a[i])
+            print(io, ", ")
+        end
+        write_mstatement(io, a[na])
+        print(io, "}")
 
     elseif h == symbol("'") || h == symbol(".'")
         print(io, "(")
