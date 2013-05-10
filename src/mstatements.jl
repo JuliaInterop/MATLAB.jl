@@ -35,7 +35,7 @@ function write_mstatement(io::IO, ex::Expr)
         print(io, " = ")
         write_mstatement(io, a[2])
 
-    elseif h == (:call)
+    elseif h == :call || h == :ref
         f = a[1]
 
         if na == 1
@@ -49,7 +49,7 @@ function write_mstatement(io::IO, ex::Expr)
             print(io, ")")
 
         elseif na == 3
-            if has(matlab_infix_ops, f)
+            if contains(matlab_infix_ops, f)
                 print(io, "(")
                 write_mstatement(io, a[2])
                 print(io, ") ")
@@ -122,6 +122,13 @@ function write_mstatement(io::IO, ex::Expr)
         write_mstatement(io, a[1])
         print(io, ".")
         print(io, string(eval(a[2])))
+
+    elseif h == :(:)
+        write_mstatement(io, a[1])
+        for i = 2:na
+            print(io, ":")
+            write_mstatement(io, a[i])
+        end
 
     elseif h == symbol("'") || h == symbol(".'")
         print(io, "(")
