@@ -368,6 +368,7 @@ function mxarray{T<:MxNumOrBool}(a::Array{T})
 end
 
 mxarray(a::BitArray) = mxarray(convert(Array{Bool}, a))
+mxarray(a::Ranges) = mxarray([a])
 
 # sparse matrix
 

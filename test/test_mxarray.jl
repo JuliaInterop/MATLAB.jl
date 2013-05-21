@@ -136,6 +136,12 @@ a2 = jvector(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
+a = 1:5
+a_mx = mxarray(a)
+a2 = jvector(a_mx)
+@test isequal(a, a2)
+delete(a_mx)
+
 # sparse matrices
 
 a = sprand(8, 9, 0.2)
