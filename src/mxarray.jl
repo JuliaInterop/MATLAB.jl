@@ -311,7 +311,7 @@ function mxarray{T<:MxNumerics}(ty::Type{T}, dims::(Int...))
 end
 
 function mxarray(ty::Type{Bool}, dims::(Int...))
-    pm = ccall(_mx_create_numeric_arr, Ptr{Void}, 
+    pm = ccall(_mx_create_logical_arr, Ptr{Void}, 
         (mwSize, Ptr{mwSize}), length(dims), _dims_to_mwSize(dims))
     MxArray(pm)
 end
