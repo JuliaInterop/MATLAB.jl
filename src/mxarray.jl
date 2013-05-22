@@ -70,17 +70,17 @@ const mxOBJECT_CLASS   = convert(mxClassID, 18)
 const mxREAL    = convert(mxComplexity, 0)
 const mxCOMPLEX = convert(mxComplexity, 1)
 
-mxclassid(ty::Type{Bool})    = mxCELL_CLASS::Cint
-mxclassid(ty::Type{Float64}) = mxDOUBLE_CLASS::Cint
-mxclassid(ty::Type{Float32}) = mxSINGLE_CLASS::Cint
-mxclassid(ty::Type{Int8})    = mxINT8_CLASS::Cint
-mxclassid(ty::Type{Uint8})   = mxUINT8_CLASS::Cint
-mxclassid(ty::Type{Int16})   = mxINT16_CLASS::Cint
-mxclassid(ty::Type{Uint16})  = mxUINT16_CLASS::Cint
-mxclassid(ty::Type{Int32})   = mxINT32_CLASS::Cint
-mxclassid(ty::Type{Uint32})  = mxUINT32_CLASS::Cint
-mxclassid(ty::Type{Int64})   = mxINT64_CLASS::Cint
-mxclassid(ty::Type{Uint64})  = mxUINT64_CLASS::Cint
+mxclassid(::Type{Bool})    = mxCELL_CLASS::Cint
+mxclassid(::Type{Float64}) = mxDOUBLE_CLASS::Cint
+mxclassid(::Type{Float32}) = mxSINGLE_CLASS::Cint
+mxclassid(::Type{Int8})    = mxINT8_CLASS::Cint
+mxclassid(::Type{Uint8})   = mxUINT8_CLASS::Cint
+mxclassid(::Type{Int16})   = mxINT16_CLASS::Cint
+mxclassid(::Type{Uint16})  = mxUINT16_CLASS::Cint
+mxclassid(::Type{Int32})   = mxINT32_CLASS::Cint
+mxclassid(::Type{Uint32})  = mxUINT32_CLASS::Cint
+mxclassid(::Type{Int64})   = mxINT64_CLASS::Cint
+mxclassid(::Type{Uint64})  = mxUINT64_CLASS::Cint
 
 const classid_type_map = (mxClassID=>Type)[
     mxLOGICAL_CLASS => Bool,
