@@ -267,14 +267,7 @@ const _mx_get_fieldname = mxfunc(:mxGetFieldNameByNumber)
 
 # create zero arrays
 
-function mxarray{T<:MxNumerics}(ty::Type{T}, n::Integer)
-    pm = ccall(_mx_create_numeric_mat, Ptr{Void}, 
-        (mwSize, mwSize, mxClassID, mxComplexity),
-        n, 1, mxclassid(T), mxREAL)
-    MxArray(pm)
-end
-
-function mxarray{T<:MxNumerics}(ty::Type{T}, m::Integer, n::Integer)
+function mxarray{T<:MxNumerics}(ty::Type{T}, m::Integer, n::Integer=1)
     pm = ccall(_mx_create_numeric_mat, Ptr{Void}, 
         (mwSize, mwSize, mxClassID, mxComplexity),
         m, n, mxclassid(T), mxREAL)
@@ -283,12 +276,7 @@ end
 
 mxempty() = mxarray(Float64, 0, 0)
 
-function mxarray(ty::Type{Bool}, n::Integer)
-    pm = ccall(_mx_create_logical_mat, Ptr{Void}, (mwSize, mwSize), n, 1)
-    MxArray(pm)
-end
-
-function mxarray(ty::Type{Bool}, m::Integer, n::Integer)
+function mxarray(ty::Type{Bool}, m::Integer, n::Integer=1)
     pm = ccall(_mx_create_logical_mat, Ptr{Void}, (mwSize, mwSize), m, n)
     MxArray(pm)
 end
@@ -434,12 +422,7 @@ end
 
 # cell arrays
 
-function mxcellarray(n::Integer)
-    pm = ccall(_mx_create_cell_matrix, Ptr{Void}, (mwSize, mwSize), n, 1)
-    MxArray(pm)
-end
-
-function mxcellarray(m::Integer, n::Integer)
+function mxcellarray(m::Integer, n::Integer=1)
     pm = ccall(_mx_create_cell_matrix, Ptr{Void}, (mwSize, mwSize), m, n)
     MxArray(pm)
 end
