@@ -35,6 +35,7 @@ copy(mx::MxArray) = duplicate(mx)
 
 MxNumerics = Union(Float64,Float32,Int32,Uint32,Int64,Uint64,Int16,Uint16,Int8,Uint8)
 MxNumOrBool = Union(MxNumerics, Bool)
+MxComplexNum = Union(Complex64, Complex128)
 
 ###########################################################
 #
@@ -70,7 +71,7 @@ const mxOBJECT_CLASS   = convert(mxClassID, 18)
 const mxREAL    = convert(mxComplexity, 0)
 const mxCOMPLEX = convert(mxComplexity, 1)
 
-mxclassid(::Type{Bool})    = mxCELL_CLASS::Cint
+mxclassid(::Type{Bool})    = mxLOGICAL_CLASS::Cint
 mxclassid(::Type{Float64}) = mxDOUBLE_CLASS::Cint
 mxclassid(::Type{Float32}) = mxSINGLE_CLASS::Cint
 mxclassid(::Type{Int8})    = mxINT8_CLASS::Cint
@@ -237,10 +238,7 @@ end
 # pre-cached functions
 
 const _mx_create_numeric_mat = mxfunc(:mxCreateNumericMatrix_730)
-const _mx_create_logical_mat = mxfunc(:mxCreateLogicalMatrix_730)
-
 const _mx_create_numeric_arr = mxfunc(:mxCreateNumericArray_730)
-const _mx_create_logical_arr = mxfunc(:mxCreateLogicalArray_730)
 
 const _mx_create_double_scalar = mxfunc(:mxCreateDoubleScalar)
 const _mx_create_logical_scalar = mxfunc(:mxCreateLogicalScalar)
@@ -251,7 +249,6 @@ const _mx_create_sparse_logical = mxfunc(:mxCreateSparseLogicalMatrix_730)
 const _mx_create_string = mxfunc(:mxCreateString)
 #const _mx_create_char_array = mxfunc(:mxCreateCharArray_730)
 
-const _mx_create_cell_matrix = mxfunc(:mxCreateCellMatrix_730)
 const _mx_create_cell_array = mxfunc(:mxCreateCellArray_730)
 
 const _mx_create_struct_matrix = mxfunc(:mxCreateStructMatrix_730)
@@ -267,19 +264,7 @@ const _mx_get_fieldname = mxfunc(:mxGetFieldNameByNumber)
 
 # create zero arrays
 
-function mxarray{T<:MxNumerics}(ty::Type{T}, m::Integer, n::Integer=1)
-    pm = ccall(_mx_create_numeric_mat, Ptr{Void}, 
-        (mwSize, mwSize, mxClassID, mxComplexity),
-        m, n, mxclassid(T), mxREAL)
-    MxArray(pm)
-end
-
 mxempty() = mxarray(Float64, 0, 0)
-
-function mxarray(ty::Type{Bool}, m::Integer, n::Integer=1)
-    pm = ccall(_mx_create_logical_mat, Ptr{Void}, (mwSize, mwSize), m, n)
-    MxArray(pm)
-end
 
 function _dims_to_mwSize(dims::(Int...))
     ndim = length(dims)
@@ -290,19 +275,14 @@ function _dims_to_mwSize(dims::(Int...))
     _dims
 end
 
-function mxarray{T<:MxNumerics}(ty::Type{T}, dims::(Int...))
+function mxarray{T<:MxNumOrBool}(ty::Type{T}, dims::(Int...))
     pm = ccall(_mx_create_numeric_arr, Ptr{Void}, 
         (mwSize, Ptr{mwSize}, mxClassID, mxComplexity), 
         length(dims), _dims_to_mwSize(dims), mxclassid(ty), mxREAL)
         
     MxArray(pm)
 end
-
-function mxarray(ty::Type{Bool}, dims::(Int...))
-    pm = ccall(_mx_create_logical_arr, Ptr{Void}, 
-        (mwSize, Ptr{mwSize}), length(dims), _dims_to_mwSize(dims))
-    MxArray(pm)
-end
+mxarray{T<:MxNumOrBool}(ty::Type{T}, dims::Int...) = mxarray(ty, dims)
 
 # create scalars
 
@@ -316,7 +296,7 @@ function mxarray(x::Bool)
     MxArray(pm)
 end
 
-function mxarray{T<:MxNumerics}(x::T)
+function mxarray{T<:MxNumOrBool}(x::T)
     pm = ccall(_mx_create_numeric_mat, Ptr{Void}, 
         (mwSize, mwSize, mxClassID, mxComplexity),
         1, 1, mxclassid(T), mxREAL)
@@ -330,23 +310,6 @@ end
 # conversion from Julia variables to MATLAB
 # Note: the conversion is deep-copy, as there is no way to let
 # mxArray use Julia array's memory
-
-function mxarray{T<:MxNumOrBool}(a::Vector{T})
-    n = length(a)
-    pm = mxarray(T, n)
-    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint),
-        data_ptr(pm), a, n * sizeof(T))
-    pm
-end
-
-function mxarray{T<:MxNumOrBool}(a::Matrix{T})
-    m = size(a, 1)
-    n = size(a, 2)
-    mx = mxarray(T, m, n)
-    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint),
-        data_ptr(mx), a, m * n * sizeof(T))
-    mx
-end
 
 function mxarray{T<:MxNumOrBool}(a::Array{T})
     mx = mxarray(T, size(a))
@@ -422,16 +385,12 @@ end
 
 # cell arrays
 
-function mxcellarray(m::Integer, n::Integer=1)
-    pm = ccall(_mx_create_cell_matrix, Ptr{Void}, (mwSize, mwSize), m, n)
-    MxArray(pm)
-end
-
 function mxcellarray(dims::(Int...))
     pm = ccall(_mx_create_cell_array, Ptr{Void}, (mwSize, Ptr{mwSize}), 
         length(dims), _dims_to_mwSize(dims))
     MxArray(pm) 
 end
+mxcellarray(dims::Int...) = mxcellarray(dims)
 
 function get_cell(mx::MxArray, i::Integer)
     pm = ccall(_mx_get_cell, Ptr{Void}, (Ptr{Void}, mwIndex), mx.ptr, i-1)
@@ -442,25 +401,6 @@ function set_cell(mx::MxArray, i::Integer, v::MxArray)
     v.own = false
     ccall(_mx_set_cell, Void, (Ptr{Void}, mwIndex, Ptr{Void}), 
         mx.ptr, i - 1, v.ptr)
-end
-
-function mxcellarray(a::Vector)
-    n = length(a)
-    pm = mxcellarray(n)
-    for i = 1 : n
-        set_cell(pm, i, mxarray(a[i]))
-    end
-    pm
-end
-
-function mxcellarray(a::Matrix)
-    m = size(a, 1)
-    n = size(a, 2)
-    pm = mxcellarray(m, n)
-    for i = 1 : m * n
-        set_cell(pm, i, mxarray(a[i]))
-    end
-    pm
 end
 
 function mxcellarray(a::Array)
