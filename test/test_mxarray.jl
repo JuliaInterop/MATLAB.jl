@@ -21,6 +21,7 @@ macro mx_test_basic_types(ty, testfun)
         @test size(a, 1) == n
         @test size(a, 2) == 1
         @test size(a, 3) == 1
+        @test !is_complex(a)
         @test $(testfun)(a)
         delete(a)
 
@@ -35,6 +36,7 @@ macro mx_test_basic_types(ty, testfun)
         @test size(b, 1) == m
         @test size(b, 2) == n
         @test size(b, 3) == 1
+        @test !is_complex(b)
         @test $(testfun)(b)
         delete(b)
     end
@@ -63,6 +65,29 @@ a = mxempty()
 @mx_test_basic_types Int8    is_int8
 @mx_test_basic_types Uint8   is_uint8
 @mx_test_basic_types Bool    is_logical
+
+# complex arrays
+
+macro mx_test_complex_type(ty, testfun)
+    quote
+        b = mxarray(Complex{$(ty)}, m, n)
+        @test elsize(b) == sizeof($(ty))
+        @test eltype(b) === $(ty)
+        @test nrows(b) == m
+        @test ncols(b) == n
+        @test nelems(b) == m * n
+        @test ndims(b) == 2
+        @test size(b) == (m, n)
+        @test size(b, 1) == m
+        @test size(b, 2) == n
+        @test size(b, 3) == 1
+        @test is_complex(b)
+        @test $(testfun)(b)
+        delete(b)
+    end
+end
+@mx_test_complex_type Float64 is_double
+@mx_test_complex_type Float32 is_single
 
 # test creating multi-dimensional arrays
 
@@ -116,6 +141,12 @@ a_mx = mxarray(false)
 @test !jscalar(a_mx)
 delete(a_mx)
 
+a_mx = mxarray(3.25 + 4im)
+@test eltype(a_mx) == Float64
+@test size(a_mx) == (1, 1)
+@test jscalar(a_mx) == 3.25 + 4im
+delete(a_mx)
+
 # conversion between Julia and MATLAB numeric arrays
 
 a = rand(5, 6)
@@ -139,6 +170,12 @@ delete(a_mx)
 a = 1:5
 a_mx = mxarray(a)
 a2 = jvector(a_mx)
+@test isequal(a, a2)
+delete(a_mx)
+
+a = rand(5, 6) + rand(5, 6)*im
+a_mx = mxarray(a)
+a2 = jarray(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
