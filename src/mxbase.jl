@@ -31,7 +31,7 @@ function get_paths()
         if !isexecutable(default_startcmd)
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
         end
-        default_startcmd = "exec $default_startcmd -nosplash"
+        default_startcmd = "exec $(Base.shell_escape(default_startcmd)) -nosplash"
     end
 
     # Get path to MATLAB libraries
