@@ -555,13 +555,9 @@ function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
         @assert !is_sparse(mx)
         T = eltype(mx)
         if is_complex(mx)
-            a = Array(Complex{T}, siz)
-            n = *(siz...)
-            rdat = pointer_to_array(real_ptr(mx), n, false)
-            idat = pointer_to_array(imag_ptr(mx), n, false)
-            for i = 1:n
-                a[i] = complex(rdat[i], idat[i])
-            end
+            rdat = pointer_to_array(real_ptr(mx), siz, false)
+            idat = pointer_to_array(imag_ptr(mx), siz, false)
+            a = complex(rdat, idat)
         else
             a = Array(T, siz)
             ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint), 
