@@ -1,6 +1,4 @@
-
-using MATLAB
-using Test
+using MATLAB, Base.Test
 
 restart_default_msession()
 
