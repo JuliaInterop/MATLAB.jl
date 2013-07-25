@@ -40,13 +40,14 @@ function get_paths()
         if !isexecutable(default_startcmd)
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
         end
+        default_startcmd = "exec $(Base.shell_escape(default_startcmd)) -nosplash"
     elseif OS_NAME == :Windows
         default_startcmd = joinpath(matlab_homepath, "bin", (Int == Int32 ? "win32" : "win64"), "MATLAB.exe")
         if !isfile(default_startcmd)
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
         end
+        default_startcmd *= " -nosplash"
     end
-    default_startcmd *= " -nosplash"
 
     # Get path to MATLAB libraries
     matlab_library_path = nothing
