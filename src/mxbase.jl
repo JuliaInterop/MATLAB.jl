@@ -19,11 +19,20 @@ function get_paths()
             if ~isempty(apps)
                 matlab_homepath = joinpath("/Applications", min(apps))
             end
+        elseif OS_NAME == :Windows
+            default_dir = Int == Int32 ? "C:\\Program Files (x86)\\MATLAB" : "C:\\Program Files\\MATLAB"
+            if isdir(default_dir)
+                dirs = readdir(default_dir)
+                filter!(dir -> ismatch(r"^R[0-9]+[ab]$", dir), dirs)
+                if ~isempty(dirs)
+                    matlab_homepath = joinpath(default_dir, min(dirs))
+                end
+            end
         end
     end
 
     if matlab_homepath == ""
-        error("The MATLAB path could be found. Set the MATLAB_HOME environmental variable to specify the MATLAB path.")
+        error("The MATLAB path could not be found. Set the MATLAB_HOME environmental variable to specify the MATLAB path.")
     end
 
     if OS_NAME != :Windows
@@ -32,6 +41,12 @@ function get_paths()
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
         end
         default_startcmd = "exec $(Base.shell_escape(default_startcmd)) -nosplash"
+    elseif OS_NAME == :Windows
+        default_startcmd = joinpath(matlab_homepath, "bin", (Int == Int32 ? "win32" : "win64"), "MATLAB.exe")
+        if !isfile(default_startcmd)
+            error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
+        end
+        default_startcmd *= " -nosplash"
     end
 
     # Get path to MATLAB libraries
@@ -40,6 +55,8 @@ function get_paths()
         matlab_library_path = joinpath(matlab_homepath, "bin", (Int == Int32 ? "glnx86" : "glnxa64"))
     elseif OS_NAME == :Darwin
         matlab_library_path = joinpath(matlab_homepath, "bin", (Int == Int32 ? "maci" : "maci64"))
+    elseif OS_NAME == :Windows
+        matlab_library_path = joinpath(matlab_homepath, "bin", (Int == Int32 ? "win32" : "win64"))
     end
 
     if matlab_library_path != nothing && !isdir(matlab_library_path)
