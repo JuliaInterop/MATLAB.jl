@@ -19,12 +19,13 @@ module MATLAB
     # mstatments
     export mstatement
 
-    # engine
-    export MSession
+    # engine & matfile
+    export MSession, MatFile
     export get_default_msession, restart_default_msession, close_default_msession
     export eval_string, put_variable, get_mvariable, get_variable
     export mxcall
     export @mput, @mget, @matlab
+
 
     import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims
 
