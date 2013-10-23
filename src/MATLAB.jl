@@ -23,7 +23,7 @@ module MATLAB
     export MSession, MatFile
     export get_default_msession, restart_default_msession, close_default_msession
     export eval_string, get_mvariable, get_variable, put_variable, put_variables
-    export write_matfile
+    export variable_names, read_matfile, write_matfile
     export mxcall
     export @mput, @mget, @matlab
 

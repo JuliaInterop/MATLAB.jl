@@ -88,7 +88,22 @@ x = mxarray(["a", 1, 2.3])  # converts a Julia array to a MATLAB cell array
 x = mxarray({"a"=>1, "b"=>"string", "c"=>[1,2,3]}) # converts a Julia dictionary to a MATLAB struct
 ```
 
-MATLAB has its own memory management mechanism, and a MATLAB array is not able to use Julia's memory. Hence, the conversion from a Julia array to a MATLAB array involves deep-copy.
+The function ``mxarray`` can also converts a compound type to a Julia struct:
+```julia
+type S
+	x::Float64
+	y::Vector{Int32}
+	z::Bool
+end
+
+s = S(1.2, Int32[1, 2], false)
+
+x = mxarray(s)   # creates a MATLAB struct with three fields: x, y, z
+xc = mxarray([s, s])  # creates a MATLAB cell array, each cell is a struct.
+xs = mxstructarray([s, s])  # creates a MATLAB array of structs
+```
+
+**Note:** For safety, the conversation between MATLAB and Julia variables uses deep copy.
 
 When you finish using a MATLAB variable, you may call ``delete`` to free the memory. But this is optional, it will be deleted when reclaimed by the garbage collector.
 
@@ -143,6 +158,65 @@ a = jdict(x)    # converts a MATLAB struct to a Julia dictionary (using fieldnam
 
 a = jvariable(x)  # converts x to a Julia variable in default manner
 ```
+
+### Read/Write MAT Files
+
+This package provides functions to manipulate MATLAB's mat files:
+
+```julia
+mf = MatFile(filename)    # opens a MAT file, and returns a handle
+close(mf)                 # closes a MAT file.
+
+get_mvariable(mf, name)   # gets a variable and returns an mxArray
+get_variable(mf, name)    # gets a variable, but converts it to a Julia variable
+                          # using `jvariable`
+
+put_variable(mf, name, v)   # puts a variable v to the MAT file
+                            # v can be either an MxArray instance or normal variable
+                            # If v is not an MxArray, it will be converted using `mxarray`
+
+put_variables(mf; name1=v1, name2=v2, ...)  # put multiple variables using keyword arguments
+
+variable_names(mf)   # get a vector of all variable names in a MAT file
+```
+
+There are also convenient functions that can get/put all variables in one call:
+
+```julia
+read_matfile(filename)    # returns a dictionary that maps each variable name
+                          # to an MxArray instance
+
+write_matfile(filename; name1=v1, name2=v2, ...)  # writes all variables given in the
+                                                  # keyword argument list to a MAT file
+```
+Both ``read_matfile`` and ``write_matfile`` will close the MAT file handle before returning. 
+
+**Examples:**
+
+```julia
+immutable S
+	x::Float64
+	y::Bool
+	z::Vector{Float64}
+end
+
+write_matfile("test.mat"; 
+	a = Int32[1 2 3; 4 5 6], 
+	b = [1.2, 3.4, 5.6, 7.8], 
+	c = {[0., 1.], [1., 2.], [1., 2., 3.]}, 
+	d = {"name"=>"MATLAB", "score"=>100.}, 
+	s = "abcde"
+	ss = [S(1.0, true, [1., 2.]), S(2.0, false, [3., 4.])] )
+```
+
+This example will create a MAT file called ``test.mat``, which contains six MATLAB variables:
+
+* ``a``: a 2-by-3 int32 array
+* ``b``: a 4-by-1 double array
+* ``c``: a 3-by-1 cell array, each cell contains a double vector
+* ``d``: a struct with two fields: name and score
+* ``s``: a string (i.e. char array)
+* ``ss``: an array of structs with two elements, and three fields: x, y, and z.
 
 
 ### Use MATLAB Engine

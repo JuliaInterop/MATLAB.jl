@@ -30,7 +30,7 @@ end
 
 function get_mvariable(f::MatFile, name::ASCIIString)
 	f.ptr != C_NULL || error("Cannot get variable from a null file.")
-	pm = ccall(_mat_get_variable, Ptr{Void}, (Ptr{Void}, Ptr{Void}), 
+	pm = ccall(_mat_get_variable, Ptr{Void}, (Ptr{Void}, Ptr{Cchar}), 
 		f.ptr, name)
 	pm != C_NULL || error("Attempt to get variable $(name) failed.")
 	MxArray(pm)
@@ -70,3 +70,40 @@ function write_matfile(filename::ASCIIString; kwargs...)
 		close(mf)
 	end
 end
+
+function variable_names(f::MatFile)
+	# get a list of all variable names
+	_n = Cint[0]
+	_a = ccall(_mat_get_dir, Ptr{Ptr{Cchar}}, (Ptr{Void}, Ptr{Cint}), 
+		f.ptr, _n)
+
+	n = int(_n[1])
+	a = pointer_to_array(_a, (n,), false)
+
+	names = ASCIIString[bytestring(s) for s in a]
+	ccall(_mx_free, Void, (Ptr{Void},), _a)
+	return names
+end
+
+function read_matfile(f::MatFile)
+	# return a dictionary of all variables
+	names = variable_names(f)
+	r = (ASCIIString=>MxArray)[]
+	sizehint(r, length(names))
+	for nam in names
+		r[nam] = get_mvariable(f, nam)
+	end
+	return r
+end
+
+function read_matfile(filename::ASCIIString)
+	f = MatFile(filename, "r")
+	local r
+	try
+		r = read_matfile(f)
+	finally
+		close(f)
+	end
+	return r
+end
+

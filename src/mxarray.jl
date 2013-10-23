@@ -124,6 +124,8 @@ end
 
 # pre-cached some useful functions
 
+const _mx_free = mxfunc(:mxFree)
+
 const _mx_get_classid = mxfunc(:mxGetClassID)
 const _mx_get_m = mxfunc(:mxGetM)
 const _mx_get_n = mxfunc(:mxGetN)
