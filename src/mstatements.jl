@@ -49,7 +49,7 @@ function write_mstatement(io::IO, ex::Expr)
             print(io, ")")
 
         elseif na == 3
-            if contains(matlab_infix_ops, f)
+            if (f in matlab_infix_ops)
                 print(io, "(")
                 write_mstatement(io, a[2])
                 print(io, ") ")
