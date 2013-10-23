@@ -31,6 +31,7 @@ module MATLAB
     include("exceptions.jl")
     include("mxbase.jl")
     include("mxarray.jl")
+    include("matfile.jl")
 
     include("mstatements.jl")
     include("engine.jl")
