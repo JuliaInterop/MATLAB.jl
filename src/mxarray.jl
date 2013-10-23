@@ -15,6 +15,8 @@ type MxArray
     MxArray(p::Ptr{Void}) = MxArray(p, true)
 end
 
+mxarray(mx::MxArray) = mx
+
 # delete & duplicate
 
 function delete(mx::MxArray)
@@ -548,7 +550,8 @@ mxarray(d) = mxstruct(d)
 
 const _mx_get_string = mxfunc(:mxGetString_730)
 
-# shallow conversion from MATLAB variable to Julia array
+# use deep-copy from MATLAB variable to Julia array
+# in practice, MATLAB variable often has shorter life-cycle
 
 function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
     if is_numeric(mx) || is_logical(mx)

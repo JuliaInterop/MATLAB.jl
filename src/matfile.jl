@@ -6,6 +6,8 @@ const _mat_get_variable = matfunc(:matGetVariable)
 const _mat_put_variable = matfunc(:matPutVariable)
 const _mat_get_dir = matfunc(:matGetDir)
 
+# mat file open & close
+
 type MatFile
 	ptr::Ptr{Void}
 	filename::ASCIIString
@@ -24,6 +26,8 @@ function close(f::MatFile)
 	end
 end
 
+# get & put variables
+
 function get_mvariable(f::MatFile, name::ASCIIString)
 	f.ptr != C_NULL || error("Cannot get variable from a null file.")
 	pm = ccall(_mat_get_variable, Ptr{Void}, (Ptr{Void}, Ptr{Void}), 
@@ -40,10 +44,29 @@ get_variable(f::MatFile, name::Symbol) = jvariable(get_mvariable(f, name))
 function put_variable(f::MatFile, name::ASCIIString, v::MxArray)
 	f.ptr != C_NULL || error("Cannot put variable to a null file.")
 	v.ptr != C_NULL || error("Cannot put an null variable.")
-	ret = ccall(_mat_put_variable, Cint, (Ptr{Void}, Ptr{Void}, Ptr{Void}), 
+	ret = ccall(_mat_put_variable, Cint, (Ptr{Void}, Ptr{Cchar}, Ptr{Void}), 
 		f.ptr, name, v.ptr)
 	ret == 0 || error("Attempt to put variable $(name) failed.")
 end
 
 put_variable(f::MatFile, name::Symbol, v::MxArray) = put_variable(f, string(name), v)
 
+put_variable(f::MatFile, name::ASCIIString, v) = put_variable(f, name, mxarray(v))
+put_variable(f::MatFile, name::Symbol, v) = put_variable(f, name, mxarray(v))
+
+# operation over entire file
+
+function put_variables(f::MatFile; kwargs...)
+	for (name, val) in kwargs
+		put_variable(f, name, val)
+	end
+end
+
+function write_matfile(filename::ASCIIString; kwargs...)
+	mf = MatFile(filename, "w")
+	try
+		put_variables(mf; kwargs...)
+	finally
+		close(mf)
+	end
+end
