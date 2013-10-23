@@ -1,6 +1,7 @@
 
 libmx = C_NULL
 libeng = C_NULL
+libmat = C_NULL
 
 # Determine MATLAB library path and provide facilities to load libraries with
 # this path
@@ -82,6 +83,21 @@ function load_libmx()
 end
 
 load_libmx()
+
+# libmat (loaded when the module is imported)
+
+function load_libmat()
+    global libmat
+    if libmat == C_NULL
+        libmat = dlopen(matlab_library("libmat"), RTLD_GLOBAL | RTLD_LAZY)
+
+        if libmat == C_NULL
+            error("Failed to load libmat.")
+        end
+    end
+end
+
+load_libmat()
 
 # libeng (loaded when needed)
 
