@@ -565,8 +565,10 @@ function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
             a = complex(rdat, idat)
         else
             a = Array(T, siz)
-            ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint), 
-                a, data_ptr(mx), sizeof(T) * length(a))
+            if !isempty(a)
+                ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint), 
+                    a, data_ptr(mx), sizeof(T) * length(a))
+            end
         end
         a
         #pointer_to_array(data_ptr(mx), siz, false)
