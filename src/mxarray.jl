@@ -5,6 +5,9 @@ type MxArray
     own::Bool
     
     function MxArray(p::Ptr{Void}, own::Bool)
+        if p == C_NULL
+            error("NULL pointer for MxArray.")
+        end
         mx = new(p, own)
         if own
             finalizer(mx, delete)
