@@ -75,7 +75,7 @@ You may also convert a Julia variable to MATLAB variable
 ```julia
 a = rand(m, n)
 
-x = mxarray(a)     # converts v to a MATLAB array
+x = mxarray(a)     # converts a to a MATLAB array
 x = mxarray(1.2)   # converts a scalar 1.2 to a MATLAB variable
 
 a = sprand(m, n, 0.1)
@@ -259,7 +259,7 @@ Here, ``get_mvariable`` returns an instance of ``MxArray``, and the user can mak
 
 #### Caveats of @matlab
 
-Note that some MATLAB expressions is not a valid Julia expression. This package provides some ways to work around this in the ``@matlab`` macro:
+Note that some MATLAB expressions are not valid Julia expressions. This package provides some ways to work around this in the ``@matlab`` macro:
 
 ```julia
  # MATLAB uses single-quote for strings, while Julia uses double-quote. 
