@@ -140,7 +140,7 @@ function write_mstatement(io::IO, ex::Expr)
     elseif h == :block
         for s in a
             write_mstatement(io, s)
-            print(io, "\n")
+            print(io, ";\n")
         end
 
     elseif h == :line
