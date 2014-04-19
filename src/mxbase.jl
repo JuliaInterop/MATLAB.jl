@@ -1,4 +1,3 @@
-
 libmx = C_NULL
 libeng = C_NULL
 libmat = C_NULL
@@ -26,7 +25,7 @@ function get_paths()
                 dirs = readdir(default_dir)
                 filter!(dir -> ismatch(r"^R[0-9]+[ab]$", dir), dirs)
                 if ~isempty(dirs)
-                    matlab_homepath = joinpath(default_dir, min(dirs))
+                    matlab_homepath = joinpath(default_dir, minimum(dirs))
                 end
             end
         end
