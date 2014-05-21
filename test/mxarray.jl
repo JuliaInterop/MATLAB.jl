@@ -170,7 +170,7 @@ delete(a_mx)
 a = 1:5
 a_mx = mxarray(a)
 a2 = jvector(a_mx)
-@test isequal(a, a2)
+@test isequal([1:5], a2)
 delete(a_mx)
 
 a = rand(5, 6) + rand(5, 6)*im
@@ -190,7 +190,7 @@ a_mx = mxarray(a)
 
 a2 = jsparse(a_mx)
 @test size(a2) == (8, 9)
-@test nnz(a2) == nnz(a)
+@test countnz(a2) == countnz(a)
 @test isequal(a2, a)
 delete(a_mx)
 
@@ -203,7 +203,7 @@ a_mx = mxarray(a)
 
 a2 = jsparse(a_mx)
 @test size(a2) == (8, 9)
-@test nnz(a2) == nnz(a)
+@test countnz(a2) == countnz(a)
 @test isequal(a2, a)
 delete(a_mx)
 
