@@ -164,8 +164,9 @@ a = jvariable(x)  # converts x to a Julia variable in default manner
 This package provides functions to manipulate MATLAB's mat files:
 
 ```julia
-mf = MatFile(filename)    # opens a MAT file, and returns a handle
-close(mf)                 # closes a MAT file.
+mf = MatFile(filename, mode)    # opens a MAT file using a specific mode, and returns a handle
+mf = MatFile(filename)          # opens a MAT file for reading, equivalent to MatFile(filename, "r")
+close(mf)                       # closes a MAT file.
 
 get_mvariable(mf, name)   # gets a variable and returns an mxArray
 get_variable(mf, name)    # gets a variable, but converts it to a Julia variable

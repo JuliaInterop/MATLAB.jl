@@ -17,6 +17,8 @@ type MatFile
             filename, mode)
         new(p, filename)        
     end
+
+    MatFile(filename::ASCIIString) = MatFile(filename, "r")
 end
 
 function close(f::MatFile) 
