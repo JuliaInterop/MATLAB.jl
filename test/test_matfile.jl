@@ -9,9 +9,9 @@ c = {[0., 1.], [1., 2.], [1., 2., 3.]}
 d = {"name"=>"MATLAB", "score"=>100.}
 
 immutable S
-	x::Float64
-	y::Bool
-	z::Vector{Float64}
+    x::Float64
+    y::Bool
+    z::Vector{Float64}
 end
 
 ss = S[S(1.0, true, [1., 2.]), S(2.0, false, [3., 4.])]
