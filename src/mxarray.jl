@@ -645,7 +645,7 @@ end
 
 
 function jstring(mx::MxArray)
-    if !(classid(mx) == mxCHAR_CLASS && ndims(mx) == 2 && nrows(mx) == 1)
+    if !(classid(mx) == mxCHAR_CLASS && ((ndims(mx) == 2 && nrows(mx) == 1) || is_empty(mx)))
         throw(ArgumentError("jstring only applies to strings (i.e. char vectors)."))
     end
     len = ncols(mx) + 2
@@ -682,7 +682,7 @@ function jvariable(mx::MxArray)
         else
             jsparse(mx)
         end
-    elseif is_char(mx) && nrows(mx) == 1
+    elseif is_char(mx) && (nrows(mx) == 1 || is_empty(mx))
         jstring(mx)
     elseif is_cell(mx)
         ndims(mx) == 2 ? (ncols(mx) == 1 ? jvector(mx) : jmatrix(mx)) :

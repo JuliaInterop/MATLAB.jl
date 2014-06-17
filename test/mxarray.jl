@@ -222,6 +222,16 @@ s2 = jstring(s_mx)
 @test s == s2
 delete(s_mx)
 
+s = ""
+s_mx = mxarray(s)
+@test classid(s_mx) == MATLAB.mxCHAR_CLASS
+@test is_char(s_mx)
+@test is_empty(s_mx)
+
+s2 = jstring(s_mx)
+@test s == s2
+delete(s_mx)
+
 # cell arrays
 
 a = mxcellarray(10)
