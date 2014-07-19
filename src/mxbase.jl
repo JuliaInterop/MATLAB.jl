@@ -17,7 +17,7 @@ function get_paths()
             apps = readdir("/Applications")
             filter!(app -> ismatch(r"^MATLAB_R[0-9]+[ab]\.app$", app), apps)
             if ~isempty(apps)
-                matlab_homepath = joinpath("/Applications", min(apps))
+                matlab_homepath = joinpath("/Applications", minimum(apps))
             end
         elseif OS_NAME == :Windows
             default_dir = Int == Int32 ? "C:\\Program Files (x86)\\MATLAB" : "C:\\Program Files\\MATLAB"
