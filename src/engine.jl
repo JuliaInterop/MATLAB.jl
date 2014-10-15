@@ -104,7 +104,10 @@ function eval_string(session::MSession, stmt::ASCIIString)
 
     bufptr::Ptr{Uint8} = session.bufptr
     if bufptr != C_NULL
-        print(bytestring(bufptr))
+        bs = bytestring(bufptr)
+        if ~isempty(bs)
+            print(bytestring(bufptr))
+        end
     end
 end
 
