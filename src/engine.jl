@@ -106,7 +106,7 @@ function eval_string(session::MSession, stmt::ASCIIString)
     if bufptr != C_NULL
         bs = bytestring(bufptr)
         if ~isempty(bs)
-            print(bytestring(bufptr))
+            print(bs)
         end
     end
 end
