@@ -1,4 +1,5 @@
 module MATLAB
+    using Compat
 
     # mxarray
     export MxArray, mxClassID, mxComplexity

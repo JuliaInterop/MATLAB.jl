@@ -91,7 +91,7 @@ mxclassid(::Type{Uint64})  = mxUINT64_CLASS::Cint
 mxcomplexflag{T<:MxRealNum}(::Type{T})    = mxREAL
 mxcomplexflag{T<:MxComplexNum}(::Type{T}) = mxCOMPLEX
 
-const classid_type_map = (mxClassID=>Type)[
+const classid_type_map = @compat Dict{mxClassID,Type}(
     mxLOGICAL_CLASS => Bool,
     mxCHAR_CLASS    => Char,
     mxDOUBLE_CLASS  => Float64,
@@ -104,7 +104,7 @@ const classid_type_map = (mxClassID=>Type)[
     mxUINT32_CLASS  => Uint32,
     mxINT64_CLASS   => Int64,
     mxUINT64_CLASS  => Uint64
-]
+)
 
 function mxclassid_to_type(cid::mxClassID)
     ty = get(classid_type_map::Dict{mxClassID, Type}, cid, nothing)
@@ -670,7 +670,7 @@ function jdict(mx::MxArray)
         fx = MxArray(pv, false)
         fvals[i] = jvariable(fx)
     end
-    Dict(fnames, fvals)
+    Dict(zip(fnames, fvals))
 end
 
 function jvariable(mx::MxArray)

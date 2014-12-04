@@ -90,7 +90,7 @@ end
 function read_matfile(f::MatFile)
     # return a dictionary of all variables
     names = variable_names(f)
-    r = (ASCIIString=>MxArray)[]
+    r = Dict{ASCIIString,MxArray}()
     sizehint(r, length(names))
     for nam in names
         r[nam] = get_mvariable(f, nam)

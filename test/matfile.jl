@@ -1,12 +1,11 @@
 # Test MATLAB MAT file I/O
 
-using MATLAB
-using Base.Test
+using MATLAB, Compat, Base.Test
 
 a = Int32[1 2 3; 4 5 6]
 b = [1.2, 3.4, 5.6, 7.8]
-c = {[0., 1.], [1., 2.], [1., 2., 3.]}
-d = {"name"=>"MATLAB", "score"=>100.}
+c = Any[[0., 1.], [1., 2.], [1., 2., 3.]]
+d = @compat Dict{Any,Any}("name"=>"MATLAB", "score"=>100.)
 
 immutable S
     x::Float64
