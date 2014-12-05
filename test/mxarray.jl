@@ -1,7 +1,6 @@
 # Unit testing for MxArray
 
-using MATLAB
-using Base.Test
+using MATLAB, Compat, Base.Test
 
 m = 5
 n = 6
@@ -278,7 +277,7 @@ a = mxstruct("abc", "efg", "xyz")
 @test get_fieldname(a, 3) == "xyz"
 delete(a)
 
-s = {"name"=>"MATLAB", "version"=>12.0, "data"=>[1,2,3]}
+s = @compat Dict{Any,Any}("name"=>"MATLAB", "version"=>12.0, "data"=>[1,2,3])
 a = mxstruct(s)
 @test is_struct(a)
 @test nfields(a) == 3
@@ -360,7 +359,7 @@ delete(x)
 @test y[2] == a[2]
 @test y[3] == a[3]
 
-a = {"abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB"}
+a = @compat Dict{Any,Any}("abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB")
 x = mxarray(a)
 y = jvariable(x)
 delete(x)
