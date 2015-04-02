@@ -206,7 +206,7 @@ write_matfile("test.mat";
 	b = [1.2, 3.4, 5.6, 7.8], 
 	c = {[0., 1.], [1., 2.], [1., 2., 3.]}, 
 	d = {"name"=>"MATLAB", "score"=>100.}, 
-	s = "abcde"
+	s = "abcde",
 	ss = [S(1.0, true, [1., 2.]), S(2.0, false, [3., 4.])] )
 ```
 
