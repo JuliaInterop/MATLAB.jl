@@ -344,7 +344,7 @@ function mxarray{T<:MxComplexNum}(a::Array{T})
 end
 
 mxarray(a::BitArray) = mxarray(convert(Array{Bool}, a))
-mxarray(a::Ranges) = mxarray([a])
+mxarray(a::Ranges) = mxarray([a;])
 
 # sparse matrix
 
@@ -444,7 +444,7 @@ function _fieldname_array(fieldnames::ASCIIString...)
     n = length(fieldnames)
     a = Array(Ptr{Uint8}, n)
     for i = 1 : n
-        a[i] = convert(Ptr{Uint8}, fieldnames[i])
+        a[i] = unsafe_convert(Ptr{Uint8}, fieldnames[i])
     end
     a
 end

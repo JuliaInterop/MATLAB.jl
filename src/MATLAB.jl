@@ -1,5 +1,5 @@
 module MATLAB
-    using Compat
+    using Compat, Compat.Libdl
 
     # mxarray
     export MxArray, mxClassID, mxComplexity
@@ -29,7 +29,7 @@ module MATLAB
     export @mput, @mget, @matlab
 
 
-    import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims
+    import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims, Compat.unsafe_convert
 
     include("exceptions.jl")
     include("mxbase.jl")

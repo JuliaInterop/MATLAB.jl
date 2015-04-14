@@ -79,7 +79,7 @@ function variable_names(f::MatFile)
     _a = ccall(_mat_get_dir, Ptr{Ptr{Cchar}}, (Ptr{Void}, Ptr{Cint}), 
         f.ptr, _n)
 
-    n = int(_n[1])
+    n = @compat Int(_n[1])
     a = pointer_to_array(_a, (n,), false)
 
     names = ASCIIString[bytestring(s) for s in a]
@@ -91,7 +91,7 @@ function read_matfile(f::MatFile)
     # return a dictionary of all variables
     names = variable_names(f)
     r = Dict{ASCIIString,MxArray}()
-    sizehint(r, length(names))
+    sizehint!(r, length(names))
     for nam in names
         r[nam] = get_mvariable(f, nam)
     end

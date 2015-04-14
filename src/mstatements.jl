@@ -137,6 +137,9 @@ function write_mstatement(io::IO, ex::Expr)
         print(io, ")")
         print(io, string(h))
 
+    elseif h == :macrocall
+        print(io, a[1])
+
     elseif h == :block
         for s in a
             write_mstatement(io, s)

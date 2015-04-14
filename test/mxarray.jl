@@ -122,10 +122,10 @@ a_mx = mxarray(3.25)
 @test jscalar(a_mx) == 3.25
 delete(a_mx)
 
-a_mx = mxarray(int32(12))
+a_mx = mxarray(@compat Int32(12))
 @test eltype(a_mx) == Int32
 @test size(a_mx) == (1, 1)
-@test jscalar(a_mx) == int32(12)
+@test jscalar(a_mx) == @compat Int32(12)
 delete(a_mx)
 
 a_mx = mxarray(true)
@@ -169,7 +169,7 @@ delete(a_mx)
 a = 1:5
 a_mx = mxarray(a)
 a2 = jvector(a_mx)
-@test isequal([1:5], a2)
+@test isequal([1:5;], a2)
 delete(a_mx)
 
 a = rand(5, 6) + rand(5, 6)*im
