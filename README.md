@@ -32,7 +32,7 @@ The procedure to setup this package consists of three steps.
 
 	```bash
 	cd <your/julia/package/path>
-	git clone https://github.com/lindahua/MATLAB.jl.git MATLAB
+	git clone https://github.com/JuliaLang/MATLAB.jl.git MATLAB
 	```
 
 ##### Mac OS X
@@ -47,7 +47,7 @@ The procedure to setup this package consists of three steps.
 
 	```bash
 	cd <your/julia/package/path>
-	git clone https://github.com/lindahua/MATLAB.jl.git MATLAB
+	git clone https://github.com/JuliaLang/MATLAB.jl.git MATLAB
 	```
 
 
