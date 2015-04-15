@@ -26,7 +26,7 @@ module MATLAB
     export eval_string, get_mvariable, get_variable, put_variable, put_variables
     export variable_names, read_matfile, write_matfile
     export mxcall
-    export @mput, @mget, @matlab
+    export @mput, @mget, @matlab, @mat_str, @mat_mstr
 
 
     import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims, Compat.unsafe_convert
@@ -38,5 +38,6 @@ module MATLAB
 
     include("mstatements.jl")
     include("engine.jl")
+    include("matstr.jl")
 
 end # module
