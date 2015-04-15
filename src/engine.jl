@@ -80,6 +80,7 @@ function close_default_msession()
     global default_msession
     if !(default_msession == nothing)
         close(default_msession)
+        default_msession = nothing
     end
 end
 
