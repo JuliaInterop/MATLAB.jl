@@ -224,41 +224,56 @@ This example will create a MAT file called ``test.mat``, which contains six MATL
 
 #### Basic Use
 
-To evaluate expressions in MATLAB, one may open a MATLAB engine session and communicate with it.
+To evaluate expressions in MATLAB, one may open a MATLAB engine session and communicate with it. There are three ways to call MATLAB from Julia:
 
-Below is a simple example that illustrates how one can use MATLAB from within Julia:
+- The `mat""` custom string literal allows you to write MATLAB syntax inside Julia and use Julia variables directly from MATLAB via interpolation
+- The `@matlab` macro, in combination with `@mput` and `@mget`, translates Julia syntax to MATLAB
+- The `mxcall` function calls a given MATLAB function and returns the result
+
+*Note:* There can be multiple (reasonable) ways to convert a MATLAB variable to Julia array. For example, MATLAB represents a scalar using a 1-by-1 matrix. Here we have two choices in terms of converting such a matrix back to Julia: (1) convert to a scalar number, or (2) convert to a matrix of size 1-by-1.
+
+##### The `mat""` custom string literal
+
+Text inside the `mat""` custom string literal is in MATLAB syntax. Variables from Julia can be "interpolated" into MATLAB code by prefixing them with a dollar sign as you would interpolate them into an ordinary string.
 
 ```julia
 using MATLAB
 
-restart_default_msession()   # Open a default MATLAB session
+x = linspace(-10., 10., 500)
+mat"plot($x, sin($x))"  # evaluate a MATLAB function
+
+y = linspace(2., 3., 500)
+mat"""
+    $u = $x + $y
+	$v = $x - $y
+"""
+@show u v               # u and v are accessible from Julia
+```
+
+As with ordinary string literals, you can also interpolate whole Julia expressions, e.g. `mat"$(x[1]) = $(x[2]) + $(binomial(5, 2))`.
+
+##### The `@matlab` macro
+
+The example above can also be written using the `@matlab` macro in combination with `@mput` and `@mget`.
+
+```julia
+using MATLAB
 
 x = linspace(-10., 10., 500)
-
 @mput x                  # put x to MATLAB's workspace
 @matlab plot(x, sin(x))  # evaluate a MATLAB function
 
-close_default_msession()    # close the default session (optional)
-```
-
-You can put multiple variable and evaluate multiple statement by calling ``@mput`` and ``@matlab`` once:
-```julia
-x = linspace(-10., 10., 500)
 y = linspace(2., 3., 500)
-
-@mput x y
+@mput y
 @matlab begin
     u = x + y
 	v = x - y
 end
 @mget u v
+@show u v
 ```
 
-*Note:* There can be multiple (reasonable) ways to convert a MATLAB variable to Julia array. For example, MATLAB represents a scalar using a 1-by-1 matrix. Here we have two choice in terms of converting such a matrix back to Julia: (1) convert to a scalar number, or (2) convert to a matrix of size 1-by-1.
-
-Here, ``get_mvariable`` returns an instance of ``MxArray``, and the user can make his own choice by calling ``jarray``, ``jvector``, or ``jscalar`` to convert it to a Julia variable.
-
-#### Caveats of @matlab
+###### Caveats of @matlab
 
 Note that some MATLAB expressions are not valid Julia expressions. This package provides some ways to work around this in the ``@matlab`` macro:
 
@@ -282,9 +297,9 @@ While we try to cover most MATLAB statements, some valid MATLAB statements remai
 eval_string("[u, v] = myfun(x, y);")
 ```
 
-#### mxcall
+##### `mxcall`
 
-You may also directly call a MATLAB function on Julia variables
+You may also directly call a MATLAB function on Julia variables using `mxcall`:
 
 ```julia
 x = [-10.:0.1:10.]
