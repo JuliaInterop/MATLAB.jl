@@ -278,7 +278,7 @@ const _mx_get_fieldname = mxfunc(:mxGetFieldNameByNumber)
 
 mxempty() = mxarray(Float64, 0, 0)
 
-function _dims_to_mwSize(dims::(Int...))
+function _dims_to_mwSize(dims::@compat Tuple{Vararg{Int}})
     ndim = length(dims)
     _dims = Array(mwSize, ndim)
     for i = 1 : ndim
@@ -287,7 +287,7 @@ function _dims_to_mwSize(dims::(Int...))
     _dims
 end
 
-function mxarray{T<:MxNum}(ty::Type{T}, dims::(Int...))
+function mxarray{T<:MxNum}(ty::Type{T}, dims::@compat Tuple{Vararg{Int}})
     pm = ccall(_mx_create_numeric_arr, Ptr{Void}, 
         (mwSize, Ptr{mwSize}, mxClassID, mxComplexity), 
         length(dims), _dims_to_mwSize(dims), mxclassid(ty), mxcomplexflag(ty))
@@ -410,7 +410,7 @@ end
 
 # cell arrays
 
-function mxcellarray(dims::(Int...))
+function mxcellarray(dims::@compat Tuple{Vararg{Int}})
     pm = ccall(_mx_create_cell_array, Ptr{Void}, (mwSize, Ptr{mwSize}), 
         length(dims), _dims_to_mwSize(dims))
     MxArray(pm) 
@@ -518,27 +518,27 @@ function mxstruct(pairs::NTuple{2}...)
 end
 
 function mxstruct{T}(d::T)
-    fieldnames = T.names
-    fieldnames_str = map(string, fieldnames)
-    mx = mxstruct(fieldnames_str...)
-    for i = 1:length(fieldnames)
-        set_field(mx, fieldnames_str[i], mxarray(getfield(d, fieldnames[i])))
+    names = fieldnames(T)
+    names_str = map(string, names)
+    mx = mxstruct(names_str...)
+    for i = 1:length(names)
+        set_field(mx, names_str[i], mxarray(getfield(d, names[i])))
     end
     mx
 end
 
 function mxstructarray{T}(d::Array{T})
-    fieldnames = T.names
-    fieldnames_str = map(string, fieldnames)
-    a = _fieldname_array(fieldnames_str...)
+    names = fieldnames(T)
+    names_str = map(string, names)
+    a = _fieldname_array(names_str...)
 
     pm = ccall(_mx_create_struct_array, Ptr{Void}, (mwSize, Ptr{mwSize}, Cint,
         Ptr{Ptr{Uint8}}), ndims(d), _dims_to_mwSize(size(d)), length(a), a)
     mx = MxArray(pm)
 
-    for i = 1:length(d), j = 1:length(fieldnames)
-        set_field(mx, i, fieldnames_str[j],
-            mxarray(getfield(d[i], fieldnames[j])))
+    for i = 1:length(d), j = 1:length(names)
+        set_field(mx, i, names_str[j],
+            mxarray(getfield(d[i], names[j])))
     end
     mx
 end
