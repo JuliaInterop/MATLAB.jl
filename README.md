@@ -250,7 +250,7 @@ mat"""
 @show u v               # u and v are accessible from Julia
 ```
 
-As with ordinary string literals, you can also interpolate whole Julia expressions, e.g. `mat"$(x[1]) = $(x[2]) + $(binomial(5, 2))`.
+As with ordinary string literals, you can also interpolate whole Julia expressions, e.g. `mat"$(x[1]) = $(x[2]) + $(binomial(5, 2))"`.
 
 ##### The `@matlab` macro
 
