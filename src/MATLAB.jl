@@ -1,5 +1,6 @@
 module MATLAB
     using Compat, Compat.Libdl
+    using Compat.Libdl: dlopen, dlsym
 
     # mxarray
     export MxArray, mxClassID, mxComplexity

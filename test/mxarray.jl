@@ -1,6 +1,7 @@
 # Unit testing for MxArray
 
 using MATLAB, Compat, Base.Test
+using MATLAB: nfields
 
 m = 5
 n = 6
