@@ -344,7 +344,7 @@ function mxarray{T<:MxComplexNum}(a::Array{T})
 end
 
 mxarray(a::BitArray) = mxarray(convert(Array{Bool}, a))
-mxarray(a::Ranges) = mxarray([a;])
+mxarray(a::Range) = mxarray([a;])
 
 # sparse matrix
 
