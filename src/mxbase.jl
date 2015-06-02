@@ -110,8 +110,8 @@ function load_libeng()
     end
 end
 
-engfunc(fun::Symbol) = dlsym(libeng::Ptr{Void}, fun)
-mxfunc(fun::Symbol) = dlsym(libmx::Ptr{Void}, fun)
-matfunc(fun::Symbol) = dlsym(libmat::Ptr{Void}, fun)
+engfunc(fun::Symbol) = dlsym(libeng::DLHandle, fun)
+mxfunc(fun::Symbol) = dlsym(libmx::DLHandle, fun)
+matfunc(fun::Symbol) = dlsym(libmat::DLHandle, fun)
 
 
