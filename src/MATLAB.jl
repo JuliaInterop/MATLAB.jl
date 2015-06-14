@@ -32,12 +32,6 @@ module MATLAB
 
     import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims, Compat.unsafe_convert
 
-    if VERSION >= v"0.4.0-dev+4889"
-        import Base.Libdl.DLHandle
-    else
-        typealias DLHandle Ptr{Void}
-    end
-
     include("exceptions.jl")
     include("mxbase.jl")
     include("mxarray.jl")

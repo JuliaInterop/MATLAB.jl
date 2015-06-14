@@ -51,7 +51,7 @@ end
 function close(session::MSession)
     # Close a MATLAB Engine session
 
-    @assert libeng != C_NULL
+    @assert libeng::Ptr{Void} != C_NULL
 
     r = ccall(engfunc(:engClose), Cint, (Ptr{Void},), session.ptr)
     if r != 0
@@ -99,7 +99,7 @@ end
 function eval_string(session::MSession, stmt::ASCIIString)
     # Evaluate a MATLAB statement in a given MATLAB session
 
-    @assert libeng != C_NULL
+    @assert libeng::Ptr{Void} != C_NULL
 
     r::Cint = ccall(engfunc(:engEvalString), Cint,
         (Ptr{Void}, Ptr{Uint8}), session.ptr, stmt)
@@ -123,7 +123,7 @@ eval_string(stmt::ASCIIString) = eval_string(get_default_msession(), stmt)
 function put_variable(session::MSession, name::Symbol, v::MxArray)
     # Put a variable into a MATLAB engine session
 
-    @assert libeng != C_NULL
+    @assert libeng::Ptr{Void} != C_NULL
 
     r = ccall(engfunc(:engPutVariable), Cint,
         (Ptr{Void}, Ptr{Uint8}, Ptr{Void}), session.ptr, string(name), v.ptr)
@@ -140,7 +140,7 @@ put_variable(name::Symbol, v) = put_variable(get_default_msession(), name, v)
 
 function get_mvariable(session::MSession, name::Symbol)
 
-    @assert libeng != C_NULL
+    @assert libeng::Ptr{Void} != C_NULL
 
     pv = ccall(engfunc(:engGetVariable), Ptr{Void},
         (Ptr{Void}, Ptr{Uint8}), session.ptr, string(name))
