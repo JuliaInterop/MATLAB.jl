@@ -94,8 +94,15 @@ end
 function do_mat_str(ex)
     # Hack to do interpolation
     interp = parse(string("\"\"\"", replace(ex, "\"\"\"", "\\\"\"\""), "\"\"\""))
-    @assert interp.head == :macrocall
-    interp = interp.args[2:end]
+    if isa(interp, String)
+        interp = [interp]
+    elseif interp.head == :string
+        interp = interp.args
+    elseif interp.head == :macrocall
+        interp = interp.args[2:end]
+    else
+        throw(ArgumentError("unexpected input"))
+    end
 
     # Handle interpolated variables
     putblock = Expr(:block)
@@ -135,7 +142,7 @@ function do_mat_str(ex)
     unshift!(interp, "clear ans;\nmatlab_jl_has_ans = 0;\n")
 
     # Add a semicolon to the end of the last statement to suppress output
-    interp[end] = rstrip(interp[end])
+    isa(interp[end], String) && (interp[end] = rstrip(interp[end]))
     push!(interp, ";")
 
     # Figure out if `ans` exists in code to avoid an error if it doesn't
