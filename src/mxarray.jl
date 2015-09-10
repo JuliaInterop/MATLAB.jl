@@ -503,7 +503,13 @@ function get_fieldname(mx::MxArray, i::Integer)
     bytestring(p)
 end
 
-function mxstruct(pairs::NTuple{2}...)
+if VERSION >= v"0.4.0-dev+980"
+    typealias Pairs Union(Pair,NTuple{2})
+else
+    typealias Pairs NTuple{2}
+end
+
+function mxstruct(pairs::Pairs...)
     nf = length(pairs)
     fieldnames = Array(ASCIIString, nf)
     for i = 1 : nf
