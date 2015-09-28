@@ -1,29 +1,31 @@
 ## MATLAB.jl
 
-The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from the [Julia language](http://julialang.org). You cannot use `MATLAB.jl` without having purchased and installed a copy of MATLAB™ from [MathWorks](http://www.mathworks.com/). This package is available free of charge and in no way replaces or alters any functionality of MathWorks's MATLAB product.
+The `MATLAB.jl` package provides interfaces for using [MATLAB™](http://www.mathworks.com/products/matlab/) from the [Julia language](http://julialang.org) and vice versa. You cannot use `MATLAB.jl` without having purchased and installed a copy of MATLAB™ from [MathWorks](http://www.mathworks.com/). This package is available free of charge and in no way replaces or alters any functionality of MathWorks's MATLAB product.
 
-[Julia](http://julialang.org) is a technical computing language, which relies on LLVM to achieve efficiency comparable to C. As a young language, many useful functions are still lacking. This package allows users to call MATLAB functions from within Julia, thus making it easier to use the sheer amount of toolboxes available in MATLAB.
+[Julia](http://julialang.org) is a technical computing language, which relies on LLVM to achieve efficiency comparable to C. As a young language, many useful functions are still lacking. This package allows users to call MATLAB functions from within Julia, thus making it easier to use the sheer amount of toolboxes available in MATLAB. This package also provides a means for calling Julia from MATLAB, allowing users to augment their MATLAB workflow with Julia.
 
 ### Overview
 
-Generally, this package is comprised of two aspects:
+Generally, this package is comprised of three aspects:
 
-* Creating and manipulating mxArrays (the data structure that MATLAB used to represent arrays and other kinds of data)
+* Creating and manipulating mxArrays (the structure that MATLAB uses to represent arrays and other kinds of data)
 
-* Communicating with MATLAB engine sessions
+* Communicating with MATLAB engine sessions (Julia front-end)
+
+* Communicating with Julia from MATLAB via a MEX function interface (MATLAB front-end)
 
 ### Installation
 
-The procedure to setup this package consists of three steps. 
+Package setup consists of three steps.
 
 ##### Linux
 
-1. Make sure ``matlab`` is in executable path. 
+1. Make sure ``matlab`` is in executable path.
 
-2. Make sure ``csh`` is installed. (Note: MATLAB for Linux relies on ``csh`` to open an engine session.) 
-	
+2. Make sure ``csh`` is installed. (Note: MATLAB for Linux relies on ``csh`` to open an engine session.)
+
 	To install ``csh`` in Debian/Ubuntu/Linux Mint, you may type in the following command in terminal:
-	
+
 	```bash
 	sudo apt-get install csh
 	```
@@ -38,7 +40,7 @@ The procedure to setup this package consists of three steps.
 ##### Mac OS X
 
 1. Ensure that MATLAB is installed in `/Applications`. By default, MATLAB.jl uses the MATLAB installation with the greatest version number. To specify that a specific MATLAB installation should be used, set the environment variable ``MATLAB_HOME``. For example, if you are using MATLAB R2012b, you may add the following command to ``.profile``:
-	
+
 	```bash
 	export MATLAB_HOME=/Applications/MATLAB_R2012b.app
 	```
@@ -61,7 +63,7 @@ One can use the function ``mxarray`` to create MATLAB variables (of type ``MxArr
 
 ```julia
 mxarray(Float64, n)   # creates an n-by-1 MATLAB zero array of double valued type
-mxarray(Int32, m, n)  # creates an m-by-n MATLAB zero array of int32 valued type 
+mxarray(Int32, m, n)  # creates an m-by-n MATLAB zero array of int32 valued type
 mxarray(Bool, m, n)   # creates a MATLAB logical array of size m-by-n
 
 mxarray(Float64, (n1, n2, n3))  # creates a MATLAB array of size n1-by-n2-by-n3
@@ -121,7 +123,7 @@ You may access attributes and data of a MATLAB variable through the functions pr
 ```julia
  # suppose x is of type MxArray
 nrows(x)    # returns number of rows in x
-ncols(x)    # returns number of columns in x 
+ncols(x)    # returns number of columns in x
 nelems(x)   # returns number of elements in x
 ndims(x)    # returns number of dimensions in x
 size(x)     # returns the size of x as a tuple
@@ -159,7 +161,7 @@ a = jdict(x)    # converts a MATLAB struct to a Julia dictionary (using fieldnam
 a = jvariable(x)  # converts x to a Julia variable in default manner
 ```
 
-### Read/Write MAT Files
+### Read/write MAT files
 
 This package provides functions to manipulate MATLAB's mat files:
 
@@ -190,7 +192,7 @@ read_matfile(filename)    # returns a dictionary that maps each variable name
 write_matfile(filename; name1=v1, name2=v2, ...)  # writes all variables given in the
                                                   # keyword argument list to a MAT file
 ```
-Both ``read_matfile`` and ``write_matfile`` will close the MAT file handle before returning. 
+Both ``read_matfile`` and ``write_matfile`` will close the MAT file handle before returning.
 
 **Examples:**
 
@@ -201,11 +203,11 @@ immutable S
 	z::Vector{Float64}
 end
 
-write_matfile("test.mat"; 
-	a = Int32[1 2 3; 4 5 6], 
-	b = [1.2, 3.4, 5.6, 7.8], 
-	c = {[0., 1.], [1., 2.], [1., 2., 3.]}, 
-	d = {"name"=>"MATLAB", "score"=>100.}, 
+write_matfile("test.mat";
+	a = Int32[1 2 3; 4 5 6],
+	b = [1.2, 3.4, 5.6, 7.8],
+	c = {[0., 1.], [1., 2.], [1., 2., 3.]},
+	d = {"name"=>"MATLAB", "score"=>100.},
 	s = "abcde",
 	ss = [S(1.0, true, [1., 2.]), S(2.0, false, [3., 4.])] )
 ```
@@ -220,9 +222,9 @@ This example will create a MAT file called ``test.mat``, which contains six MATL
 * ``ss``: an array of structs with two elements, and three fields: x, y, and z.
 
 
-### Use MATLAB Engine
+### Use MATLAB engine
 
-#### Basic Use
+#### Basic use
 
 To evaluate expressions in MATLAB, one may open a MATLAB engine session and communicate with it. There are three ways to call MATLAB from Julia:
 
@@ -278,7 +280,7 @@ end
 Note that some MATLAB expressions are not valid Julia expressions. This package provides some ways to work around this in the ``@matlab`` macro:
 
 ```julia
- # MATLAB uses single-quote for strings, while Julia uses double-quote. 
+ # MATLAB uses single-quote for strings, while Julia uses double-quote.
 @matlab sprintf("%d", 10)   # ==> MATLAB: sprintf('%d', 10)
 
  # MATLAB does not allow [x, y] on the left hand side
@@ -311,7 +313,7 @@ xx, yy = mxcall(:meshgrid, 2, x, y)
 ``mxcall`` puts the input arguments to the MATLAB workspace (using mangled names), evaluates the function call in MATLAB, and retrievs the variable from the MATLAB session. This function is mainly provided for convenience. However, you should keep in mind that it may incur considerable overhead due to the communication between MATLAB and Julia domain.
 
 
-#### Advanced use of MATLAB Engines
+#### Advanced use of MATLAB engines
 
 This package provides a series of functions for users to control the communication with MATLAB sessions.
 
@@ -342,3 +344,81 @@ close(s1)  # close session s1
 close(s2)  # close session s2
 ```
 
+### Using the MEX interface
+
+#### Setup
+
+Setting up the MEX interface involves running the `jlconfig` script from the matlab prompt. It will build the mex function and add the `MATLAB/m` directory to your MATLAB path.
+
+#### A quick look at the high-level interface
+
+You can evaluate Julia expressions in MATLAB:
+
+```Matlab
+>> Jl.eval('1+1')
+
+ans =
+
+                    2
+```
+
+You can call Julia functions:
+
+```Matlab
+>> Jl.call('*', 1, 2, 3, 4, 5)
+
+ans =
+
+   120
+
+>> Jl.call('factorial', 5)
+
+ans =
+
+   120
+```
+
+Data is marshaled from MATLAB to Julia by calling `jvariable`. Return values are marshaled from Julia to MATLAB by calling `mxarray`.
+
+#### Under the hood
+
+Underneath the higher-level interface provided by `Jl.m`, Julia is exposed to MATLAB through a MEX function, `jlcall`. This MEX function expects that its first argument is a string naming a Julia function with a MEX-like signature, which is to say it can be called with four arguments having the types `Int32`, `Ptr{Void}`, `Int32`, `Ptr{Void}`.
+
+To exercise more control over data marshaling you can define your own functions accepting this signature, load them into the Julia back-end, and then call them from MATLAB using `jlcall`. For example, `Jl.eval` is itself implemented this way. `MATLAB.jl` provides `mex_eval`, whose definition is:
+
+```julia
+function mex_eval(nlhs::Int32, plhs::Ptr{Void}, nrhs::Int32, prhs::Ptr{Void})
+  @assert nlhs == nrhs
+  try
+    mex_return(nlhs, plhs, [ eval(parse(e)) for e in mex_args(nrhs, prhs) ]...)
+  catch e
+    mex_showerror(e)
+  end
+end
+```
+
+`mex_args`, `mex_return`, and `mex_showerror` are helper functions also defined in `MATLAB.jl`. Here are two ways to equivalent ways evaluate a Julia expression:
+
+```Matlab
+>> a = Jl.eval('1+1')
+
+a =
+
+                    2
+
+>> b = jlcall('mex_eval','1+1')
+
+b =
+
+                    2
+```
+
+You can define your own Julia code and load it with `Jl.include`, _e.g._:
+
+```Matlab
+>> Jl.include('mycode.jl');
+```
+
+#### Caveats
+
+The arguments passed in from MATLAB cannot be mutated. Expect MATLAB to crash if Julia code attempts to modify the arguments.

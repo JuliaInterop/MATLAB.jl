@@ -6,13 +6,13 @@ module MATLAB
     export MxArray, mxClassID, mxComplexity
     export mxclassid, data_ptr
     export classid, nrows, ncols, nelems, elsize
-    
+
     export is_double, is_single
     export is_int8, is_uint8, is_int16, is_uint16
     export is_int32, is_uint32, is_int64, is_uint64
     export is_numeric, is_complex, is_sparse, is_empty
     export is_logical, is_char, is_struct, is_cell
-    
+
     export mxarray, mxempty, mxsparse, delete, duplicate
     export mxcellarray, get_cell, set_cell
     export mxstruct, mxstructarray, nfields, get_fieldname, get_field, set_field
@@ -39,6 +39,7 @@ module MATLAB
 
     include("mstatements.jl")
     include("engine.jl")
+    include("mex.jl")
     include("matstr.jl")
 
 end # module
