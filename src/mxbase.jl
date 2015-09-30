@@ -1,6 +1,7 @@
 libmx = C_NULL
 libeng = C_NULL
 libmat = C_NULL
+libmex = C_NULL
 
 # Determine MATLAB library path and provide facilities to load libraries with
 # this path
@@ -110,8 +111,19 @@ function load_libeng()
     end
 end
 
+# libmex (loaded when needed)
+
+function load_libmex()
+    global libmex
+    if libmex == C_NULL
+        libmex = dlopen(matlab_library("libmex"), RTLD_GLOBAL | RTLD_LAZY)
+        if libmex == C_NULL
+            error("Failed to load libmex.")
+        end
+    end
+end
+
 engfunc(fun::Symbol) = dlsym(libeng::Ptr{Void}, fun)
 mxfunc(fun::Symbol) = dlsym(libmx::Ptr{Void}, fun)
 matfunc(fun::Symbol) = dlsym(libmat::Ptr{Void}, fun)
-
-
+mexfunc(fun::Symbol) = dlsym(libmex::Ptr{Void}, fun)
