@@ -38,9 +38,9 @@ copy(mx::MxArray) = duplicate(mx)
 
 # functions to create mxArray from Julia values/arrays
 
-MxRealNum = Union(Float64,Float32,Int32,Uint32,Int64,Uint64,Int16,Uint16,Int8,Uint8,Bool)
-MxComplexNum = Union(Complex64, Complex128)
-MxNum = Union(MxRealNum, MxComplexNum)
+MxRealNum = Union{Float64,Float32,Int32,UInt32,Int64,UInt64,Int16,UInt16,Int8,UInt8,Bool}
+MxComplexNum = Union{Complex64, Complex128}
+MxNum = Union{MxRealNum, MxComplexNum}
 
 ###########################################################
 #
@@ -48,7 +48,7 @@ MxNum = Union(MxRealNum, MxComplexNum)
 #
 ###########################################################
 
-typealias mwSize Uint
+typealias mwSize UInt
 typealias mwIndex Int
 typealias mxClassID Cint
 typealias mxComplexity Cint
@@ -77,16 +77,16 @@ const mxREAL    = convert(mxComplexity, 0)
 const mxCOMPLEX = convert(mxComplexity, 1)
 
 mxclassid(::Type{Bool})    = mxLOGICAL_CLASS::Cint
-mxclassid(::Union(Type{Float64}, Type{Complex128})) = mxDOUBLE_CLASS::Cint
-mxclassid(::Union(Type{Float32}, Type{Complex64})) = mxSINGLE_CLASS::Cint
+mxclassid(::Union{Type{Float64}, Type{Complex128}}) = mxDOUBLE_CLASS::Cint
+mxclassid(::Union{Type{Float32}, Type{Complex64}}) = mxSINGLE_CLASS::Cint
 mxclassid(::Type{Int8})    = mxINT8_CLASS::Cint
-mxclassid(::Type{Uint8})   = mxUINT8_CLASS::Cint
+mxclassid(::Type{UInt8})   = mxUINT8_CLASS::Cint
 mxclassid(::Type{Int16})   = mxINT16_CLASS::Cint
-mxclassid(::Type{Uint16})  = mxUINT16_CLASS::Cint
+mxclassid(::Type{UInt16})  = mxUINT16_CLASS::Cint
 mxclassid(::Type{Int32})   = mxINT32_CLASS::Cint
-mxclassid(::Type{Uint32})  = mxUINT32_CLASS::Cint
+mxclassid(::Type{UInt32})  = mxUINT32_CLASS::Cint
 mxclassid(::Type{Int64})   = mxINT64_CLASS::Cint
-mxclassid(::Type{Uint64})  = mxUINT64_CLASS::Cint
+mxclassid(::Type{UInt64})  = mxUINT64_CLASS::Cint
 
 mxcomplexflag{T<:MxRealNum}(::Type{T})    = mxREAL
 mxcomplexflag{T<:MxComplexNum}(::Type{T}) = mxCOMPLEX
@@ -97,13 +97,13 @@ const classid_type_map = @compat Dict{mxClassID,Type}(
     mxDOUBLE_CLASS  => Float64,
     mxSINGLE_CLASS  => Float32,
     mxINT8_CLASS    => Int8,
-    mxUINT8_CLASS   => Uint8,
+    mxUINT8_CLASS   => UInt8,
     mxINT16_CLASS   => Int16,
-    mxUINT16_CLASS  => Uint16,
+    mxUINT16_CLASS  => UInt16,
     mxINT32_CLASS   => Int32,
-    mxUINT32_CLASS  => Uint32,
+    mxUINT32_CLASS  => UInt32,
     mxINT64_CLASS   => Int64,
-    mxUINT64_CLASS  => Uint64
+    mxUINT64_CLASS  => UInt64
 )
 
 function mxclassid_to_type(cid::mxClassID)
@@ -171,13 +171,13 @@ macro mxget_attr(fun, ret)
 end
 
 classid(mx::MxArray) = @mxget_attr(_mx_get_classid, mxClassID)
-nrows(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_m, Uint))
-ncols(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_n, Uint))
-nelems(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_nelems, Uint))
+nrows(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_m, UInt))
+ncols(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_n, UInt))
+nelems(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_nelems, UInt))
 ndims(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_ndims, mwSize))
 
 eltype(mx::MxArray)  = mxclassid_to_type(classid(mx))
-elsize(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_elemsize, Uint))
+elsize(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_elemsize, UInt))
 data_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_data, Ptr{Void}))
 real_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_pr, Ptr{Void}))
 imag_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_pi, Ptr{Void}))
@@ -326,7 +326,7 @@ mxarray{T<:MxComplexNum}(x::T) = mxarray([x])
 
 function mxarray{T<:MxRealNum}(a::Array{T})
     mx = mxarray(T, size(a))
-    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint),
+    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt),
         data_ptr(mx), a, length(a) * sizeof(T))
     mx
 end
@@ -381,10 +381,10 @@ function _copy_sparse_mat{V,I}(a::SparseMatrixCSC{V,I},
         jc[i] = colptr[i] - 1
     end
     
-    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint), pr_p, v, nnz * sizeof(V))
+    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), pr_p, v, nnz * sizeof(V))
 end
 
-function mxarray{V<:Union(Float64,Bool),I}(a::SparseMatrixCSC{V,I})
+function mxarray{V<:Union{Float64,Bool},I}(a::SparseMatrixCSC{V,I})
     m::Int = a.m
     n::Int = a.n
     nnz = length(a.nzval)
@@ -404,7 +404,7 @@ end
 # char arrays and string
 
 function mxarray(s::ASCIIString)
-    pm = ccall(_mx_create_string, Ptr{Void}, (Ptr{Uint8},), s)
+    pm = ccall(_mx_create_string, Ptr{Void}, (Ptr{UInt8},), s)
     MxArray(pm)
 end
 
@@ -442,9 +442,9 @@ mxarray(a::Array) = mxcellarray(a)
 
 function _fieldname_array(fieldnames::ASCIIString...)
     n = length(fieldnames)
-    a = Array(Ptr{Uint8}, n)
+    a = Array(Ptr{UInt8}, n)
     for i = 1 : n
-        a[i] = unsafe_convert(Ptr{Uint8}, fieldnames[i])
+        a[i] = unsafe_convert(Ptr{UInt8}, fieldnames[i])
     end
     a
 end
@@ -452,7 +452,7 @@ end
 function mxstruct(fns::Vector{ASCIIString})
     a = _fieldname_array(fns...)
     pm = ccall(_mx_create_struct_matrix, Ptr{Void}, 
-        (mwSize, mwSize, Cint, Ptr{Ptr{Uint8}}), 
+        (mwSize, mwSize, Cint, Ptr{Ptr{UInt8}}), 
         1, 1, length(a), a)
     MxArray(pm)
 end
@@ -460,7 +460,7 @@ end
 function mxstruct(fn1::ASCIIString, fnr::ASCIIString...)
     a = _fieldname_array(fn1, fnr...)
     pm = ccall(_mx_create_struct_matrix, Ptr{Void}, 
-        (mwSize, mwSize, Cint, Ptr{Ptr{Uint8}}), 
+        (mwSize, mwSize, Cint, Ptr{Ptr{UInt8}}), 
         1, 1, length(a), a)
     MxArray(pm)
 end
@@ -468,14 +468,14 @@ end
 function set_field(mx::MxArray, i::Integer, f::ASCIIString, v::MxArray)
     v.own = false
     ccall(_mx_set_field, Void, 
-        (Ptr{Void}, mwIndex, Ptr{Uint8}, Ptr{Void}), 
+        (Ptr{Void}, mwIndex, Ptr{UInt8}, Ptr{Void}), 
         mx.ptr, i-1, f, v.ptr)
 end
 
 set_field(mx::MxArray, f::ASCIIString, v::MxArray) = set_field(mx, 1, f, v)
 
 function get_field(mx::MxArray, i::Integer, f::ASCIIString)
-    pm = ccall(_mx_get_field, Ptr{Void}, (Ptr{Void}, mwIndex, Ptr{Uint8}), 
+    pm = ccall(_mx_get_field, Ptr{Void}, (Ptr{Void}, mwIndex, Ptr{UInt8}), 
         mx.ptr, i-1, f)
     if pm == C_NULL
         throw(ArgumentError("Failed to get field."))
@@ -498,13 +498,13 @@ get_field(mx::MxArray, fn::Integer) = get_field(mx, 1, fn)
 
 
 function get_fieldname(mx::MxArray, i::Integer)
-    p = ccall(_mx_get_fieldname, Ptr{Uint8}, (Ptr{Void}, Cint), 
+    p = ccall(_mx_get_fieldname, Ptr{UInt8}, (Ptr{Void}, Cint), 
         mx.ptr, i-1)
     bytestring(p)
 end
 
 if VERSION >= v"0.4.0-dev+980"
-    typealias Pairs Union(Pair,NTuple{2})
+    typealias Pairs Union{Pair,NTuple{2}}
 else
     typealias Pairs NTuple{2}
 end
@@ -539,7 +539,7 @@ function mxstructarray{T}(d::Array{T})
     a = _fieldname_array(names_str...)
 
     pm = ccall(_mx_create_struct_array, Ptr{Void}, (mwSize, Ptr{mwSize}, Cint,
-        Ptr{Ptr{Uint8}}), ndims(d), _dims_to_mwSize(size(d)), length(a), a)
+        Ptr{Ptr{UInt8}}), ndims(d), _dims_to_mwSize(size(d)), length(a), a)
     mx = MxArray(pm)
 
     for i = 1:length(d), j = 1:length(names)
@@ -564,7 +564,7 @@ const _mx_get_string = mxfunc(:mxGetString_730)
 # use deep-copy from MATLAB variable to Julia array
 # in practice, MATLAB variable often has shorter life-cycle
 
-function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
+function _jarrayx(fun::AbstractString, mx::MxArray, siz::Tuple)
     if is_numeric(mx) || is_logical(mx)
         @assert !is_sparse(mx)
         T = eltype(mx)
@@ -575,7 +575,7 @@ function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
         else
             a = Array(T, siz)
             if !isempty(a)
-                ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, Uint), 
+                ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), 
                     a, data_ptr(mx), sizeof(T) * length(a))
             end
         end
@@ -655,8 +655,8 @@ function jstring(mx::MxArray)
         throw(ArgumentError("jstring only applies to strings (i.e. char vectors)."))
     end
     len = ncols(mx) + 2
-    tmp = Array(Uint8, len)
-    ccall(_mx_get_string, Cint, (Ptr{Void}, Ptr{Uint8}, mwSize), 
+    tmp = Array(UInt8, len)
+    ccall(_mx_get_string, Cint, (Ptr{Void}, Ptr{UInt8}, mwSize), 
         mx.ptr, tmp, len)
     bytestring(pointer(tmp))
 end
@@ -706,7 +706,7 @@ jvariable(mx::MxArray, ty::Type{Array})  = jarray(mx)
 jvariable(mx::MxArray, ty::Type{Vector}) = jvector(mx)
 jvariable(mx::MxArray, ty::Type{Matrix}) = jmatrix(mx)
 jvariable(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
-jvariable(mx::MxArray, ty::Type{String}) = jstring(mx)::ASCIIString
+jvariable(mx::MxArray, ty::Type{AbstractString}) = jstring(mx)::ASCIIString
 jvariable(mx::MxArray, ty::Type{ASCIIString}) = jstring(mx)::ASCIIString
 jvariable(mx::MxArray, ty::Type{Dict}) = jdict(mx)
 jvariable(mx::MxArray, ty::Type{SparseMatrixCSC}) = jsparse(mx)

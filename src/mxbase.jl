@@ -65,7 +65,7 @@ function get_paths()
 end
 get_paths()
 
-matlab_library(lib::String) =
+matlab_library(lib::AbstractString) =
     matlab_library_path == nothing ? lib : joinpath(matlab_library_path, lib)
 
 # libmx (loaded when the module is imported)

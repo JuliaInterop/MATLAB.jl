@@ -57,13 +57,13 @@ a = mxempty()
 @mx_test_basic_types Float64 is_double
 @mx_test_basic_types Float32 is_single
 @mx_test_basic_types Int64   is_int64
-@mx_test_basic_types Uint64  is_uint64
+@mx_test_basic_types UInt64  is_uint64
 @mx_test_basic_types Int32   is_int32
-@mx_test_basic_types Uint32  is_uint32
+@mx_test_basic_types UInt32  is_uint32
 @mx_test_basic_types Int16   is_int16
-@mx_test_basic_types Uint16  is_uint16
+@mx_test_basic_types UInt16  is_uint16
 @mx_test_basic_types Int8    is_int8
-@mx_test_basic_types Uint8   is_uint8
+@mx_test_basic_types UInt8   is_uint8
 @mx_test_basic_types Bool    is_logical
 
 # complex arrays
@@ -288,7 +288,7 @@ a = mxstruct(s)
 delete(a)
 
 type TestType
-    name::String
+    name::AbstractString
     version::Float64
     data::Vector{Int}
 end
@@ -364,7 +364,7 @@ a = @compat Dict{Any,Any}("abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB")
 x = mxarray(a)
 y = jvariable(x)
 delete(x)
-@test isa(y, Dict{String, Any})
+@test isa(y, Dict{AbstractString, Any})
 
 @test y["abc"] == 10.0
 @test isequal(y["efg"], [1, 2, 3])
