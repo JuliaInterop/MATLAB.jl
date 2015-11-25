@@ -11,8 +11,8 @@ const default_output_buffer_size = 64 * 1024
 
 type MSession
     ptr::Ptr{Void}
-    buffer::Vector{Uint8}
-    bufptr::Ptr{Uint8}
+    buffer::Vector{UInt8}
+    bufptr::Ptr{UInt8}
 
     function MSession(bufsize::Integer)
         global libeng
@@ -21,19 +21,19 @@ type MSession
         end
         @assert libeng != C_NULL
 
-        ep = ccall(engfunc(:engOpen), Ptr{Void}, (Ptr{Uint8},), default_startcmd)
+        ep = ccall(engfunc(:engOpen), Ptr{Void}, (Ptr{UInt8},), default_startcmd)
         if ep == C_NULL
             throw(MEngineError("Failed to open a MATLAB engine session."))
         end
 
-        buf = Array(Uint8, bufsize)
+        buf = Array(UInt8, bufsize)
 
         if bufsize > 0
             bufptr = pointer(buf)
-            ccall(engfunc(:engOutputBuffer), Cint, (Ptr{Void}, Ptr{Uint8}, Cint),
+            ccall(engfunc(:engOutputBuffer), Cint, (Ptr{Void}, Ptr{UInt8}, Cint),
                 ep, bufptr, bufsize)
         else
-            bufptr = convert(Ptr{Uint8}, C_NULL)
+            bufptr = convert(Ptr{UInt8}, C_NULL)
         end
         
         if OS_NAME == :Windows
@@ -102,13 +102,13 @@ function eval_string(session::MSession, stmt::ASCIIString)
     @assert libeng::Ptr{Void} != C_NULL
 
     r::Cint = ccall(engfunc(:engEvalString), Cint,
-        (Ptr{Void}, Ptr{Uint8}), session.ptr, stmt)
+        (Ptr{Void}, Ptr{UInt8}), session.ptr, stmt)
 
     if r != 0
         throw(MEngineError("Invalid engine session."))
     end
 
-    bufptr::Ptr{Uint8} = session.bufptr
+    bufptr::Ptr{UInt8} = session.bufptr
     if bufptr != C_NULL
         bs = bytestring(bufptr)
         if ~isempty(bs)
@@ -126,7 +126,7 @@ function put_variable(session::MSession, name::Symbol, v::MxArray)
     @assert libeng::Ptr{Void} != C_NULL
 
     r = ccall(engfunc(:engPutVariable), Cint,
-        (Ptr{Void}, Ptr{Uint8}, Ptr{Void}), session.ptr, string(name), v.ptr)
+        (Ptr{Void}, Ptr{UInt8}, Ptr{Void}), session.ptr, string(name), v.ptr)
 
     if r != 0
         throw(MEngineError("Failed to put the variable $(name) into a MATLAB session."))
@@ -143,7 +143,7 @@ function get_mvariable(session::MSession, name::Symbol)
     @assert libeng::Ptr{Void} != C_NULL
 
     pv = ccall(engfunc(:engGetVariable), Ptr{Void},
-        (Ptr{Void}, Ptr{Uint8}), session.ptr, string(name))
+        (Ptr{Void}, Ptr{UInt8}), session.ptr, string(name))
 
     if pv == C_NULL
         throw(MEngineError("Failed to get the variable $(name) from a MATLAB session."))
@@ -197,7 +197,7 @@ function make_getvar_statement(ex::Expr)
     :( $(v) = MATLAB.get_variable($(Meta.quot(v)), $(k)) )
 end
 
-function _mget_multi(vs::Union(Symbol, Expr)...)
+@compat function _mget_multi(vs::Union{Symbol, Expr}...)
     nv = length(vs)
     if nv == 1
         make_getvar_statement(vs[1])
