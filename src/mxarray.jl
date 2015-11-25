@@ -38,9 +38,9 @@ copy(mx::MxArray) = duplicate(mx)
 
 # functions to create mxArray from Julia values/arrays
 
-MxRealNum = Union{Float64,Float32,Int32,UInt32,Int64,UInt64,Int16,UInt16,Int8,UInt8,Bool}
-MxComplexNum = Union{Complex64, Complex128}
-MxNum = Union{MxRealNum, MxComplexNum}
+@compat MxRealNum = Union{Float64,Float32,Int32,UInt32,Int64,UInt64,Int16,UInt16,Int8,UInt8,Bool}
+@compat MxComplexNum = Union{Complex64, Complex128}
+@compat MxNum = Union{MxRealNum, MxComplexNum}
 
 ###########################################################
 #
@@ -77,8 +77,8 @@ const mxREAL    = convert(mxComplexity, 0)
 const mxCOMPLEX = convert(mxComplexity, 1)
 
 mxclassid(::Type{Bool})    = mxLOGICAL_CLASS::Cint
-mxclassid(::Union{Type{Float64}, Type{Complex128}}) = mxDOUBLE_CLASS::Cint
-mxclassid(::Union{Type{Float32}, Type{Complex64}}) = mxSINGLE_CLASS::Cint
+@compat mxclassid(::Union{Type{Float64}, Type{Complex128}}) = mxDOUBLE_CLASS::Cint
+@compat mxclassid(::Union{Type{Float32}, Type{Complex64}}) = mxSINGLE_CLASS::Cint
 mxclassid(::Type{Int8})    = mxINT8_CLASS::Cint
 mxclassid(::Type{UInt8})   = mxUINT8_CLASS::Cint
 mxclassid(::Type{Int16})   = mxINT16_CLASS::Cint
@@ -384,7 +384,7 @@ function _copy_sparse_mat{V,I}(a::SparseMatrixCSC{V,I},
     ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), pr_p, v, nnz * sizeof(V))
 end
 
-function mxarray{V<:Union{Float64,Bool},I}(a::SparseMatrixCSC{V,I})
+@compat function mxarray{V<:Union{Float64,Bool},I}(a::SparseMatrixCSC{V,I})
     m::Int = a.m
     n::Int = a.n
     nnz = length(a.nzval)

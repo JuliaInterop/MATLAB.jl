@@ -197,7 +197,7 @@ function make_getvar_statement(ex::Expr)
     :( $(v) = MATLAB.get_variable($(Meta.quot(v)), $(k)) )
 end
 
-function _mget_multi(vs::Union{Symbol, Expr}...)
+@compat function _mget_multi(vs::Union{Symbol, Expr}...)
     nv = length(vs)
     if nv == 1
         make_getvar_statement(vs[1])
