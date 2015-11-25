@@ -666,7 +666,7 @@ function jdict(mx::MxArray)
         throw(ArgumentError("jdict only applies to a single struct."))
     end
     nf = nfields(mx)
-    fnames = Array(String, nf)
+    fnames = Array(AbstractString, nf)
     fvals = Array(Any, nf)
     for i = 1 : nf
         fnames[i] = get_fieldname(mx, i)
