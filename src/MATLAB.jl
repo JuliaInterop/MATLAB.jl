@@ -30,7 +30,7 @@ module MATLAB
     export @mput, @mget, @matlab, @mat_str, @mat_mstr
 
 
-    import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims, Compat.unsafe_convert
+    import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims, Compat.unsafe_convert, Compat.ASCIIString
 
     include("exceptions.jl")
     include("mxbase.jl")
