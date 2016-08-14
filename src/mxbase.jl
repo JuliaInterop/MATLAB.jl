@@ -53,7 +53,7 @@ function get_paths()
     matlab_library_path = nothing
     if is_linux()
         matlab_library_path = joinpath(matlab_homepath, "bin", (Int == Int32 ? "glnx86" : "glnxa64"))
-    elseif is_osx()
+    elseif is_apple()
         matlab_library_path = joinpath(matlab_homepath, "bin", (Int == Int32 ? "maci" : "maci64"))
     elseif is_windows()
         matlab_library_path = joinpath(matlab_homepath, "bin", (Int == Int32 ? "win32" : "win64"))
