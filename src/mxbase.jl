@@ -11,15 +11,15 @@ function get_paths()
     global matlab_library_path = nothing
 
     if matlab_homepath == ""
-        if OS_NAME == :Linux
+        if is_linux()
             matlab_homepath = dirname(dirname(realpath(chomp(readstring(`which matlab`)))))
-        elseif OS_NAME == :Darwin
+        elseif is_apple()
             apps = readdir("/Applications")
             filter!(app -> ismatch(r"^MATLAB_R[0-9]+[ab]\.app$", app), apps)
             if ~isempty(apps)
                 matlab_homepath = joinpath("/Applications", minimum(apps))
             end
-        elseif OS_NAME == :Windows
+        elseif is_windows()
             default_dir = Int == Int32 ? "C:\\Program Files (x86)\\MATLAB" : "C:\\Program Files\\MATLAB"
             if isdir(default_dir)
                 dirs = readdir(default_dir)
@@ -35,13 +35,13 @@ function get_paths()
         error("The MATLAB path could not be found. Set the MATLAB_HOME environmental variable to specify the MATLAB path.")
     end
 
-    if OS_NAME != :Windows
+    if !is_windows()
         default_startcmd = joinpath(matlab_homepath, "bin", "matlab")
         if !isfile(default_startcmd)
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
         end
         default_startcmd = "exec $(Base.shell_escape(default_startcmd)) -nosplash"
-    elseif OS_NAME == :Windows
+    elseif is_windows()
         default_startcmd = joinpath(matlab_homepath, "bin", (Int == Int32 ? "win32" : "win64"), "MATLAB.exe")
         if !isfile(default_startcmd)
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
@@ -51,11 +51,11 @@ function get_paths()
 
     # Get path to MATLAB libraries
     matlab_library_path = nothing
-    if OS_NAME == :Linux
+    if is_linux()
         matlab_library_path = joinpath(matlab_homepath, "bin", (Int == Int32 ? "glnx86" : "glnxa64"))
-    elseif OS_NAME == :Darwin
+    elseif is_osx()
         matlab_library_path = joinpath(matlab_homepath, "bin", (Int == Int32 ? "maci" : "maci64"))
-    elseif OS_NAME == :Windows
+    elseif is_windows()
         matlab_library_path = joinpath(matlab_homepath, "bin", (Int == Int32 ? "win32" : "win64"))
     end
 

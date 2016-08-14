@@ -36,7 +36,7 @@ type MSession
             bufptr = convert(Ptr{UInt8}, C_NULL)
         end
         
-        if OS_NAME == :Windows
+        if is_windows()
             # Hide the MATLAB Command Window on Windows
             ccall(engfunc(:engSetVisible ), Cint, (Ptr{Void}, Cint), ep, 0)
         end
