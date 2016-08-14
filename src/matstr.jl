@@ -116,7 +116,7 @@ function do_mat_str(ex)
             if haskey(varmap, interp[i])
                 var = varmap[interp[i]]
             else
-                var = symbol(string("matlab_jl_", i))
+                var = Symbol(string("matlab_jl_", i))
                 if isa(interp[i], Symbol)
                     varmap[interp[i]] = var
                 end

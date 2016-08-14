@@ -270,7 +270,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     # put variables to MATLAB
     
     for i = 1 : nin
-        put_variable(session, symbol(in_arg_names[i]), in_args[i])
+        put_variable(session, Symbol(in_arg_names[i]), in_args[i])
     end
     
     # execute MATLAB statement
@@ -280,11 +280,11 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     # get results from MATLAB
     
     ret = if nout == 1
-        jvariable(get_mvariable(session, symbol(out_arg_names[1])))
+        jvariable(get_mvariable(session, Symbol(out_arg_names[1])))
     elseif nout >= 2
         results = Array(Any, nout)
         for i = 1 : nout
-            results[i] = jvariable(get_mvariable(session, symbol(out_arg_names[i])))
+            results[i] = jvariable(get_mvariable(session, Symbol(out_arg_names[i])))
         end
         tuple(results...)
     else
