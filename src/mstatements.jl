@@ -157,5 +157,5 @@ end
 function mstatement(ex::Expr)
     ss = IOBuffer()
     write_mstatement(ss, ex)
-    ASCIIString(ss)
+    takebuf_string(ss)
 end

@@ -110,7 +110,7 @@ function eval_string(session::MSession, stmt::ASCIIString)
 
     bufptr::Ptr{UInt8} = session.bufptr
     if bufptr != C_NULL
-        bs = unsafe_wrap(String, bufptr)
+        bs = unsafe_string(bufptr)
         if ~isempty(bs)
             print(bs)
         end
