@@ -215,7 +215,7 @@ is_empty(mx::MxArray)   = @mx_test_is(_mx_is_empty)
 function size(mx::MxArray)
     nd = ndims(mx)
     pdims::Ptr{mwSize} = @mxget_attr(_mx_get_dims, Ptr{mwSize})
-    _dims = pointer_to_array(pdims, (nd,), false)
+    _dims = unsafe_wrap(Array, pdims, (nd,))
     dims = Array(Int, nd)
     for i = 1 : nd
         dims[i] = convert(Int, _dims[i])
@@ -234,7 +234,7 @@ function size(mx::MxArray, d::Integer)
         d == 2 ? ncols(mx) : 1
     else
         pdims::Ptr{mwSize} = @mxget_attr(_mx_get_dims, Ptr{mwSize})
-        _dims = pointer_to_array(pdims, (nd,), false)
+        _dims = unsafe_wrap(Array, pdims, (nd,))
         d <= nd ? convert(Int, _dims[d]) : 1
     end    
 end
@@ -315,7 +315,7 @@ function mxarray{T<:MxRealNum}(x::T)
         
     pdat = ccall(_mx_get_data, Ptr{T}, (Ptr{Void},), pm)
     
-    pointer_to_array(pdat, (1,), false)[1] = x
+    unsafe_wrap(Array, pdat, (1,))[1] = x
     MxArray(pm)
 end
 mxarray{T<:MxComplexNum}(x::T) = mxarray([x])
@@ -334,8 +334,8 @@ end
 function mxarray{T<:MxComplexNum}(a::Array{T})
     mx = mxarray(T, size(a))
     na = length(a)
-    rdat = pointer_to_array(real_ptr(mx), na, false)
-    idat = pointer_to_array(imag_ptr(mx), na, false)
+    rdat = unsafe_wrap(Array, real_ptr(mx), na)
+    idat = unsafe_wrap(Array, imag_ptr(mx), na)
     for i = 1:na
         rdat[i] = real(a[i])
         idat[i] = imag(a[i])
@@ -371,12 +371,12 @@ function _copy_sparse_mat{V,I}(a::SparseMatrixCSC{V,I},
     
     # Note: ir and jc contain zero-based indices
     
-    ir = pointer_to_array(ir_p, (nnz,), false)
+    ir = unsafe_wrap(Array, ir_p, (nnz,))
     for i = 1 : nnz    
         ir[i] = rinds[i] - 1
     end
     
-    jc = pointer_to_array(jc_p, (n+1,), false)
+    jc = unsafe_wrap(Array, jc_p, (n+1,))
     for i = 1 : n+1
         jc[i] = colptr[i] - 1
     end
@@ -569,8 +569,8 @@ function _jarrayx(fun::AbstractString, mx::MxArray, siz::Tuple)
         @assert !is_sparse(mx)
         T = eltype(mx)
         if is_complex(mx)
-            rdat = pointer_to_array(real_ptr(mx), siz, false)
-            idat = pointer_to_array(imag_ptr(mx), siz, false)
+            rdat = unsafe_wrap(Array, real_ptr(mx), siz)
+            idat = unsafe_wrap(Array, imag_ptr(mx), siz)
             a = complex(rdat, idat)
         else
             a = Array(T, siz)
@@ -580,7 +580,7 @@ function _jarrayx(fun::AbstractString, mx::MxArray, siz::Tuple)
             end
         end
         a
-        #pointer_to_array(data_ptr(mx), siz, false)
+        #unsafe_wrap(Array, data_ptr(mx), siz)
     elseif is_cell(mx)
         a = Array(Any, siz)
         for i = 1 : length(a)
@@ -608,9 +608,9 @@ function jscalar(mx::MxArray)
     end
     @assert !is_sparse(mx)
     if is_complex(mx)
-        pointer_to_array(real_ptr(mx), (1,), false)[1] + im*pointer_to_array(imag_ptr(mx), (1,), false)[1]
+        unsafe_wrap(Array, real_ptr(mx), (1,), false)[1] + im*unsafe_wrap(Array, imag_ptr(mx), (1,))[1]
     else
-        pointer_to_array(data_ptr(mx), (1,), false)[1]
+        unsafe_wrap(Array, data_ptr(mx), (1,))[1]
     end
 end
 
@@ -621,23 +621,23 @@ function _jsparse{T<:MxRealNum}(ty::Type{T}, mx::MxArray)
     jc_ptr = ccall(_mx_get_jc, Ptr{mwIndex}, (Ptr{Void},), mx.ptr)
     pr_ptr = ccall(_mx_get_pr, Ptr{T}, (Ptr{Void},), mx.ptr)
     
-    jc_a::Vector{mwIndex} = pointer_to_array(jc_ptr, (n+1,), false)
+    jc_a::Vector{mwIndex} = unsafe_wrap(Array, jc_ptr, (n+1,))
     nnz = jc_a[n+1]
     
     ir = Array(Int, nnz)
     jc = Array(Int, n+1)
     
-    ir_x = pointer_to_array(ir_ptr, (nnz,), false)
+    ir_x = unsafe_wrap(Array, ir_ptr, (nnz,))
     for i = 1 : nnz
         ir[i] = ir_x[i] + 1
     end
     
-    jc_x = pointer_to_array(jc_ptr, (n+1,), false)
+    jc_x = unsafe_wrap(Array, jc_ptr, (n+1,))
     for i = 1 : n+1
         jc[i] = jc_x[i] + 1
     end
     
-    pr::Vector{T} = copy(pointer_to_array(pr_ptr, (nnz,), false))
+    pr::Vector{T} = copy(unsafe_wrap(Array, pr_ptr, (nnz,)))
     SparseMatrixCSC(m, n, jc, ir, pr)
 end
 
