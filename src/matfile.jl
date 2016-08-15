@@ -80,9 +80,9 @@ function variable_names(f::MatFile)
         f.ptr, _n)
 
     n = @compat Int(_n[1])
-    a = pointer_to_array(_a, (n,), false)
+    a = unsafe_wrap(Array, _a, (n,))
 
-    names = ASCIIString[bytestring(s) for s in a]
+    names = ASCIIString[unsafe_string(s) for s in a]
     ccall(_mx_free, Void, (Ptr{Void},), _a)
     return names
 end

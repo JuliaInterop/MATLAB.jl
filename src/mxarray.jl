@@ -500,7 +500,7 @@ get_field(mx::MxArray, fn::Integer) = get_field(mx, 1, fn)
 function get_fieldname(mx::MxArray, i::Integer)
     p = ccall(_mx_get_fieldname, Ptr{UInt8}, (Ptr{Void}, Cint), 
         mx.ptr, i-1)
-    bytestring(p)
+    unsafe_string(p)
 end
 
 if VERSION >= v"0.4.0-dev+980"
@@ -658,7 +658,7 @@ function jstring(mx::MxArray)
     tmp = Array(UInt8, len)
     ccall(_mx_get_string, Cint, (Ptr{Void}, Ptr{UInt8}, mwSize), 
         mx.ptr, tmp, len)
-    bytestring(pointer(tmp))
+    unsafe_string(pointer(tmp))
 end
 
 function jdict(mx::MxArray)

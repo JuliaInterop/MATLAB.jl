@@ -110,7 +110,7 @@ function eval_string(session::MSession, stmt::ASCIIString)
 
     bufptr::Ptr{UInt8} = session.bufptr
     if bufptr != C_NULL
-        bs = bytestring(bufptr)
+        bs = unsafe_wrap(String, bufptr)
         if ~isempty(bs)
             print(bs)
         end
@@ -265,7 +265,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     end
     print(buf, ");")
     
-    stmt = bytestring(buf)
+    stmt = ASCIIString(buf)
     
     # put variables to MATLAB
     
