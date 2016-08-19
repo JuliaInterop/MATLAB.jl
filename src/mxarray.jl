@@ -654,11 +654,12 @@ function jstring(mx::MxArray)
     if !(classid(mx) == mxCHAR_CLASS && ((ndims(mx) == 2 && nrows(mx) == 1) || is_empty(mx)))
         throw(ArgumentError("jstring only applies to strings (i.e. char vectors)."))
     end
-    len = ncols(mx) + 2
+    len = ncols(mx) + 1
     tmp = Array(UInt8, len)
     ccall(_mx_get_string, Cint, (Ptr{Void}, Ptr{UInt8}, mwSize), 
         mx.ptr, tmp, len)
-    unsafe_string(pointer(tmp))
+    pop!(tmp)
+    String(tmp)
 end
 
 function jdict(mx::MxArray)

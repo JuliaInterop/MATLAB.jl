@@ -30,7 +30,7 @@ module MATLAB
     export @mput, @mget, @matlab, @mat_str, @mat_mstr
 
 
-    import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims, Compat.unsafe_convert, Compat.ASCIIString
+    import Base.eltype, Base.close, Base.size, Base.copy, Base.ndims, Compat.unsafe_convert, Compat.ASCIIString, Compat.String
 
     include("exceptions.jl")
     include("mxbase.jl")
@@ -40,5 +40,4 @@ module MATLAB
     include("mstatements.jl")
     include("engine.jl")
     include("matstr.jl")
-
 end # module
