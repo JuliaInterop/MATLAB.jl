@@ -251,7 +251,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
         if nout > 1
             print(buf, "[")
         end
-        print(buf, join(out_arg_names, ", "))
+        join(buf, out_arg_names, ", ")
         if nout > 1
             print(buf, "]")
         end
@@ -261,7 +261,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     print(buf, string(mfun))
     print(buf, "(")
     if nin > 0
-        print(buf, join(in_arg_names, ", "))
+        join(buf, in_arg_names, ", ")
     end
     print(buf, ");")
     
