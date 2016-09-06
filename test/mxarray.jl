@@ -2,6 +2,7 @@
 
 using MATLAB, Compat, Base.Test
 using MATLAB: nfields
+import Compat: ASCIIString
 
 m = 5
 n = 6

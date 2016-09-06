@@ -1,6 +1,7 @@
 # Test MATLAB MAT file I/O
 
 using MATLAB, Compat, Base.Test
+import Compat: ASCIIString
 
 a = Int32[1 2 3; 4 5 6]
 b = [1.2, 3.4, 5.6, 7.8]

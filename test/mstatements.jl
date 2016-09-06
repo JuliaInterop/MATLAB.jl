@@ -31,8 +31,6 @@ using Base.Test
 @test mstatement(:([1 2 3])) == "[1, 2, 3]"
 @test mstatement(:([x; y; z])) == "[x; y; z]"
 @test mstatement(:([1 2 3; 4 5 6])) == "[[1, 2, 3]; [4, 5, 6]]"
-@test mstatement(:({1, 2, 3})) == "{1, 2, 3}"
-@test mstatement(:({1 2 3; 4 5 6})) == "{1 2 3; 4 5 6}"
 
 @test mstatement(:(a(1))) == "a(1)"
 @test mstatement(:(a(1, 1))) == "a(1, 1)"

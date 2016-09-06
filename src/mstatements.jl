@@ -131,7 +131,7 @@ function write_mstatement(io::IO, ex::Expr)
             write_mstatement(io, a[i])
         end
 
-    elseif h == symbol("'") || h == symbol(".'")
+    elseif h == Symbol("'") || h == Symbol(".'")
         print(io, "(")
         write_mstatement(io, a[1])
         print(io, ")")
@@ -157,5 +157,5 @@ end
 function mstatement(ex::Expr)
     ss = IOBuffer()
     write_mstatement(ss, ex)
-    bytestring(ss)
+    takebuf_string(ss)
 end

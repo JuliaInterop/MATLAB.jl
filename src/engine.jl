@@ -36,7 +36,7 @@ type MSession
             bufptr = convert(Ptr{UInt8}, C_NULL)
         end
         
-        if OS_NAME == :Windows
+        if is_windows()
             # Hide the MATLAB Command Window on Windows
             ccall(engfunc(:engSetVisible ), Cint, (Ptr{Void}, Cint), ep, 0)
         end
@@ -110,7 +110,7 @@ function eval_string(session::MSession, stmt::ASCIIString)
 
     bufptr::Ptr{UInt8} = session.bufptr
     if bufptr != C_NULL
-        bs = bytestring(bufptr)
+        bs = unsafe_string(bufptr)
         if ~isempty(bs)
             print(bs)
         end
@@ -251,7 +251,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
         if nout > 1
             print(buf, "[")
         end
-        print(buf, join(out_arg_names, ", "))
+        join(buf, out_arg_names, ", ")
         if nout > 1
             print(buf, "]")
         end
@@ -261,16 +261,16 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     print(buf, string(mfun))
     print(buf, "(")
     if nin > 0
-        print(buf, join(in_arg_names, ", "))
+        join(buf, in_arg_names, ", ")
     end
     print(buf, ");")
     
-    stmt = bytestring(buf)
+    stmt = takebuf_string(buf)
     
     # put variables to MATLAB
     
     for i = 1 : nin
-        put_variable(session, symbol(in_arg_names[i]), in_args[i])
+        put_variable(session, Symbol(in_arg_names[i]), in_args[i])
     end
     
     # execute MATLAB statement
@@ -280,11 +280,11 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     # get results from MATLAB
     
     ret = if nout == 1
-        jvariable(get_mvariable(session, symbol(out_arg_names[1])))
+        jvariable(get_mvariable(session, Symbol(out_arg_names[1])))
     elseif nout >= 2
         results = Array(Any, nout)
         for i = 1 : nout
-            results[i] = jvariable(get_mvariable(session, symbol(out_arg_names[i])))
+            results[i] = jvariable(get_mvariable(session, Symbol(out_arg_names[i])))
         end
         tuple(results...)
     else
