@@ -302,8 +302,8 @@ eval_string("[u, v] = myfun(x, y);")
 You may also directly call a MATLAB function on Julia variables using `mxcall`:
 
 ```julia
-x = [-10.:0.1:10.]
-y = [-10.:0.1:10.]
+x = -10.0:0.1:10.0
+y = -10.0:0.1:10.0
 xx, yy = mxcall(:meshgrid, 2, x, y)
 ```
 *Note:* Since MATLAB functions behavior depends on the number of outputs, you have to specify the number of output arguments in ``mxcall`` as the second argument.
