@@ -2,9 +2,9 @@
 
 The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from the [Julia language](http://julialang.org). You cannot use `MATLAB.jl` without having purchased and installed a copy of MATLAB™ from [MathWorks](http://www.mathworks.com/). This package is available free of charge and in no way replaces or alters any functionality of MathWorks's MATLAB product.
 
-[Julia](http://julialang.org) is a technical computing language, which relies on LLVM to achieve efficiency comparable to C. As a young language, many useful functions are still lacking. This package allows users to call MATLAB functions from within Julia, thus making it easier to use the sheer amount of toolboxes available in MATLAB.
+[Julia](http://julialang.org) is a technical computing language. This package allows users to call MATLAB functions from within Julia, thus making it easier to use the sheer amount of toolboxes available in MATLAB.
 
-### Overview
+## Overview
 
 Generally, this package is comprised of two aspects:
 
@@ -12,11 +12,20 @@ Generally, this package is comprised of two aspects:
 
 * Communicating with MATLAB engine sessions
 
-### Installation
+## Installation
 
 The procedure to setup this package consists of three steps. 
 
-##### Linux
+### Windows
+
+1. Start a Command Prompt as an Administrator.
+
+2. Enter `matlab /regserver` in the command prompt.
+
+3. Install `MATLAB.jl`, from Julia run: `Pkg.clone("https://github.com/JuliaInterop/MATLAB.jl.git")`
+
+
+### Linux
 
 1. Make sure ``matlab`` is in executable path. 
 
@@ -28,14 +37,10 @@ The procedure to setup this package consists of three steps.
 	sudo apt-get install csh
 	```
 
-3. Clone this package from the GitHub repo to your Julia package directory, as
+3. Install `MATLAB.jl`, from Julia run: `Pkg.clone("https://github.com/JuliaInterop/MATLAB.jl.git")`
 
-	```bash
-	cd <your/julia/package/path>
-	git clone https://github.com/JuliaLang/MATLAB.jl.git MATLAB
-	```
 
-##### Mac OS X
+### Mac OS X
 
 1. Ensure that MATLAB is installed in `/Applications`. By default, MATLAB.jl uses the MATLAB installation with the greatest version number. To specify that a specific MATLAB installation should be used, set the environment variable ``MATLAB_HOME``. For example, if you are using MATLAB R2012b, you may add the following command to ``.profile``:
 	
@@ -43,13 +48,10 @@ The procedure to setup this package consists of three steps.
 	export MATLAB_HOME=/Applications/MATLAB_R2012b.app
 	```
 
-3. Clone this package from the GitHub repo to your Julia package directory, as
+2. Install `MATLAB.jl`, from Julia run: `Pkg.clone("https://github.com/JuliaInterop/MATLAB.jl.git")`
 
-	```bash
-	cd <your/julia/package/path>
-	git clone https://github.com/JuliaLang/MATLAB.jl.git MATLAB
-	```
 
+## Usage
 
 ### MxArray class
 
