@@ -44,8 +44,15 @@ type MSession
         println("A MATLAB session is open successfully")
         new(ep, buf, bufptr)
     end
+end
+MSession() = MSession(default_output_buffer_size)
 
-    MSession() = MSession(default_output_buffer_size)
+# workaround "primary message table for module 77" error
+# creates a dummy Engine session and keeps it open so the libraries used by all other
+# Engine clients are not loaded and unloaded repeatedly
+# see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
+if is_windows()
+    MSession()
 end
 
 function close(session::MSession)
@@ -231,7 +238,7 @@ _gen_marg_name(mfun::Symbol, prefix::ASCIIString, i::Int) = "jx_$(mfun)_arg_$(pr
 function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     nin = length(in_args)
     
-    # generate tempoary variable names
+    # generate temporary variable names
     
     in_arg_names = Array(ASCIIString, nin)
     out_arg_names = Array(ASCIIString, nout)
@@ -301,8 +308,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
         eval_string(session, string("clear ", out_arg_names[i], ";"))
     end
     
-    # return 
-    ret
+    return ret
 end
 
 mxcall(mfun::Symbol, nout::Integer, in_args...) = mxcall(get_default_msession(), mfun, nout, in_args...)
