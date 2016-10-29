@@ -40,8 +40,6 @@ type MSession
             # Hide the MATLAB Command Window on Windows
             ccall(engfunc(:engSetVisible ), Cint, (Ptr{Void}, Cint), ep, 0)
         end
-
-        println("A MATLAB session is open successfully")
         new(ep, buf, bufptr)
     end
 end
