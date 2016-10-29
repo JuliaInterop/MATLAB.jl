@@ -12,11 +12,10 @@ type MxArray
         if own
             finalizer(mx, delete)
         end
-        mx
-    end
-    
-    MxArray(p::Ptr{Void}) = MxArray(p, true)
+        return mx
+    end    
 end
+MxArray(p::Ptr{Void}) = MxArray(p, true)
 
 mxarray(mx::MxArray) = mx
 
@@ -27,11 +26,12 @@ function delete(mx::MxArray)
         ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx.ptr)
     end
     mx.ptr = C_NULL
+    return nothing
 end
 
 function duplicate(mx::MxArray)
     pm::Ptr{Void} = ccall(mxfunc(:mxDuplicateArray), Ptr{Void}, (Ptr{Void},), mx.ptr)
-    MxArray(pm)
+    return MxArray(pm)
 end
 
 copy(mx::MxArray) = duplicate(mx)
