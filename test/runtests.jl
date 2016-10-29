@@ -1,3 +1,6 @@
+using MATLAB
+using Base.Test
+
 include("engine.jl")
 include("matfile.jl")
 include("matstr.jl")

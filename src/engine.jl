@@ -96,7 +96,7 @@ end
 #
 ###########################################################
 
-function eval_string(session::MSession, stmt::ASCIIString)
+function eval_string(session::MSession, stmt::String)
     # Evaluate a MATLAB statement in a given MATLAB session
 
     @assert libeng::Ptr{Void} != C_NULL
@@ -117,7 +117,7 @@ function eval_string(session::MSession, stmt::ASCIIString)
     end
 end
 
-eval_string(stmt::ASCIIString) = eval_string(get_default_msession(), stmt)
+eval_string(stmt::String) = eval_string(get_default_msession(), stmt)
 
 
 function put_variable(session::MSession, name::Symbol, v::MxArray)
@@ -197,7 +197,7 @@ function make_getvar_statement(ex::Expr)
     :( $(v) = MATLAB.get_variable($(Meta.quot(v)), $(k)) )
 end
 
-@compat function _mget_multi(vs::Union{Symbol, Expr}...)
+function _mget_multi(vs::Union{Symbol, Expr}...)
     nv = length(vs)
     if nv == 1
         make_getvar_statement(vs[1])
@@ -226,15 +226,15 @@ end
 ###########################################################
 
 # MATLAB does not allow underscore as prefix of a variable name
-_gen_marg_name(mfun::Symbol, prefix::ASCIIString, i::Int) = "jx_$(mfun)_arg_$(prefix)_$(i)"
+_gen_marg_name(mfun::Symbol, prefix::String, i::Int) = "jx_$(mfun)_arg_$(prefix)_$(i)"
  
 function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     nin = length(in_args)
     
     # generate tempoary variable names
     
-    in_arg_names = Array(ASCIIString, nin)
-    out_arg_names = Array(ASCIIString, nout)
+    in_arg_names = Array(String, nin)
+    out_arg_names = Array(String, nout)
      
     for i = 1 : nin
         in_arg_names[i] = _gen_marg_name(mfun, "in", i)

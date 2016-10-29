@@ -1,8 +1,8 @@
 ## MATLAB.jl
 
-The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from the [Julia language](http://julialang.org). You cannot use `MATLAB.jl` without having purchased and installed a copy of MATLAB™ from [MathWorks](http://www.mathworks.com/). This package is available free of charge and in no way replaces or alters any functionality of MathWorks's MATLAB product.
+The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from [Julia](http://julialang.org).  In other words, this package allows users to call MATLAB functions within Julia, thus making it easy to use the sheer number of toolboxes available in MATLAB.
 
-[Julia](http://julialang.org) is a technical computing language. This package allows users to call MATLAB functions from within Julia, thus making it easier to use the sheer amount of toolboxes available in MATLAB.
+You cannot use `MATLAB.jl` without having purchased and installed a copy of MATLAB™ from [MathWorks](http://www.mathworks.com/). This package is available free of charge and in no way replaces or alters any functionality of MathWorks's MATLAB product.
 
 ## Overview
 
@@ -22,7 +22,7 @@ The procedure to setup this package consists of three steps.
 
 2. Enter `matlab /regserver` in the command prompt.
 
-3. Install `MATLAB.jl`, from Julia run: `Pkg.clone("https://github.com/JuliaInterop/MATLAB.jl.git")`
+3. From Julia run: `Pkg.add("MATLAB")`
 
 
 ### Linux
@@ -37,7 +37,7 @@ The procedure to setup this package consists of three steps.
 	sudo apt-get install csh
 	```
 
-3. Install `MATLAB.jl`, from Julia run: `Pkg.clone("https://github.com/JuliaInterop/MATLAB.jl.git")`
+3. From Julia run: `Pkg.add("MATLAB")`
 
 
 ### Mac OS X
@@ -48,7 +48,7 @@ The procedure to setup this package consists of three steps.
 	export MATLAB_HOME=/Applications/MATLAB_R2012b.app
 	```
 
-2. Install `MATLAB.jl`, from Julia run: `Pkg.clone("https://github.com/JuliaInterop/MATLAB.jl.git")`
+2. From Julia run: `Pkg.add("MATLAB")`
 
 
 ## Usage
