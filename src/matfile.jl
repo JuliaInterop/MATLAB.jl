@@ -17,9 +17,8 @@ type MatFile
             filename, mode)
         new(p, filename)        
     end
-
-    MatFile(filename::String) = MatFile(filename, "r")
 end
+MatFile(filename::String) = MatFile(filename, "r")
 
 function close(f::MatFile) 
     if f.ptr != C_NULL

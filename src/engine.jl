@@ -44,9 +44,9 @@ type MSession
         println("A MATLAB session is open successfully")
         new(ep, buf, bufptr)
     end
-
-    MSession() = MSession(default_output_buffer_size)
 end
+MSession() = MSession(default_output_buffer_size)
+
 
 function close(session::MSession)
     # Close a MATLAB Engine session
@@ -231,7 +231,7 @@ _gen_marg_name(mfun::Symbol, prefix::String, i::Int) = "jx_$(mfun)_arg_$(prefix)
 function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     nin = length(in_args)
     
-    # generate tempoary variable names
+    # generate temporary variable names
     
     in_arg_names = Array(String, nin)
     out_arg_names = Array(String, nout)
@@ -301,8 +301,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
         eval_string(session, string("clear ", out_arg_names[i], ";"))
     end
     
-    # return 
-    ret
+    return ret
 end
 
 mxcall(mfun::Symbol, nout::Integer, in_args...) = mxcall(get_default_msession(), mfun, nout, in_args...)
