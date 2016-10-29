@@ -14,7 +14,7 @@ type MSession
     buffer::Vector{UInt8}
     bufptr::Ptr{UInt8}
 
-    function MSession(bufsize::Integer)
+    function MSession(bufsize::Int=default_output_buffer_size)
         global libeng
         if libeng == C_NULL
             load_libeng()
@@ -45,7 +45,6 @@ type MSession
         new(ep, buf, bufptr)
     end
 end
-MSession() = MSession(default_output_buffer_size)
 
 
 function close(session::MSession)
@@ -63,7 +62,7 @@ end
 
 default_msession = nothing
 
-function restart_default_msession(bufsize::Integer)
+function restart_default_msession(bufsize::Int=default_output_buffer_size)
     global default_msession
     if !(default_msession == nothing)
         close(default_msession)
@@ -71,7 +70,6 @@ function restart_default_msession(bufsize::Integer)
     default_msession = MSession(bufsize)
 end
 
-restart_default_msession() = restart_default_msession(default_output_buffer_size)
 
 function get_default_msession()
     global default_msession
@@ -228,7 +226,7 @@ end
 # MATLAB does not allow underscore as prefix of a variable name
 _gen_marg_name(mfun::Symbol, prefix::String, i::Int) = "jx_$(mfun)_arg_$(prefix)_$(i)"
  
-function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
+function mxcall(session::MSession, mfun::Symbol, nout::Int, in_args...)
     nin = length(in_args)
     
     # generate temporary variable names
@@ -304,6 +302,6 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     return ret
 end
 
-mxcall(mfun::Symbol, nout::Integer, in_args...) = mxcall(get_default_msession(), mfun, nout, in_args...)
+mxcall(mfun::Symbol, nout::Int, in_args...) = mxcall(get_default_msession(), mfun, nout, in_args...)
 
 

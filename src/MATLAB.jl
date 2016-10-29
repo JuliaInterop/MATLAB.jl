@@ -45,4 +45,9 @@ include("mstatements.jl")
 include("engine.jl")
 include("matstr.jl")
 
+
+function __init__()
+    is_windows() && MSession()
+end
+
 end

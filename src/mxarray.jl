@@ -5,9 +5,7 @@ type MxArray
     own::Bool
     
     function MxArray(p::Ptr{Void}, own::Bool)
-        if p == C_NULL
-            error("NULL pointer for MxArray.")
-        end
+        p == C_NULL && error("NULL pointer for MxArray.")
         mx = new(p, own)
         if own
             finalizer(mx, delete)
@@ -223,7 +221,7 @@ function size(mx::MxArray)
     tuple(dims...)
 end
 
-function size(mx::MxArray, d::Integer)
+function size(mx::MxArray, d::Int)
     nd = ndims(mx)
     if d <= 0
         throw(ArgumentError("The dimension must be a positive integer."))
@@ -348,13 +346,13 @@ mxarray(a::Range) = mxarray([a;])
 
 # sparse matrix
 
-function mxsparse(ty::Type{Float64}, m::Integer, n::Integer, nzmax::Integer)
+function mxsparse(ty::Type{Float64}, m::Int, n::Int, nzmax::Int)
     pm = ccall(_mx_create_sparse, Ptr{Void},
         (mwSize, mwSize, mwSize, mxComplexity), m, n, nzmax, mxREAL)
     MxArray(pm)
 end
 
-function mxsparse(ty::Type{Bool}, m::Integer, n::Integer, nzmax::Integer)
+function mxsparse(ty::Type{Bool}, m::Int, n::Int, nzmax::Int)
     pm = ccall(_mx_create_sparse_logical, Ptr{Void},
         (mwSize, mwSize, mwSize), m, n, nzmax)
     MxArray(pm)
@@ -417,12 +415,12 @@ function mxcellarray(dims::Tuple{Vararg{Int}})
 end
 mxcellarray(dims::Int...) = mxcellarray(dims)
 
-function get_cell(mx::MxArray, i::Integer)
+function get_cell(mx::MxArray, i::Int)
     pm = ccall(_mx_get_cell, Ptr{Void}, (Ptr{Void}, mwIndex), mx.ptr, i-1)
     MxArray(pm, false)
 end
 
-function set_cell(mx::MxArray, i::Integer, v::MxArray)    
+function set_cell(mx::MxArray, i::Int, v::MxArray)    
     v.own = false
     ccall(_mx_set_cell, Void, (Ptr{Void}, mwIndex, Ptr{Void}), 
         mx.ptr, i - 1, v.ptr)
@@ -465,7 +463,7 @@ function mxstruct(fn1::String, fnr::String...)
     MxArray(pm)
 end
 
-function set_field(mx::MxArray, i::Integer, f::String, v::MxArray)
+function set_field(mx::MxArray, i::Int, f::String, v::MxArray)
     v.own = false
     ccall(_mx_set_field, Void, 
         (Ptr{Void}, mwIndex, Ptr{UInt8}, Ptr{Void}), 
@@ -474,30 +472,26 @@ end
 
 set_field(mx::MxArray, f::String, v::MxArray) = set_field(mx, 1, f, v)
 
-function get_field(mx::MxArray, i::Integer, f::String)
+function get_field(mx::MxArray, i::Int, f::String)
     pm = ccall(_mx_get_field, Ptr{Void}, (Ptr{Void}, mwIndex, Ptr{UInt8}), 
         mx.ptr, i-1, f)
-    if pm == C_NULL
-        throw(ArgumentError("Failed to get field."))
-    end
+    pm == C_NULL && throw(ArgumentError("Failed to get field."))
     MxArray(pm, false)
 end
 
 get_field(mx::MxArray, f::String) = get_field(mx, 1, f)
 
-function get_field(mx::MxArray, i::Integer, fn::Integer)
+function get_field(mx::MxArray, i::Int, fn::Int)
     pm = ccall(_mx_get_field_bynum, Ptr{Void}, (Ptr{Void}, mwIndex, Cint), 
         mx.ptr, i-1, fn-1)
-    if pm == C_NULL
-        throw(ArgumentError("Failed to get field."))
-    end
+    pm == C_NULL && throw(ArgumentError("Failed to get field."))
     MxArray(pm, false)
 end
 
-get_field(mx::MxArray, fn::Integer) = get_field(mx, 1, fn)
+get_field(mx::MxArray, fn::Int) = get_field(mx, 1, fn)
 
 
-function get_fieldname(mx::MxArray, i::Integer)
+function get_fieldname(mx::MxArray, i::Int)
     p = ccall(_mx_get_fieldname, Ptr{UInt8}, (Ptr{Void}, Cint), 
         mx.ptr, i-1)
     unsafe_string(p)
