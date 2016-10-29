@@ -1,5 +1,3 @@
-# Testing the generation of mstatements
-
 using MATLAB
 using Base.Test
 

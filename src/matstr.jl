@@ -58,7 +58,7 @@ function check_assignment(interp, i)
             sp = split(interp[j], "\n")
             unshift!(before, sp[end])
             for k = length(sp)-1:-1:1
-                match(r"\.\.\.[ \t]*\r?$", sp[k]) == nothing && @goto done_before
+                match(r"\.\.\.[ \t]*\r?$", sp[k]) === nothing && @goto done_before
                 unshift!(before, sp[k])
             end
         end
@@ -77,7 +77,7 @@ function check_assignment(interp, i)
             sp = split(interp[j], "\n")
             push!(after, sp[1])
             for k = 2:length(sp)
-                match(r"\.\.\.[ \t]*\r?$", sp[k-1]) == nothing && @goto done_after
+                match(r"\.\.\.[ \t]*\r?$", sp[k-1]) === nothing && @goto done_after
                 push!(after, sp[k])
             end
         elseif interp[j] == interp[i]

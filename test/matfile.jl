@@ -1,12 +1,13 @@
-# Test MATLAB MAT file I/O
+using MATLAB
+using Base.Test
 
-using MATLAB, Compat, Base.Test
-import Compat: ASCIIString
+# test MMAT file I/O
 
-a = Int32[1 2 3; 4 5 6]
+a32 = Int32[1 2 3; 4 5 6]
+a64 = Int64[1 2 3; 4 5 6]
 b = [1.2, 3.4, 5.6, 7.8]
 c = Any[[0., 1.], [1., 2.], [1., 2., 3.]]
-d = @compat Dict{Any,Any}("name"=>"MATLAB", "score"=>100.)
+d = Dict("name"=>"MATLAB", "score"=>100.)
 
 immutable S
     x::Float64
@@ -16,13 +17,14 @@ end
 
 ss = S[S(1.0, true, [1., 2.]), S(2.0, false, [3., 4.])]
 
-write_matfile("test.mat"; a=a, b=b, c=c, d=d, ss=mxstructarray(ss))
+write_matfile("test.mat"; a32=a32, a64=a64, b=b, c=c, d=d, ss=mxstructarray(ss))
 
 r = read_matfile("test.mat")
-@test isa(r, Dict{ASCIIString, MxArray})
-@test length(r) == 5
+@test isa(r, Dict{String, MxArray})
+@test length(r) == 6
 
-ra = jmatrix(r["a"])
+ra32 = jmatrix(r["a32"])
+ra64 = jmatrix(r["a64"])
 rb = jvector(r["b"])
 rc = jvariable(r["c"])
 rd = jdict(r["d"])
@@ -30,7 +32,8 @@ rss = r["ss"]
 
 gc()  # make sure that ra, rb, rc, rd remain valid
 
-@test ra == a
+@test ra32 == a32
+@test ra64 == a64
 @test rb == b
 @test rc == c
 

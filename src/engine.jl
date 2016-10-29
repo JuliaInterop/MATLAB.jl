@@ -16,15 +16,11 @@ type MSession
 
     function MSession(bufsize::Integer)
         global libeng
-        if libeng == C_NULL
-            load_libeng()
-        end
+        libeng == C_NULL && load_libeng()
         @assert libeng != C_NULL
 
         ep = ccall(engfunc(:engOpen), Ptr{Void}, (Ptr{UInt8},), default_startcmd)
-        if ep == C_NULL
-            throw(MEngineError("Failed to open a MATLAB engine session."))
-        end
+        ep == C_NULL && throw(MEngineError("Failed to open a MATLAB engine session."))
 
         buf = Array(UInt8, bufsize)
 
@@ -50,13 +46,10 @@ end
 
 function close(session::MSession)
     # Close a MATLAB Engine session
-
     @assert libeng::Ptr{Void} != C_NULL
-
     r = ccall(engfunc(:engClose), Cint, (Ptr{Void},), session.ptr)
-    if r != 0
-        throw(MEngineError("Failed to close a MATLAB engine session (err = $r)"))
-    end
+    r != 0 && throw(MEngineError("Failed to close a MATLAB engine session (err = $r)"))
+    return nothing
 end
 
 # default session
@@ -65,28 +58,30 @@ default_msession = nothing
 
 function restart_default_msession(bufsize::Integer)
     global default_msession
-    if !(default_msession == nothing)
+    if default_msession !== nothing
         close(default_msession)
     end
     default_msession = MSession(bufsize)
+    return nothing
 end
 
 restart_default_msession() = restart_default_msession(default_output_buffer_size)
 
 function get_default_msession()
     global default_msession
-    if default_msession == nothing
+    if default_msession === nothing
         default_msession = MSession()
     end
-    default_msession::MSession
+    return default_msession::MSession
 end
 
 function close_default_msession()
     global default_msession
-    if !(default_msession == nothing)
+    if default_msession !== nothing
         close(default_msession)
         default_msession = nothing
     end
+    return nothing
 end
 
 
@@ -96,17 +91,12 @@ end
 #
 ###########################################################
 
-function eval_string(session::MSession, stmt::ASCIIString)
+function eval_string(session::MSession, stmt::String)
     # Evaluate a MATLAB statement in a given MATLAB session
-
     @assert libeng::Ptr{Void} != C_NULL
 
-    r::Cint = ccall(engfunc(:engEvalString), Cint,
-        (Ptr{Void}, Ptr{UInt8}), session.ptr, stmt)
-
-    if r != 0
-        throw(MEngineError("Invalid engine session."))
-    end
+    r::Cint = ccall(engfunc(:engEvalString), Cint, (Ptr{Void}, Ptr{UInt8}), session.ptr, stmt)
+    r != 0 && throw(MEngineError("Invalid engine session."))
 
     bufptr::Ptr{UInt8} = session.bufptr
     if bufptr != C_NULL
@@ -117,7 +107,7 @@ function eval_string(session::MSession, stmt::ASCIIString)
     end
 end
 
-eval_string(stmt::ASCIIString) = eval_string(get_default_msession(), stmt)
+eval_string(stmt::String) = eval_string(get_default_msession(), stmt)
 
 
 function put_variable(session::MSession, name::Symbol, v::MxArray)
@@ -197,13 +187,13 @@ function make_getvar_statement(ex::Expr)
     :( $(v) = MATLAB.get_variable($(Meta.quot(v)), $(k)) )
 end
 
-@compat function _mget_multi(vs::Union{Symbol, Expr}...)
+function _mget_multi(vs::Union{Symbol, Expr}...)
     nv = length(vs)
     if nv == 1
         make_getvar_statement(vs[1])
     else
         stmts = Array(Expr, nv)
-        for i = 1 : nv
+        for i = 1:nv
             stmts[i] = make_getvar_statement(vs[i])
         end
         Expr(:block, stmts...)
@@ -226,21 +216,21 @@ end
 ###########################################################
 
 # MATLAB does not allow underscore as prefix of a variable name
-_gen_marg_name(mfun::Symbol, prefix::ASCIIString, i::Int) = "jx_$(mfun)_arg_$(prefix)_$(i)"
+_gen_marg_name(mfun::Symbol, prefix::String, i::Int) = "jx_$(mfun)_arg_$(prefix)_$(i)"
  
 function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     nin = length(in_args)
     
     # generate tempoary variable names
     
-    in_arg_names = Array(ASCIIString, nin)
-    out_arg_names = Array(ASCIIString, nout)
+    in_arg_names = Array(String, nin)
+    out_arg_names = Array(String, nout)
      
-    for i = 1 : nin
+    for i = 1:nin
         in_arg_names[i] = _gen_marg_name(mfun, "in", i)
     end
     
-    for i = 1 : nout
+    for i = 1:nout
         out_arg_names[i] = _gen_marg_name(mfun, "out", i)
     end
     
@@ -269,7 +259,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     
     # put variables to MATLAB
     
-    for i = 1 : nin
+    for i = 1:nin
         put_variable(session, Symbol(in_arg_names[i]), in_args[i])
     end
     
@@ -293,11 +283,11 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     
     # clear temporaries from MATLAB workspace
     
-    for i = 1 : nin
+    for i = 1:nin
         eval_string(session, string("clear ", in_arg_names[i], ";"))
     end
     
-    for i = 1 : nout
+    for i = 1:nout
         eval_string(session, string("clear ", out_arg_names[i], ";"))
     end
     
