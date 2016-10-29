@@ -1,3 +1,6 @@
+using MATLAB
+using Base.Test
+
 # Unit testing for MxArray
 
 using MATLAB: nfields
@@ -124,10 +127,10 @@ a_mx = mxarray(3.25)
 @test jscalar(a_mx) == 3.25
 delete(a_mx)
 
-a_mx = mxarray(12)
-@test eltype(a_mx) == Int
+a_mx = mxarray(Int32(12))
+@test eltype(a_mx) == Int32
 @test size(a_mx) == (1, 1)
-@test jscalar(a_mx) == Int(12)
+@test jscalar(a_mx) == Int32(12)
 delete(a_mx)
 
 a_mx = mxarray(true)

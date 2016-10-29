@@ -1,3 +1,6 @@
+using MATLAB
+using Base.Test
+
 # test MMAT file I/O
 
 a = [1 2 3; 4 5 6]
