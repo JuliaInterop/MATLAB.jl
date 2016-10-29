@@ -5,9 +5,7 @@ type MxArray
     own::Bool
     
     function MxArray(p::Ptr{Void}, own::Bool)
-        if p == C_NULL
-            error("NULL pointer for MxArray.")
-        end
+        p == C_NULL && error("NULL pointer for MxArray.")
         mx = new(p, own)
         if own
             finalizer(mx, delete)
@@ -409,7 +407,7 @@ end
 # cell arrays
 
 function mxcellarray(dims::Tuple{Vararg{Int}})
-    pm = ccall(_mx_create_cell_array, Ptr{Void}, (mwSize, Ptr{mwSize}), 
+    pm = ccall(_mx_create_cell_array, Ptr{Void}, (mwSize, Ptr{mwSize}),
         length(dims), _dims_to_mwSize(dims))
     MxArray(pm) 
 end
@@ -422,8 +420,7 @@ end
 
 function set_cell(mx::MxArray, i::Integer, v::MxArray)    
     v.own = false
-    ccall(_mx_set_cell, Void, (Ptr{Void}, mwIndex, Ptr{Void}), 
-        mx.ptr, i - 1, v.ptr)
+    ccall(_mx_set_cell, Void, (Ptr{Void}, mwIndex, Ptr{Void}), mx.ptr, i - 1, v.ptr)
 end
 
 function mxcellarray(a::Array)
@@ -450,45 +447,35 @@ end
 function mxstruct(fns::Vector{String})
     a = _fieldname_array(fns...)
     pm = ccall(_mx_create_struct_matrix, Ptr{Void}, 
-        (mwSize, mwSize, Cint, Ptr{Ptr{UInt8}}), 
-        1, 1, length(a), a)
+        (mwSize, mwSize, Cint, Ptr{Ptr{UInt8}}), 1, 1, length(a), a)
     MxArray(pm)
 end
 
 function mxstruct(fn1::String, fnr::String...)
     a = _fieldname_array(fn1, fnr...)
     pm = ccall(_mx_create_struct_matrix, Ptr{Void}, 
-        (mwSize, mwSize, Cint, Ptr{Ptr{UInt8}}), 
-        1, 1, length(a), a)
+        (mwSize, mwSize, Cint, Ptr{Ptr{UInt8}}), 1, 1, length(a), a)
     MxArray(pm)
 end
 
 function set_field(mx::MxArray, i::Integer, f::String, v::MxArray)
     v.own = false
-    ccall(_mx_set_field, Void, 
-        (Ptr{Void}, mwIndex, Ptr{UInt8}, Ptr{Void}), 
-        mx.ptr, i-1, f, v.ptr)
+    ccall(_mx_set_field, Void, (Ptr{Void}, mwIndex, Ptr{UInt8}, Ptr{Void}), mx.ptr, i-1, f, v.ptr)
 end
 
 set_field(mx::MxArray, f::String, v::MxArray) = set_field(mx, 1, f, v)
 
 function get_field(mx::MxArray, i::Integer, f::String)
-    pm = ccall(_mx_get_field, Ptr{Void}, (Ptr{Void}, mwIndex, Ptr{UInt8}), 
-        mx.ptr, i-1, f)
-    if pm == C_NULL
-        throw(ArgumentError("Failed to get field."))
-    end
+    pm = ccall(_mx_get_field, Ptr{Void}, (Ptr{Void}, mwIndex, Ptr{UInt8}), mx.ptr, i-1, f)
+    pm == C_NULL && throw(ArgumentError("Failed to get field."))
     MxArray(pm, false)
 end
 
 get_field(mx::MxArray, f::String) = get_field(mx, 1, f)
 
 function get_field(mx::MxArray, i::Integer, fn::Integer)
-    pm = ccall(_mx_get_field_bynum, Ptr{Void}, (Ptr{Void}, mwIndex, Cint), 
-        mx.ptr, i-1, fn-1)
-    if pm == C_NULL
-        throw(ArgumentError("Failed to get field."))
-    end
+    pm = ccall(_mx_get_field_bynum, Ptr{Void}, (Ptr{Void}, mwIndex, Cint), mx.ptr, i-1, fn-1)
+    pm == C_NULL && throw(ArgumentError("Failed to get field."))
     MxArray(pm, false)
 end
 
@@ -496,8 +483,7 @@ get_field(mx::MxArray, fn::Integer) = get_field(mx, 1, fn)
 
 
 function get_fieldname(mx::MxArray, i::Integer)
-    p = ccall(_mx_get_fieldname, Ptr{UInt8}, (Ptr{Void}, Cint), 
-        mx.ptr, i-1)
+    p = ccall(_mx_get_fieldname, Ptr{UInt8}, (Ptr{Void}, Cint), mx.ptr, i-1)
     unsafe_string(p)
 end
 

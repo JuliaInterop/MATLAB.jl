@@ -14,7 +14,7 @@ type MSession
     buffer::Vector{UInt8}
     bufptr::Ptr{UInt8}
 
-    function MSession(bufsize::Integer)
+    function MSession(bufsize::Integer = default_output_buffer_size)
         global libeng
         libeng == C_NULL && load_libeng()
         @assert libeng != C_NULL
@@ -39,7 +39,6 @@ type MSession
         new(ep, buf, bufptr)
     end
 end
-MSession() = MSession(default_output_buffer_size)
 
 
 function close(session::MSession)
@@ -54,7 +53,7 @@ end
 
 default_msession = nothing
 
-function restart_default_msession(bufsize::Integer)
+function restart_default_msession(bufsize::Integer = default_output_buffer_size)
     global default_msession
     if default_msession !== nothing
         close(default_msession)
@@ -63,7 +62,6 @@ function restart_default_msession(bufsize::Integer)
     return nothing
 end
 
-restart_default_msession() = restart_default_msession(default_output_buffer_size)
 
 function get_default_msession()
     global default_msession
