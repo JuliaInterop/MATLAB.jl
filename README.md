@@ -284,7 +284,7 @@ Note that some MATLAB expressions are not valid Julia expressions. This package 
 @matlab sprintf("%d", 10)   # ==> MATLAB: sprintf('%d', 10)
 
  # MATLAB does not allow [x, y] on the left hand side
-x = linspace(-5., 5. 100)
+x = linspace(-5.0, 5.0, 100)
 y = x
 @mput x y
 @matlab begin
@@ -338,7 +338,7 @@ r2_mx = get_mvariable(s2, :r)  # get r from s2
 r1 = jarray(r1_mx)
 r2 = jarray(r2_mx)
 
-...  # do other stuff on r1 and r2
+# ... do other stuff on r1 and r2
 
 close(s1)  # close session s1
 close(s2)  # close session s2

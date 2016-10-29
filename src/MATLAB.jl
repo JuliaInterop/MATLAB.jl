@@ -47,7 +47,7 @@ include("matstr.jl")
 
 
 function __init__()
-    is_windows() && MSession()
+    is_windows() && MSession(0)
 end
 
 end
