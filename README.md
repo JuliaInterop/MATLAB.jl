@@ -119,7 +119,7 @@ delete(x)
 You may access attributes and data of a MATLAB variable through the functions provided by this package.
 
 ```julia
- # suppose x is of type MxArray
+# suppose x is of type MxArray
 nrows(x)    # returns number of rows in x
 ncols(x)    # returns number of columns in x 
 nelems(x)   # returns number of elements in x
@@ -131,6 +131,10 @@ eltype(x)   # returns element type of x (in Julia Type)
 elsize(x)   # return number of bytes per element
 
 data_ptr(x)   # returns pointer to data (in Ptr{T}), where T is eltype(x)
+
+# suppose s is a MATLAB struct
+mxnfields(s)	# returns the number of fields in struct s
+
 ```
 
 You may also make tests on a MATLAB variable.

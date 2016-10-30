@@ -178,7 +178,7 @@ data_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_data, Ptr{V
 real_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_pr, Ptr{Void}))
 imag_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_pi, Ptr{Void}))
 
-nfields(mx::MxArray) = convert(Int, @mxget_attr(_mx_get_nfields, Cint))
+mxnfields(mx::MxArray) = convert(Int, @mxget_attr(_mx_get_nfields, Cint))
 
 # validation functions
 
@@ -646,7 +646,7 @@ function jdict(mx::MxArray)
     if !(is_struct(mx) && nelems(mx) == 1)
         throw(ArgumentError("jdict only applies to a single struct."))
     end
-    nf = nfields(mx)
+    nf = mxnfields(mx)
     fnames = Array(AbstractString, nf)
     fvals = Array(Any, nf)
     for i = 1:nf

@@ -18,7 +18,7 @@ export is_double, is_single,
 
 export mxarray, mxempty, mxsparse, delete, duplicate,
        mxcellarray, get_cell, set_cell,
-       mxstruct, mxstructarray, nfields, get_fieldname, get_field, set_field,
+       mxstruct, mxstructarray, mxnfields, get_fieldname, get_field, set_field,
        jvariable, jarray, jscalar, jvector, jmatrix, jsparse, jstring, jdict
 
 # mstatments
@@ -51,6 +51,12 @@ function __init__()
     # Engine clients are not loaded and unloaded repeatedly
     # see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
     is_windows() && MSession(0)
+end
+
+# deprecations
+function nfields(mx::MxArray) 
+    Base.depwarn("MATLAB.nfields is deprecated, use mxnfields instead.", :nfields)
+    return mxfields(mx)
 end
 
 end

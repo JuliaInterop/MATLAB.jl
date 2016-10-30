@@ -3,8 +3,6 @@ using Base.Test
 
 # Unit testing for MxArray
 
-using MATLAB: nfields
-
 m = 5
 n = 6
 
@@ -271,7 +269,7 @@ delete(s_mx)
 
 a = mxstruct("abc", "efg", "xyz")
 @test is_struct(a)
-@test nfields(a) == 3
+@test mxnfields(a) == 3
 @test nrows(a) == 1
 @test ncols(a) == 1
 @test nelems(a) == 1
@@ -285,7 +283,7 @@ delete(a)
 s = Dict("name"=>"MATLAB", "version"=>12.0, "data"=>[1,2,3])
 a = mxstruct(s)
 @test is_struct(a)
-@test nfields(a) == 3
+@test mxnfields(a) == 3
 @test jstring(get_field(a, "name")) == "MATLAB"
 @test jscalar(get_field(a, "version")) == 12.0
 @test isequal(jvector(get_field(a, "data")), [1,2,3])
@@ -299,7 +297,7 @@ end
 t = TestType("MATLAB", 12.0, [1,2,3])
 a = mxstruct(t)
 @test is_struct(a)
-@test nfields(a) == 3
+@test mxnfields(a) == 3
 @test jstring(get_field(a, "name")) == "MATLAB"
 @test jscalar(get_field(a, "version")) == 12.0
 @test isequal(jvector(get_field(a, "data")), [1,2,3])
@@ -308,7 +306,7 @@ delete(a)
 a = mxstructarray([TestType("MATLAB", 12.0, [1,2,3]),
     TestType("Julia", 0.2, [4,5,6])])
 @test is_struct(a)
-@test nfields(a) == 3
+@test mxnfields(a) == 3
 @test jstring(get_field(a, 1, "name")) == "MATLAB"
 @test jscalar(get_field(a, 1, "version")) == 12.0
 @test isequal(jvector(get_field(a, 1, "data")), [1,2,3])
