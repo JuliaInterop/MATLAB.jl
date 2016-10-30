@@ -46,6 +46,7 @@ function close(session::MSession)
     @assert libeng::Ptr{Void} != C_NULL
     r = ccall(engfunc(:engClose), Cint, (Ptr{Void},), session.ptr)
     r != 0 && throw(MEngineError("Failed to close a MATLAB engine session (err = $r)"))
+    session.ptr = C_NULL
     return nothing
 end
 

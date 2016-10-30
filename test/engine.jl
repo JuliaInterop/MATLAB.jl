@@ -36,3 +36,10 @@ r = mxcall(:plus, 1, a, b)
 @test isequal(yy, [3. 3.; 4. 4.])
 
 close_default_msession()
+
+# test for segfault
+
+s = MSession()
+close(s)
+@test_throws MATLAB.MEngineError close(s)
+
