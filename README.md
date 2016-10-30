@@ -2,8 +2,6 @@
 
 The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from the [Julia language](http://julialang.org). You cannot use `MATLAB.jl` without having purchased and installed a copy of MATLAB™ from [MathWorks](http://www.mathworks.com/). This package is available free of charge and in no way replaces or alters any functionality of MathWorks's MATLAB product.
 
-[Julia](http://julialang.org) is a technical computing language. This package allows users to call MATLAB functions from within Julia, thus making it easier to use the sheer amount of toolboxes available in MATLAB.
-
 ## Overview
 
 Generally, this package is comprised of two aspects:
