@@ -40,11 +40,16 @@ type MSession
     end
 end
 
+function unsafe_convert(::Type{Ptr{Void}}, m::MSession)
+    ptr = m.ptr
+    ptr == C_NULL && throw(UndefRefError())
+    return ptr
+end
 
 function close(session::MSession)
     # Close a MATLAB Engine session
     @assert libeng::Ptr{Void} != C_NULL
-    r = ccall(engfunc(:engClose), Cint, (Ptr{Void},), session.ptr)
+    r = ccall(engfunc(:engClose), Cint, (Ptr{Void},), session)
     r != 0 && throw(MEngineError("Failed to close a MATLAB engine session (err = $r)"))
     session.ptr = C_NULL
     return nothing
@@ -92,7 +97,7 @@ function eval_string(session::MSession, stmt::String)
     # Evaluate a MATLAB statement in a given MATLAB session
     @assert libeng::Ptr{Void} != C_NULL
 
-    r::Cint = ccall(engfunc(:engEvalString), Cint, (Ptr{Void}, Ptr{UInt8}), session.ptr, stmt)
+    r = ccall(engfunc(:engEvalString), Cint, (Ptr{Void}, Ptr{UInt8}), session, stmt)
     r != 0 && throw(MEngineError("Invalid engine session."))
 
     bufptr::Ptr{UInt8} = session.bufptr
@@ -109,15 +114,10 @@ eval_string(stmt::String) = eval_string(get_default_msession(), stmt)
 
 function put_variable(session::MSession, name::Symbol, v::MxArray)
     # Put a variable into a MATLAB engine session
-
     @assert libeng::Ptr{Void} != C_NULL
-
-    r = ccall(engfunc(:engPutVariable), Cint,
-        (Ptr{Void}, Ptr{UInt8}, Ptr{Void}), session.ptr, string(name), v.ptr)
-
-    if r != 0
-        throw(MEngineError("Failed to put the variable $(name) into a MATLAB session."))
-    end
+    r = ccall(engfunc(:engPutVariable), Cint, (Ptr{Void}, Ptr{UInt8}, Ptr{Void}), session, string(name), v)
+    r != 0 && throw(MEngineError("Failed to put the variable $(name) into a MATLAB session."))
+    return nothing
 end
 
 put_variable(session::MSession, name::Symbol, v) = put_variable(session, name, mxarray(v))
@@ -130,7 +130,7 @@ function get_mvariable(session::MSession, name::Symbol)
     @assert libeng::Ptr{Void} != C_NULL
 
     pv = ccall(engfunc(:engGetVariable), Ptr{Void},
-        (Ptr{Void}, Ptr{UInt8}), session.ptr, string(name))
+        (Ptr{Void}, Ptr{UInt8}), session, string(name))
 
     if pv == C_NULL
         throw(MEngineError("Failed to get the variable $(name) from a MATLAB session."))

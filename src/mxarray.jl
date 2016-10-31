@@ -28,12 +28,17 @@ function delete(mx::MxArray)
 end
 
 function duplicate(mx::MxArray)
-    pm::Ptr{Void} = ccall(mxfunc(:mxDuplicateArray), Ptr{Void}, (Ptr{Void},), mx.ptr)
+    pm = ccall(mxfunc(:mxDuplicateArray), Ptr{Void}, (Ptr{Void},), mx)
     return MxArray(pm)
 end
 
 copy(mx::MxArray) = duplicate(mx)
 
+function unsafe_convert(::Type{Ptr{Void}}, mx::MxArray)
+    ptr = mx.ptr
+    ptr == C_NULL && throw(UndefRefError())
+    return ptr
+end
 # functions to create mxArray from Julia values/arrays
 
 typealias MxRealNum Union{Float64,Float32,Int32,UInt32,Int64,UInt64,Int16,UInt16,Int8,UInt8,Bool}
@@ -159,11 +164,8 @@ const _mx_is_empty   = mxfunc(:mxIsEmpty)
 const _mx_is_struct  = mxfunc(:mxIsStruct)
 const _mx_is_cell    = mxfunc(:mxIsCell) 
 
-
-# getting simple attributes
-
 macro mxget_attr(fun, ret)
-    :( ccall($(fun)::Ptr{Void}, $(ret), (Ptr{Void},), mx.ptr) )
+    :(ccall($(fun)::Ptr{Void}, $(ret), (Ptr{Void},), mx))
 end
 
 classid(mx::MxArray) = @mxget_attr(_mx_get_classid, mxClassID)
@@ -183,7 +185,7 @@ mxnfields(mx::MxArray) = convert(Int, @mxget_attr(_mx_get_nfields, Cint))
 # validation functions
 
 macro mx_test_is(fun)
-    :( ccall($(fun)::Ptr{Void}, Bool, (Ptr{Void},), mx.ptr) )
+    :(ccall($(fun)::Ptr{Void}, Bool, (Ptr{Void},), mx))
 end
 
 is_double(mx::MxArray) = @mx_test_is(_mx_is_double)
@@ -388,12 +390,12 @@ function mxarray{V<:Union{Float64,Bool},I}(a::SparseMatrixCSC{V,I})
     
     mx = mxsparse(V, m, n, nnz)
     
-    ir_p = ccall(_mx_get_ir, Ptr{mwIndex}, (Ptr{Void},), mx.ptr)
-    jc_p = ccall(_mx_get_jc, Ptr{mwIndex}, (Ptr{Void},), mx.ptr)
-    pr_p = ccall(_mx_get_pr, Ptr{V}, (Ptr{Void},), mx.ptr)
+    ir_p = ccall(_mx_get_ir, Ptr{mwIndex}, (Ptr{Void},), mx)
+    jc_p = ccall(_mx_get_jc, Ptr{mwIndex}, (Ptr{Void},), mx)
+    pr_p = ccall(_mx_get_pr, Ptr{V}, (Ptr{Void},), mx)
 
     _copy_sparse_mat(a, ir_p, jc_p, pr_p)
-    mx
+    return mx
 end
 
 
@@ -414,13 +416,14 @@ end
 mxcellarray(dims::Int...) = mxcellarray(dims)
 
 function get_cell(mx::MxArray, i::Integer)
-    pm = ccall(_mx_get_cell, Ptr{Void}, (Ptr{Void}, mwIndex), mx.ptr, i-1)
+    pm = ccall(_mx_get_cell, Ptr{Void}, (Ptr{Void}, mwIndex), mx, i-1)
     MxArray(pm, false)
 end
 
 function set_cell(mx::MxArray, i::Integer, v::MxArray)    
     v.own = false
-    ccall(_mx_set_cell, Void, (Ptr{Void}, mwIndex, Ptr{Void}), mx.ptr, i - 1, v.ptr)
+    ccall(_mx_set_cell, Void, (Ptr{Void}, mwIndex, Ptr{Void}), mx, i - 1, v)
+    return nothing
 end
 
 function mxcellarray(a::Array)
@@ -428,7 +431,7 @@ function mxcellarray(a::Array)
     for i = 1:length(a)
         set_cell(pm, i, mxarray(a[i]))
     end
-    pm
+    return pm
 end
 
 mxarray(a::Array) = mxcellarray(a)
@@ -441,7 +444,7 @@ function _fieldname_array(fieldnames::String...)
     for i = 1:n
         a[i] = unsafe_convert(Ptr{UInt8}, fieldnames[i])
     end
-    a
+    return a
 end
 
 function mxstruct(fns::Vector{String})
@@ -460,13 +463,14 @@ end
 
 function set_field(mx::MxArray, i::Integer, f::String, v::MxArray)
     v.own = false
-    ccall(_mx_set_field, Void, (Ptr{Void}, mwIndex, Ptr{UInt8}, Ptr{Void}), mx.ptr, i-1, f, v.ptr)
+    ccall(_mx_set_field, Void, (Ptr{Void}, mwIndex, Ptr{UInt8}, Ptr{Void}), mx, i-1, f, v)
+    return nothing
 end
 
 set_field(mx::MxArray, f::String, v::MxArray) = set_field(mx, 1, f, v)
 
 function get_field(mx::MxArray, i::Integer, f::String)
-    pm = ccall(_mx_get_field, Ptr{Void}, (Ptr{Void}, mwIndex, Ptr{UInt8}), mx.ptr, i-1, f)
+    pm = ccall(_mx_get_field, Ptr{Void}, (Ptr{Void}, mwIndex, Ptr{UInt8}), mx, i-1, f)
     pm == C_NULL && throw(ArgumentError("Failed to get field."))
     MxArray(pm, false)
 end
@@ -474,7 +478,7 @@ end
 get_field(mx::MxArray, f::String) = get_field(mx, 1, f)
 
 function get_field(mx::MxArray, i::Integer, fn::Integer)
-    pm = ccall(_mx_get_field_bynum, Ptr{Void}, (Ptr{Void}, mwIndex, Cint), mx.ptr, i-1, fn-1)
+    pm = ccall(_mx_get_field_bynum, Ptr{Void}, (Ptr{Void}, mwIndex, Cint), mx, i-1, fn-1)
     pm == C_NULL && throw(ArgumentError("Failed to get field."))
     MxArray(pm, false)
 end
@@ -483,7 +487,7 @@ get_field(mx::MxArray, fn::Integer) = get_field(mx, 1, fn)
 
 
 function get_fieldname(mx::MxArray, i::Integer)
-    p = ccall(_mx_get_fieldname, Ptr{UInt8}, (Ptr{Void}, Cint), mx.ptr, i-1)
+    p = ccall(_mx_get_fieldname, Ptr{UInt8}, (Ptr{Void}, Cint), mx, i-1)
     unsafe_string(p)
 end
 
@@ -500,7 +504,7 @@ function mxstruct(pairs::Pairs...)
     for i = 1:nf
         set_field(mx, fieldnames[i], mxarray(pairs[i][2]))
     end
-    mx
+    return mx
 end
 
 function mxstruct{T}(d::T)
@@ -523,10 +527,9 @@ function mxstructarray{T}(d::Array{T})
     mx = MxArray(pm)
 
     for i = 1:length(d), j = 1:length(names)
-        set_field(mx, i, names_str[j],
-            mxarray(getfield(d[i], names[j])))
+        set_field(mx, i, names_str[j], mxarray(getfield(d[i], names[j])))
     end
-    mx
+    return mx
 end
 
 mxstruct(d::Associative) = mxstruct(collect(d)...)
@@ -597,9 +600,9 @@ end
 function _jsparse{T<:MxRealNum}(ty::Type{T}, mx::MxArray)
     m = nrows(mx)
     n = ncols(mx)
-    ir_ptr = ccall(_mx_get_ir, Ptr{mwIndex}, (Ptr{Void},), mx.ptr)
-    jc_ptr = ccall(_mx_get_jc, Ptr{mwIndex}, (Ptr{Void},), mx.ptr)
-    pr_ptr = ccall(_mx_get_pr, Ptr{T}, (Ptr{Void},), mx.ptr)
+    ir_ptr = ccall(_mx_get_ir, Ptr{mwIndex}, (Ptr{Void},), mx)
+    jc_ptr = ccall(_mx_get_jc, Ptr{mwIndex}, (Ptr{Void},), mx)
+    pr_ptr = ccall(_mx_get_pr, Ptr{T}, (Ptr{Void},), mx)
     
     jc_a::Vector{mwIndex} = unsafe_wrap(Array, jc_ptr, (n+1,))
     nnz = jc_a[n+1]
@@ -636,8 +639,7 @@ function jstring(mx::MxArray)
     end
     len = ncols(mx) + 1
     tmp = Array(UInt8, len)
-    ccall(_mx_get_string, Cint, (Ptr{Void}, Ptr{UInt8}, mwSize), 
-        mx.ptr, tmp, len)
+    ccall(_mx_get_string, Cint, (Ptr{Void}, Ptr{UInt8}, mwSize), mx, tmp, len)
     pop!(tmp)
     String(tmp)
 end
@@ -652,8 +654,7 @@ function jdict(mx::MxArray)
     for i = 1:nf
         fnames[i] = get_fieldname(mx, i)
         pv::Ptr{Void} = ccall(_mx_get_field_bynum, 
-            Ptr{Void}, (Ptr{Void}, mwIndex, Cint),
-            mx.ptr, 0, i-1)
+            Ptr{Void}, (Ptr{Void}, mwIndex, Cint), mx, 0, i-1)
         fx = MxArray(pv, false)
         fvals[i] = jvariable(fx)
     end

@@ -1,9 +1,8 @@
 module MATLAB
 
-using Base: unsafe_convert
 using Base.Libdl: dlopen, dlsym, RTLD_LAZY, RTLD_GLOBAL
 
-import Base: eltype, close, size, copy, ndims
+import Base: eltype, close, size, copy, ndims, unsafe_convert
 
 # mxarray
 export MxArray, mxClassID, mxComplexity,
