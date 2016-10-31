@@ -17,7 +17,7 @@ function get_paths()
             apps = readdir("/Applications")
             filter!(app -> ismatch(r"^MATLAB_R[0-9]+[ab]\.app$", app), apps)
             if ~isempty(apps)
-                matlab_homepath = joinpath("/Applications", minimum(apps))
+                matlab_homepath = joinpath("/Applications", maximum(apps))
             end
         elseif is_windows()
             default_dir = Sys.WORD_SIZE == 32 ? "C:\\Program Files (x86)\\MATLAB" : "C:\\Program Files\\MATLAB"
@@ -25,7 +25,7 @@ function get_paths()
                 dirs = readdir(default_dir)
                 filter!(dir -> ismatch(r"^R[0-9]+[ab]$", dir), dirs)
                 if ~isempty(dirs)
-                    matlab_homepath = joinpath(default_dir, minimum(dirs))
+                    matlab_homepath = joinpath(default_dir, maximum(dirs))
                 end
             end
         end
