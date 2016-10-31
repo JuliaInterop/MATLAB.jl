@@ -1,8 +1,8 @@
 ## MATLAB.jl
 
-The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from the [Julia language](http://julialang.org). You cannot use `MATLAB.jl` without having purchased and installed a copy of MATLAB™ from [MathWorks](http://www.mathworks.com/). This package is available free of charge and in no way replaces or alters any functionality of MathWorks's MATLAB product.
+The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from [Julia](http://julialang.org).  In other words, this package allows users to call MATLAB functions within Julia, thus making it easy to interoperate with MATLAB from the Julia language.
 
-[Julia](http://julialang.org) is a technical computing language. This package allows users to call MATLAB functions from within Julia, thus making it easier to use the sheer amount of toolboxes available in MATLAB.
+You cannot use `MATLAB.jl` without having purchased and installed a copy of MATLAB™ from [MathWorks](http://www.mathworks.com/). This package is available free of charge and in no way replaces or alters any functionality of MathWorks's MATLAB product.
 
 ## Overview
 
@@ -14,7 +14,9 @@ Generally, this package is comprised of two aspects:
 
 ## Installation
 
-The procedure to setup this package consists of three steps. 
+**Important**: The procedure to setup this package consists of the following steps.
+
+By default, `MATLAB.jl` uses the MATLAB installation with the greatest version number. To specify that a specific MATLAB installation should be used, set the environment variable `MATLAB_HOME`.
 
 ### Windows
 
@@ -22,7 +24,7 @@ The procedure to setup this package consists of three steps.
 
 2. Enter `matlab /regserver` in the command prompt.
 
-3. Install `MATLAB.jl`, from Julia run: `Pkg.clone("https://github.com/JuliaInterop/MATLAB.jl.git")`
+3. From Julia run: `Pkg.add("MATLAB")`
 
 
 ### Linux
@@ -37,18 +39,14 @@ The procedure to setup this package consists of three steps.
 	sudo apt-get install csh
 	```
 
-3. Install `MATLAB.jl`, from Julia run: `Pkg.clone("https://github.com/JuliaInterop/MATLAB.jl.git")`
+3. From Julia run: `Pkg.add("MATLAB")`
 
 
 ### Mac OS X
 
-1. Ensure that MATLAB is installed in `/Applications`. By default, MATLAB.jl uses the MATLAB installation with the greatest version number. To specify that a specific MATLAB installation should be used, set the environment variable ``MATLAB_HOME``. For example, if you are using MATLAB R2012b, you may add the following command to ``.profile``:
-	
-	```bash
-	export MATLAB_HOME=/Applications/MATLAB_R2012b.app
-	```
+1. Ensure that MATLAB is installed in `/Applications` (for example, if you are using MATLAB R2012b, you may add the following command to `.profile`:  `export MATLAB_HOME=/Applications/MATLAB_R2012b.app`).
 
-2. Install `MATLAB.jl`, from Julia run: `Pkg.clone("https://github.com/JuliaInterop/MATLAB.jl.git")`
+2. From Julia run: `Pkg.add("MATLAB")`
 
 
 ## Usage
@@ -121,7 +119,7 @@ delete(x)
 You may access attributes and data of a MATLAB variable through the functions provided by this package.
 
 ```julia
- # suppose x is of type MxArray
+# suppose x is of type MxArray
 nrows(x)    # returns number of rows in x
 ncols(x)    # returns number of columns in x 
 nelems(x)   # returns number of elements in x
@@ -133,6 +131,10 @@ eltype(x)   # returns element type of x (in Julia Type)
 elsize(x)   # return number of bytes per element
 
 data_ptr(x)   # returns pointer to data (in Ptr{T}), where T is eltype(x)
+
+# suppose s is a MATLAB struct
+mxnfields(s)	# returns the number of fields in struct s
+
 ```
 
 You may also make tests on a MATLAB variable.
@@ -284,7 +286,7 @@ Note that some MATLAB expressions are not valid Julia expressions. This package 
 @matlab sprintf("%d", 10)   # ==> MATLAB: sprintf('%d', 10)
 
  # MATLAB does not allow [x, y] on the left hand side
-x = linspace(-5., 5. 100)
+x = linspace(-5.0, 5.0, 100)
 y = x
 @mput x y
 @matlab begin
@@ -338,7 +340,7 @@ r2_mx = get_mvariable(s2, :r)  # get r from s2
 r1 = jarray(r1_mx)
 r2 = jarray(r2_mx)
 
-...  # do other stuff on r1 and r2
+# ... do other stuff on r1 and r2
 
 close(s1)  # close session s1
 close(s2)  # close session s2

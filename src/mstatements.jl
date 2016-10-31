@@ -6,7 +6,7 @@ function write_mstatement(io::IO, s)
     print(io, string(s))
 end
 
-function write_mstatement(io::IO, s::ASCIIString)
+function write_mstatement(io::IO, s::String)
     print(io, "'")
     print(io, s)
     print(io, "'")

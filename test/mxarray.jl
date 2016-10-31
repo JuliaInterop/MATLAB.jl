@@ -1,8 +1,7 @@
-# Unit testing for MxArray
+using MATLAB
+using Base.Test
 
-using MATLAB, Compat, Base.Test
-using MATLAB: nfields
-import Compat: ASCIIString
+# Unit testing for MxArray
 
 m = 5
 n = 6
@@ -40,6 +39,7 @@ macro mx_test_basic_types(ty, testfun)
         @test !is_complex(b)
         @test $(testfun)(b)
         delete(b)
+        return nothing
     end
 end
 
@@ -85,6 +85,7 @@ macro mx_test_complex_type(ty, testfun)
         @test is_complex(b)
         @test $(testfun)(b)
         delete(b)
+        return nothing
     end
 end
 @mx_test_complex_type Float64 is_double
@@ -124,10 +125,10 @@ a_mx = mxarray(3.25)
 @test jscalar(a_mx) == 3.25
 delete(a_mx)
 
-a_mx = mxarray(@compat Int32(12))
+a_mx = mxarray(Int32(12))
 @test eltype(a_mx) == Int32
 @test size(a_mx) == (1, 1)
-@test jscalar(a_mx) == @compat Int32(12)
+@test jscalar(a_mx) == Int32(12)
 delete(a_mx)
 
 a_mx = mxarray(true)
@@ -268,7 +269,7 @@ delete(s_mx)
 
 a = mxstruct("abc", "efg", "xyz")
 @test is_struct(a)
-@test nfields(a) == 3
+@test mxnfields(a) == 3
 @test nrows(a) == 1
 @test ncols(a) == 1
 @test nelems(a) == 1
@@ -279,24 +280,24 @@ a = mxstruct("abc", "efg", "xyz")
 @test get_fieldname(a, 3) == "xyz"
 delete(a)
 
-s = @compat Dict{Any,Any}("name"=>"MATLAB", "version"=>12.0, "data"=>[1,2,3])
+s = Dict("name"=>"MATLAB", "version"=>12.0, "data"=>[1,2,3])
 a = mxstruct(s)
 @test is_struct(a)
-@test nfields(a) == 3
+@test mxnfields(a) == 3
 @test jstring(get_field(a, "name")) == "MATLAB"
 @test jscalar(get_field(a, "version")) == 12.0
 @test isequal(jvector(get_field(a, "data")), [1,2,3])
 delete(a)
 
 type TestType
-    name::AbstractString
+    name::String
     version::Float64
     data::Vector{Int}
 end
 t = TestType("MATLAB", 12.0, [1,2,3])
 a = mxstruct(t)
 @test is_struct(a)
-@test nfields(a) == 3
+@test mxnfields(a) == 3
 @test jstring(get_field(a, "name")) == "MATLAB"
 @test jscalar(get_field(a, "version")) == 12.0
 @test isequal(jvector(get_field(a, "data")), [1,2,3])
@@ -305,7 +306,7 @@ delete(a)
 a = mxstructarray([TestType("MATLAB", 12.0, [1,2,3]),
     TestType("Julia", 0.2, [4,5,6])])
 @test is_struct(a)
-@test nfields(a) == 3
+@test mxnfields(a) == 3
 @test jstring(get_field(a, 1, "name")) == "MATLAB"
 @test jscalar(get_field(a, 1, "version")) == 12.0
 @test isequal(jvector(get_field(a, 1, "data")), [1,2,3])
@@ -348,7 +349,7 @@ a = "MATLAB"
 x = mxarray(a)
 y = jvariable(x)
 delete(x)
-@test isa(y, ASCIIString)
+@test isa(y, String)
 @test y == a
 
 a = ["abc", 3, "efg"]
@@ -361,11 +362,11 @@ delete(x)
 @test y[2] == a[2]
 @test y[3] == a[3]
 
-a = @compat Dict{Any,Any}("abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB")
+a = Dict("abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB")
 x = mxarray(a)
 y = jvariable(x)
 delete(x)
-@test isa(y, Dict{AbstractString, Any})
+@test isa(y, Dict{String, Any})
 
 @test y["abc"] == 10.0
 @test isequal(y["efg"], [1, 2, 3])
