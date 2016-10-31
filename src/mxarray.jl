@@ -173,55 +173,55 @@ const _mx_is_empty   = mxfunc(:mxIsEmpty)
 const _mx_is_struct  = mxfunc(:mxIsStruct)
 const _mx_is_cell    = mxfunc(:mxIsCell) 
 
-macro mxget_attr(fun, ret)
-    :(ccall($(fun)::Ptr{Void}, $(ret), (Ptr{Void},), mx))
+macro mxget_attr(fun, ret, mx)
+    :(ccall($(esc(fun))::Ptr{Void}, $(esc(ret)), (Ptr{Void},), $(esc(mx))))
 end
 
-classid(mx::MxArray) = @mxget_attr(_mx_get_classid, mxClassID)
-nrows(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_m, UInt))
-ncols(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_n, UInt))
-nelems(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_nelems, UInt))
-ndims(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_ndims, mwSize))
+classid(mx::MxArray) = @mxget_attr(_mx_get_classid, mxClassID, mx)
+nrows(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_m, UInt, mx))
+ncols(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_n, UInt, mx))
+nelems(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_nelems, UInt, mx))
+ndims(mx::MxArray)   = convert(Int, @mxget_attr(_mx_get_ndims, mwSize, mx))
 
 eltype(mx::MxArray)  = mxclassid_to_type(classid(mx))
-elsize(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_elemsize, UInt))
-data_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_data, Ptr{Void}))
-real_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_pr, Ptr{Void}))
-imag_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_pi, Ptr{Void}))
+elsize(mx::MxArray)  = convert(Int, @mxget_attr(_mx_get_elemsize, UInt, mx))
+data_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_data, Ptr{Void}, mx))
+real_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_pr, Ptr{Void}, mx))
+imag_ptr(mx::MxArray) = convert(Ptr{eltype(mx)}, @mxget_attr(_mx_get_pi, Ptr{Void}, mx))
 
-mxnfields(mx::MxArray) = convert(Int, @mxget_attr(_mx_get_nfields, Cint))
+mxnfields(mx::MxArray) = convert(Int, @mxget_attr(_mx_get_nfields, Cint, mx))
 
 # validation functions
 
-macro mx_test_is(fun)
-    :(ccall($(fun)::Ptr{Void}, Bool, (Ptr{Void},), mx))
+macro mx_test_is(fun, mx)
+    :((ccall($(esc(fun))::Ptr{Void}, Bool, (Ptr{Void},), $(esc(mx)))))
 end
 
-is_double(mx::MxArray) = @mx_test_is(_mx_is_double)
-is_single(mx::MxArray) = @mx_test_is(_mx_is_single)
-is_int64(mx::MxArray)  = @mx_test_is(_mx_is_int64)
-is_uint64(mx::MxArray) = @mx_test_is(_mx_is_uint64)
-is_int32(mx::MxArray)  = @mx_test_is(_mx_is_int32)
-is_uint32(mx::MxArray) = @mx_test_is(_mx_is_uint32)
-is_int16(mx::MxArray)  = @mx_test_is(_mx_is_int16)
-is_uint16(mx::MxArray) = @mx_test_is(_mx_is_uint16)
-is_int8(mx::MxArray)   = @mx_test_is(_mx_is_int8)
-is_uint8(mx::MxArray)  = @mx_test_is(_mx_is_uint8)
+is_double(mx::MxArray) = @mx_test_is(_mx_is_double, mx)
+is_single(mx::MxArray) = @mx_test_is(_mx_is_single, mx)
+is_int64(mx::MxArray)  = @mx_test_is(_mx_is_int64, mx)
+is_uint64(mx::MxArray) = @mx_test_is(_mx_is_uint64, mx)
+is_int32(mx::MxArray)  = @mx_test_is(_mx_is_int32, mx)
+is_uint32(mx::MxArray) = @mx_test_is(_mx_is_uint32, mx)
+is_int16(mx::MxArray)  = @mx_test_is(_mx_is_int16, mx)
+is_uint16(mx::MxArray) = @mx_test_is(_mx_is_uint16, mx)
+is_int8(mx::MxArray)   = @mx_test_is(_mx_is_int8, mx)
+is_uint8(mx::MxArray)  = @mx_test_is(_mx_is_uint8, mx)
 
-is_numeric(mx::MxArray) = @mx_test_is(_mx_is_numeric)
-is_logical(mx::MxArray) = @mx_test_is(_mx_is_logical)
-is_complex(mx::MxArray) = @mx_test_is(_mx_is_complex)
-is_sparse(mx::MxArray)  = @mx_test_is(_mx_is_sparse)
-is_struct(mx::MxArray)  = @mx_test_is(_mx_is_struct)
-is_cell(mx::MxArray)    = @mx_test_is(_mx_is_cell)
-is_char(mx::MxArray)    = @mx_test_is(_mx_is_char)
-is_empty(mx::MxArray)   = @mx_test_is(_mx_is_empty)
+is_numeric(mx::MxArray) = @mx_test_is(_mx_is_numeric, mx)
+is_logical(mx::MxArray) = @mx_test_is(_mx_is_logical, mx)
+is_complex(mx::MxArray) = @mx_test_is(_mx_is_complex, mx)
+is_sparse(mx::MxArray)  = @mx_test_is(_mx_is_sparse, mx)
+is_struct(mx::MxArray)  = @mx_test_is(_mx_is_struct, mx)
+is_cell(mx::MxArray)    = @mx_test_is(_mx_is_cell, mx)
+is_char(mx::MxArray)    = @mx_test_is(_mx_is_char, mx)
+is_empty(mx::MxArray)   = @mx_test_is(_mx_is_empty, mx)
 
 # size function
 
 function size(mx::MxArray)
     nd = ndims(mx)
-    pdims::Ptr{mwSize} = @mxget_attr(_mx_get_dims, Ptr{mwSize})
+    pdims::Ptr{mwSize} = @mxget_attr(_mx_get_dims, Ptr{mwSize}, mx)
     _dims = unsafe_wrap(Array, pdims, (nd,))
     dims = Array(Int, nd)
     for i = 1:nd
@@ -240,7 +240,7 @@ function size(mx::MxArray, d::Integer)
         d == 1 ? nrows(mx) : 
         d == 2 ? ncols(mx) : 1
     else
-        pdims::Ptr{mwSize} = @mxget_attr(_mx_get_dims, Ptr{mwSize})
+        pdims::Ptr{mwSize} = @mxget_attr(_mx_get_dims, Ptr{mwSize}, mx)
         _dims = unsafe_wrap(Array, pdims, (nd,))
         d <= nd ? convert(Int, _dims[d]) : 1
     end    
