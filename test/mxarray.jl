@@ -122,62 +122,62 @@ a = MxArray(Bool, (6, 5, 4))
 a_mx = MxArray(3.25)
 @test eltype(a_mx) == Float64
 @test size(a_mx) == (1, 1)
-@test jscalar(a_mx) == 3.25
+@test Any(a_mx) == 3.25
 delete(a_mx)
 
 a_mx = MxArray(Int32(12))
 @test eltype(a_mx) == Int32
 @test size(a_mx) == (1, 1)
-@test jscalar(a_mx) == Int32(12)
+@test Any(a_mx) == Int32(12)
 delete(a_mx)
 
 a_mx = MxArray(true)
 @test eltype(a_mx) == Bool
 @test size(a_mx) == (1, 1)
-@test jscalar(a_mx)
+@test Any(a_mx)
 delete(a_mx)
 
 a_mx = MxArray(false)
 @test eltype(a_mx) == Bool
 @test size(a_mx) == (1, 1)
-@test !jscalar(a_mx)
+@test !Any(a_mx)
 delete(a_mx)
 
 a_mx = MxArray(3.25 + 4im)
 @test eltype(a_mx) == Float64
 @test size(a_mx) == (1, 1)
-@test jscalar(a_mx) == 3.25 + 4im
+@test Any(a_mx) == 3.25 + 4im
 delete(a_mx)
 
 # conversion between Julia and MATLAB numeric arrays
 
 a = rand(5, 6)
 a_mx = MxArray(a)
-a2 = jarray(a_mx)
+a2 = Array(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
 a = rand(5)
 a_mx = MxArray(a)
-a2 = jvector(a_mx)
+a2 = Vector(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
 a_t = reshape(a, 1, 5)
 a_mx = MxArray(a_t)
-a2 = jvector(a_mx)
+a2 = Vector(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
 a = 1:5
 a_mx = MxArray(a)
-a2 = jvector(a_mx)
+a2 = Vector(a_mx)
 @test isequal([1:5;], a2)
 delete(a_mx)
 
 a = rand(5, 6) + rand(5, 6)*im
 a_mx = MxArray(a)
-a2 = jarray(a_mx)
+a2 = Array(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
@@ -190,7 +190,7 @@ a_mx = MxArray(a)
 @test nrows(a_mx) == 8
 @test ncols(a_mx) == 9
 
-a2 = jsparse(a_mx)
+a2 = SparseMatrixCSC(a_mx)
 @test size(a2) == (8, 9)
 @test countnz(a2) == countnz(a)
 @test isequal(a2, a)
@@ -203,7 +203,7 @@ a_mx = MxArray(a)
 @test nrows(a_mx) == 8
 @test ncols(a_mx) == 9
 
-a2 = jsparse(a_mx)
+a2 = SparseMatrixCSC(a_mx)
 @test size(a2) == (8, 9)
 @test countnz(a2) == countnz(a)
 @test isequal(a2, a)
@@ -285,8 +285,8 @@ a = mxstruct(s)
 @test is_struct(a)
 @test mxnfields(a) == 3
 @test String(get_field(a, "name")) == "MATLAB"
-@test jscalar(get_field(a, "version")) == 12.0
-@test isequal(jvector(get_field(a, "data")), [1,2,3])
+@test Any(get_field(a, "version")) == 12.0
+@test isequal(Vector(get_field(a, "data")), [1,2,3])
 delete(a)
 
 type TestType
@@ -299,8 +299,8 @@ a = mxstruct(t)
 @test is_struct(a)
 @test mxnfields(a) == 3
 @test String(get_field(a, "name")) == "MATLAB"
-@test jscalar(get_field(a, "version")) == 12.0
-@test isequal(jvector(get_field(a, "data")), [1,2,3])
+@test Any(get_field(a, "version")) == 12.0
+@test isequal(Vector(get_field(a, "data")), [1,2,3])
 delete(a)
 
 a = mxstructarray([TestType("MATLAB", 12.0, [1,2,3]),
@@ -308,11 +308,11 @@ a = mxstructarray([TestType("MATLAB", 12.0, [1,2,3]),
 @test is_struct(a)
 @test mxnfields(a) == 3
 @test String(get_field(a, 1, "name")) == "MATLAB"
-@test jscalar(get_field(a, 1, "version")) == 12.0
-@test isequal(jvector(get_field(a, 1, "data")), [1,2,3])
+@test Any(get_field(a, 1, "version")) == 12.0
+@test isequal(Vector(get_field(a, 1, "data")), [1,2,3])
 @test String(get_field(a, 2, "name")) == "Julia"
-@test jscalar(get_field(a, 2, "version")) == 0.2
-@test isequal(jvector(get_field(a, 2, "data")), [4,5,6])
+@test Any(get_field(a, 2, "version")) == 0.2
+@test isequal(Vector(get_field(a, 2, "data")), [4,5,6])
 delete(a)
 
 

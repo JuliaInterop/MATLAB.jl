@@ -23,11 +23,11 @@ r = read_matfile("test.mat")
 @test isa(r, Dict{String, MxArray})
 @test length(r) == 6
 
-ra32 = jmatrix(r["a32"])
-ra64 = jmatrix(r["a64"])
-rb = jvector(r["b"])
+ra32 = Any(r["a32"])
+ra64 = Any(r["a64"])
+rb = Any(r["b"])
 rc = Any(r["c"])
-rd = jdict(r["d"])
+rd = Any(r["d"])
 rss = r["ss"]
 
 gc()  # make sure that ra, rb, rc, rd remain valid
@@ -41,10 +41,10 @@ gc()  # make sure that ra, rb, rc, rd remain valid
 @test rd["score"] == d["score"]
 
 @test is_struct(rss)
-@test jscalar(get_field(rss, 1, "x")) == 1.0
-@test jscalar(get_field(rss, 1, "y")) 
-@test jvector(get_field(rss, 1, "z")) == ss[1].z
-@test jscalar(get_field(rss, 2, "x")) == 2.0
-@test !jscalar(get_field(rss, 2, "y")) 
-@test jvector(get_field(rss, 2, "z")) == ss[2].z
+@test Any(get_field(rss, 1, "x")) == 1.0
+@test Any(get_field(rss, 1, "y")) 
+@test Any(get_field(rss, 1, "z")) == ss[1].z
+@test Any(get_field(rss, 2, "x")) == 2.0
+@test !Any(get_field(rss, 2, "y")) 
+@test Any(get_field(rss, 2, "z")) == ss[2].z
 
