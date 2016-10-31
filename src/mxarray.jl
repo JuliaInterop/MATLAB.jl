@@ -544,7 +544,7 @@ const _mx_get_string = mxfunc(:mxGetString_730)
 # use deep-copy from MATLAB variable to Julia array
 # in practice, MATLAB variable often has shorter life-cycle
 
-function _jarrayx(fun::AbstractString, mx::MxArray, siz::Tuple)
+function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
     if is_numeric(mx) || is_logical(mx)
         @assert !is_sparse(mx)
         T = eltype(mx)
@@ -647,7 +647,7 @@ function jdict(mx::MxArray)
         throw(ArgumentError("jdict only applies to a single struct."))
     end
     nf = mxnfields(mx)
-    fnames = Array(AbstractString, nf)
+    fnames = Array(String, nf)
     fvals = Array(Any, nf)
     for i = 1:nf
         fnames[i] = get_fieldname(mx, i)
@@ -687,7 +687,6 @@ jvariable(mx::MxArray, ty::Type{Array})  = jarray(mx)
 jvariable(mx::MxArray, ty::Type{Vector}) = jvector(mx)
 jvariable(mx::MxArray, ty::Type{Matrix}) = jmatrix(mx)
 jvariable(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
-jvariable(mx::MxArray, ty::Type{AbstractString}) = jstring(mx)::String
 jvariable(mx::MxArray, ty::Type{String}) = jstring(mx)::String
 jvariable(mx::MxArray, ty::Type{Dict}) = jdict(mx)
 jvariable(mx::MxArray, ty::Type{SparseMatrixCSC}) = jsparse(mx)

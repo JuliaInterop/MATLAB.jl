@@ -290,7 +290,7 @@ a = mxstruct(s)
 delete(a)
 
 type TestType
-    name::AbstractString
+    name::String
     version::Float64
     data::Vector{Int}
 end
@@ -366,7 +366,7 @@ a = Dict("abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB")
 x = mxarray(a)
 y = jvariable(x)
 delete(x)
-@test isa(y, Dict{AbstractString, Any})
+@test isa(y, Dict{String, Any})
 
 @test y["abc"] == 10.0
 @test isequal(y["efg"], [1, 2, 3])
