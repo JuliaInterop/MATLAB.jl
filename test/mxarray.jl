@@ -10,7 +10,7 @@ n = 6
 
 macro mx_test_basic_types(ty, testfun)
     quote
-        a = mxarray($(ty), n)
+        a = MxArray($(ty), n)
         @test elsize(a) == sizeof($(ty))
         @test eltype(a) === $(ty)
         @test nrows(a) == n
@@ -25,7 +25,7 @@ macro mx_test_basic_types(ty, testfun)
         @test $(testfun)(a)
         delete(a)
 
-        b = mxarray($(ty), m, n)
+        b = MxArray($(ty), m, n)
         @test elsize(b) == sizeof($(ty))
         @test eltype(b) === $(ty)
         @test nrows(b) == m
@@ -71,7 +71,7 @@ a = mxempty()
 
 macro mx_test_complex_type(ty, testfun)
     quote
-        b = mxarray(Complex{$(ty)}, m, n)
+        b = MxArray(Complex{$(ty)}, m, n)
         @test elsize(b) == sizeof($(ty))
         @test eltype(b) === $(ty)
         @test nrows(b) == m
@@ -93,7 +93,7 @@ end
 
 # test creating multi-dimensional arrays
 
-a = mxarray(Float64, (6, 5, 4))
+a = MxArray(Float64, (6, 5, 4))
 @test elsize(a) == sizeof(Float64)
 @test eltype(a) === Float64
 @test size(a) == (6, 5, 4)
@@ -105,7 +105,7 @@ a = mxarray(Float64, (6, 5, 4))
 @test is_numeric(a)
 @test !is_sparse(a)
 
-a = mxarray(Bool, (6, 5, 4))
+a = MxArray(Bool, (6, 5, 4))
 @test elsize(a) == 1
 @test eltype(a) === Bool
 @test size(a) == (6, 5, 4)
@@ -119,31 +119,31 @@ a = mxarray(Bool, (6, 5, 4))
 
 # scalars
 
-a_mx = mxarray(3.25)
+a_mx = MxArray(3.25)
 @test eltype(a_mx) == Float64
 @test size(a_mx) == (1, 1)
 @test jscalar(a_mx) == 3.25
 delete(a_mx)
 
-a_mx = mxarray(Int32(12))
+a_mx = MxArray(Int32(12))
 @test eltype(a_mx) == Int32
 @test size(a_mx) == (1, 1)
 @test jscalar(a_mx) == Int32(12)
 delete(a_mx)
 
-a_mx = mxarray(true)
+a_mx = MxArray(true)
 @test eltype(a_mx) == Bool
 @test size(a_mx) == (1, 1)
 @test jscalar(a_mx)
 delete(a_mx)
 
-a_mx = mxarray(false)
+a_mx = MxArray(false)
 @test eltype(a_mx) == Bool
 @test size(a_mx) == (1, 1)
 @test !jscalar(a_mx)
 delete(a_mx)
 
-a_mx = mxarray(3.25 + 4im)
+a_mx = MxArray(3.25 + 4im)
 @test eltype(a_mx) == Float64
 @test size(a_mx) == (1, 1)
 @test jscalar(a_mx) == 3.25 + 4im
@@ -152,31 +152,31 @@ delete(a_mx)
 # conversion between Julia and MATLAB numeric arrays
 
 a = rand(5, 6)
-a_mx = mxarray(a)
+a_mx = MxArray(a)
 a2 = jarray(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
 a = rand(5)
-a_mx = mxarray(a)
+a_mx = MxArray(a)
 a2 = jvector(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
 a_t = reshape(a, 1, 5)
-a_mx = mxarray(a_t)
+a_mx = MxArray(a_t)
 a2 = jvector(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
 
 a = 1:5
-a_mx = mxarray(a)
+a_mx = MxArray(a)
 a2 = jvector(a_mx)
 @test isequal([1:5;], a2)
 delete(a_mx)
 
 a = rand(5, 6) + rand(5, 6)*im
-a_mx = mxarray(a)
+a_mx = MxArray(a)
 a2 = jarray(a_mx)
 @test isequal(a, a2)
 delete(a_mx)
@@ -184,7 +184,7 @@ delete(a_mx)
 # sparse matrices
 
 a = sprand(8, 9, 0.2)
-a_mx = mxarray(a)
+a_mx = MxArray(a)
 @test is_double(a_mx)
 @test is_sparse(a_mx)
 @test nrows(a_mx) == 8
@@ -197,7 +197,7 @@ a2 = jsparse(a_mx)
 delete(a_mx)
 
 a = sparse(convert(Array{Bool}, rand(8, 9) .< 0.3))
-a_mx = mxarray(a)
+a_mx = MxArray(a)
 @test is_logical(a_mx)
 @test is_sparse(a_mx)
 @test nrows(a_mx) == 8
@@ -212,7 +212,7 @@ delete(a_mx)
 # strings
 
 s = "MATLAB.jl"
-s_mx = mxarray(s)
+s_mx = MxArray(s)
 @test classid(s_mx) == MATLAB.mxCHAR_CLASS
 @test nrows(s_mx) == 1
 @test ncols(s_mx) == length(s)
@@ -220,17 +220,17 @@ s_mx = mxarray(s)
 @test ndims(s_mx) == 2
 @test is_char(s_mx)
 
-s2 = jstring(s_mx)
+s2 = String(s_mx)
 @test s == s2
 delete(s_mx)
 
 s = ""
-s_mx = mxarray(s)
+s_mx = MxArray(s)
 @test classid(s_mx) == MATLAB.mxCHAR_CLASS
 @test is_char(s_mx)
 @test is_empty(s_mx)
 
-s2 = jstring(s_mx)
+s2 = String(s_mx)
 @test s == s2
 delete(s_mx)
 
@@ -261,8 +261,8 @@ delete(a)
 
 s = ["abc", "efg"]
 s_mx = mxcellarray(s)
-@test jstring(get_cell(s_mx, 1)) == "abc"
-@test jstring(get_cell(s_mx, 2)) == "efg"
+@test String(get_cell(s_mx, 1)) == "abc"
+@test String(get_cell(s_mx, 2)) == "efg"
 delete(s_mx)
 
 # struct 
@@ -284,7 +284,7 @@ s = Dict("name"=>"MATLAB", "version"=>12.0, "data"=>[1,2,3])
 a = mxstruct(s)
 @test is_struct(a)
 @test mxnfields(a) == 3
-@test jstring(get_field(a, "name")) == "MATLAB"
+@test String(get_field(a, "name")) == "MATLAB"
 @test jscalar(get_field(a, "version")) == 12.0
 @test isequal(jvector(get_field(a, "data")), [1,2,3])
 delete(a)
@@ -298,7 +298,7 @@ t = TestType("MATLAB", 12.0, [1,2,3])
 a = mxstruct(t)
 @test is_struct(a)
 @test mxnfields(a) == 3
-@test jstring(get_field(a, "name")) == "MATLAB"
+@test String(get_field(a, "name")) == "MATLAB"
 @test jscalar(get_field(a, "version")) == 12.0
 @test isequal(jvector(get_field(a, "data")), [1,2,3])
 delete(a)
@@ -307,10 +307,10 @@ a = mxstructarray([TestType("MATLAB", 12.0, [1,2,3]),
     TestType("Julia", 0.2, [4,5,6])])
 @test is_struct(a)
 @test mxnfields(a) == 3
-@test jstring(get_field(a, 1, "name")) == "MATLAB"
+@test String(get_field(a, 1, "name")) == "MATLAB"
 @test jscalar(get_field(a, 1, "version")) == 12.0
 @test isequal(jvector(get_field(a, 1, "data")), [1,2,3])
-@test jstring(get_field(a, 2, "name")) == "Julia"
+@test String(get_field(a, 2, "name")) == "Julia"
 @test jscalar(get_field(a, 2, "version")) == 0.2
 @test isequal(jvector(get_field(a, 2, "data")), [4,5,6])
 delete(a)
@@ -318,43 +318,43 @@ delete(a)
 
 # bi-directional conversions
 
-x = mxarray(12.0)
-y = jvariable(x)
+x = MxArray(12.0)
+y = Any(x)
 delete(x)
 @test isa(y, Float64)
 @test y == 12.0
 
 a = rand(5)
-x = mxarray(a)
-y = jvariable(x)
+x = MxArray(a)
+y = Any(x)
 delete(x)
 @test isa(y, Vector{Float64})
 @test isequal(y, a)
 
 a = rand(3, 4)
-x = mxarray(a)
-y = jvariable(x)
+x = MxArray(a)
+y = Any(x)
 delete(x)
 @test isa(y, Matrix{Float64})
 @test isequal(y, a)
 
 a = rand(3, 4, 5)
-x = mxarray(a)
-y = jvariable(x)
+x = MxArray(a)
+y = Any(x)
 delete(x)
 @test isa(y, Array{Float64, 3})
 @test isequal(y, a)
 
 a = "MATLAB"
-x = mxarray(a)
-y = jvariable(x)
+x = MxArray(a)
+y = Any(x)
 delete(x)
 @test isa(y, String)
 @test y == a
 
 a = ["abc", 3, "efg"]
-x = mxarray(a)
-y = jvariable(x)
+x = MxArray(a)
+y = Any(x)
 delete(x)
 @test isa(y, Vector{Any})
 @test length(y) == 3
@@ -363,8 +363,8 @@ delete(x)
 @test y[3] == a[3]
 
 a = Dict("abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB")
-x = mxarray(a)
-y = jvariable(x)
+x = MxArray(a)
+y = Any(x)
 delete(x)
 @test isa(y, Dict{String, Any})
 
