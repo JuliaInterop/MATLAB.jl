@@ -699,5 +699,6 @@ convert(::Type{Vector}, mx::MxArray) = jvector(mx)
 convert(::Type{Matrix}, mx::MxArray) = jmatrix(mx)
 convert(::Type{Number}, mx::MxArray) = jscalar(mx)::Number
 convert(::Type{String}, mx::MxArray) = String(mx)::String
-convert(::Type{Dict}, mx::MxArray) = jdict(mx)
 convert(::Type{SparseMatrixCSC}, mx::MxArray) = jsparse(mx)
+convert(::Type{Dict}, mx::MxArray) = jdict(mx)
+Dict(mx::MxArray) = jdict(mx)

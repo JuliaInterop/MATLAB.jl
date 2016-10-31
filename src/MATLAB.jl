@@ -2,7 +2,7 @@ module MATLAB
 
 using Base.Libdl: dlopen, dlsym, RTLD_LAZY, RTLD_GLOBAL
 
-import Base: eltype, close, size, copy, ndims, unsafe_convert, convert
+import Base: eltype, close, size, copy, ndims, unsafe_convert, convert, Dict
 
 # mxarray
 export MxArray, mxClassID, mxComplexity,
