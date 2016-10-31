@@ -9,7 +9,7 @@ end
 DumbParserState() = DumbParserState(0, false)
 
 # Returns true if an = is encountered and updates pstate
-function dumb_parse!(pstate::DumbParserState, str::String)
+function dumb_parse!(pstate::DumbParserState, str::AbstractString)
     paren_depth = pstate.paren_depth
     in_string = pstate.in_string
     x = '\0'
@@ -52,9 +52,9 @@ end
 # assignment and use status
 function check_assignment(interp, i)
     # Go back to the last newline
-    before = String[]
+    before = AbstractString[]
     for j = i-1:-1:1
-        if isa(interp[j], String)
+        if isa(interp[j], AbstractString)
             sp = split(interp[j], "\n")
             unshift!(before, sp[end])
             for k = length(sp)-1:-1:1
@@ -70,10 +70,10 @@ function check_assignment(interp, i)
     (dumb_parse!(pstate, join(before)) || pstate.paren_depth > 1) && return (false, true)
 
     # Go until the next newline or comment
-    after = String[]
+    after = AbstractString[]
     both_sides = false
     for j = i+1:length(interp)
-        if isa(interp[j], String)
+        if isa(interp[j], AbstractString)
             sp = split(interp[j], "\n")
             push!(after, sp[1])
             for k = 2:length(sp)
@@ -94,7 +94,7 @@ end
 function do_mat_str(ex)
     # Hack to do interpolation
     interp = parse(string("\"\"\"", replace(ex, "\"\"\"", "\\\"\"\""), "\"\"\""))
-    if isa(interp, String)
+    if isa(interp, AbstractString)
         interp = [interp]
     elseif interp.head == :string
         interp = interp.args
@@ -111,7 +111,7 @@ function do_mat_str(ex)
     assignedvars = Set{Symbol}()
     varmap = Dict{Symbol,Symbol}()
     for i = 1:length(interp)
-        if !isa(interp[i], String)
+        if !isa(interp[i], AbstractString)
             # Don't put the same symbol to MATLAB twice
             if haskey(varmap, interp[i])
                 var = varmap[interp[i]]
@@ -142,7 +142,7 @@ function do_mat_str(ex)
     unshift!(interp, "clear ans;\nmatlab_jl_has_ans = 0;\n")
 
     # Add a semicolon to the end of the last statement to suppress output
-    isa(interp[end], String) && (interp[end] = rstrip(interp[end]))
+    isa(interp[end], AbstractString) && (interp[end] = rstrip(interp[end]))
     push!(interp, ";")
 
     # Figure out if `ans` exists in code to avoid an error if it doesn't
