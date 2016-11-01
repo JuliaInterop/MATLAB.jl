@@ -47,7 +47,7 @@ close(s)
 # segfault on deleted references
 x = mxarray(3.0)
 delete(x)
-delete(x)
+@test_throws UndefRefError delete(x)
 @test_throws UndefRefError nrows(x)
 @test_throws UndefRefError is_numeric(x)
 @test_throws UndefRefError jscalar(x)

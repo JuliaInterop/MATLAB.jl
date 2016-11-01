@@ -6,22 +6,31 @@ type MxArray
     
     function MxArray(p::Ptr{Void}, own::Bool)
         p == C_NULL && error("NULL pointer for MxArray.")
-        mx = new(p, own)
+        self = new(p, own)
         if own
-            finalizer(mx, delete)
+            finalizer(self, release)
         end
-        return mx
+        return self
     end    
 end
 MxArray(p::Ptr{Void}) = MxArray(p, true)
 
 mxarray(mx::MxArray) = mx
 
+
+function release(mx::MxArray)
+    if mx.own && mx.ptr != C_NULL
+        ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx.ptr)
+    end
+    mx.ptr = C_NULL
+    return nothing
+end
+
 # delete & duplicate
 
 function delete(mx::MxArray)
-    if mx.own && !(mx.ptr == C_NULL)
-        ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx.ptr)
+    if mx.own
+        ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx)
     end
     mx.ptr = C_NULL
     return nothing
