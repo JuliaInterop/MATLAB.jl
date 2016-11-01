@@ -41,5 +41,14 @@ close_default_msession()
 
 s = MSession()
 close(s)
-@test_throws MATLAB.MEngineError close(s)
+@test_throws UndefRefError close(s)
 
+
+# segfault on deleted references
+x = mxarray(3.0)
+delete(x)
+@test_throws UndefRefError delete(x)
+@test_throws UndefRefError nrows(x)
+@test_throws UndefRefError is_numeric(x)
+@test_throws UndefRefError jscalar(x)
+@test_throws UndefRefError jvariable(x)
