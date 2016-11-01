@@ -61,4 +61,11 @@ function nfields(mx::MxArray)
     return mxfields(mx)
 end
 
+function jvariable(mx::MxArray, ty::Type{AbstractString}) 
+    Base.depwarn("jvariable(mx::MxArray,ty::Type{AbstractString}) is 
+    deprecated, use jvariable(mx::MxArray,ty::Type{String}) instead. 
+    We now default to more strict typing on String types", :jvariable)
+    return jstring(mx)::String
+end
+
 end
