@@ -18,13 +18,7 @@ function write_mstatement(io::IO, s::Char)
     print(io, "'")
 end
 
-
-# Hack to support Julia 0.2 and 0.3
-const matlab_infix_ops = union!(Set{Symbol}(),
-    [:+, :-, :*, :/, :\, :^,
-     :.+, :.-, :.*, :./, :.\, :.^,
-     :|, :&])
-
+const matlab_infix_ops = Set([:+, :-, :*, :/, :\, :^, :.+, :.-, :.*, :./, :.\, :.^, :|, :&])
 
 function write_mstatement(io::IO, ex::Expr)
     h = ex.head
