@@ -45,11 +45,14 @@ include("engine.jl")
 include("matstr.jl")
 
 function __init__()
+    if is_windows()
+    global persistent_msession
     # workaround "primary message table for module 77" error
     # creates a dummy Engine session and keeps it open so the libraries used by all other
     # Engine clients are not loaded and unloaded repeatedly
     # see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
-    is_windows() && MSession(0)
+    persistent_msession = MSession(0)
+    end
 end
 
 # deprecations

@@ -36,7 +36,9 @@ type MSession
             # Hide the MATLAB Command Window on Windows
             ccall(engfunc(:engSetVisible ), Cint, (Ptr{Void}, Cint), ep, 0)
         end
-        new(ep, buf, bufptr)
+        self = new(ep, buf, bufptr)
+        finalizer(self, release)
+        return self
     end
 end
 
@@ -46,11 +48,21 @@ function unsafe_convert(::Type{Ptr{Void}}, m::MSession)
     return ptr
 end
 
+function release(session::MSession)
+    # Close a MATLAB Engine session
+    ptr = session.ptr
+    if ptr != C_NULL
+        ccall(engfunc(:engClose), Cint, (Ptr{Void},), ptr)
+    end
+    session.ptr = C_NULL
+    return nothing
+end
+
 function close(session::MSession)
     # Close a MATLAB Engine session
     @assert libeng::Ptr{Void} != C_NULL
-    r = ccall(engfunc(:engClose), Cint, (Ptr{Void},), session)
-    r != 0 && throw(MEngineError("Failed to close a MATLAB engine session (err = $r)"))
+    ret = ccall(engfunc(:engClose), Cint, (Ptr{Void},), session)
+    ret != 0 && throw(MEngineError("Failed to close a MATLAB engine session (err = $r)"))
     session.ptr = C_NULL
     return nothing
 end
@@ -61,7 +73,7 @@ default_msession = nothing
 
 function restart_default_msession(bufsize::Integer = default_output_buffer_size)
     global default_msession
-    if default_msession !== nothing
+    if default_msession !== nothing && default_msession.ptr != C_NULL
         close(default_msession)
     end
     default_msession = MSession(bufsize)
