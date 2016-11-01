@@ -52,3 +52,9 @@ delete(x)
 @test_throws UndefRefError is_numeric(x)
 @test_throws UndefRefError jscalar(x)
 @test_throws UndefRefError jvariable(x)
+
+# make sure restart_default_msession() doesn't error on null references on
+# default msession
+s = get_default_msession()
+close(s)
+restart_default_msession()
