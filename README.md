@@ -60,11 +60,11 @@ An instance of ``MxArray`` encapsulates a MATLAB variable. This package provides
 One can use the function ``mxarray`` to create MATLAB variables (of type ``MxArray``), as follows
 
 ```julia
-mxarray(Float64, n)   # creates an n-by-1 MATLAB zero array of double valued type
-mxarray(Int32, m, n)  # creates an m-by-n MATLAB zero array of int32 valued type 
-mxarray(Bool, m, n)   # creates a MATLAB logical array of size m-by-n
+MxArray(Float64, n)   # creates an n-by-1 MATLAB zero array of double valued type
+MxArray(Int32, m, n)  # creates an m-by-n MATLAB zero array of int32 valued type 
+MxArray(Bool, m, n)   # creates a MATLAB logical array of size m-by-n
 
-mxarray(Float64, (n1, n2, n3))  # creates a MATLAB array of size n1-by-n2-by-n3
+MxArray(Float64, (n1, n2, n3))  # creates a MATLAB array of size n1-by-n2-by-n3
 
 mxcellarray(m, n)        # creates a MATLAB cell array
 mxstruct("a", "b", "c")  # creates a MATLAB struct with given fields
@@ -75,20 +75,20 @@ You may also convert a Julia variable to MATLAB variable
 ```julia
 a = rand(m, n)
 
-x = mxarray(a)     # converts a to a MATLAB array
-x = mxarray(1.2)   # converts a scalar 1.2 to a MATLAB variable
+x = MxArray(a)     # converts a to a MATLAB array
+x = MxArray(1.2)   # converts a scalar 1.2 to a MATLAB variable
 
 a = sprand(m, n, 0.1)
-x = mxarray(a)     # converts a sparse matrix to a MATLAB sparse matrix
+x = MxArray(a)     # converts a sparse matrix to a MATLAB sparse matrix
 
-x = mxarray("abc") # converts a string to a MATLAB char array
+x = MxArray("abc") # converts a string to a MATLAB char array
 
-x = mxarray(["a", 1, 2.3])  # converts a Julia array to a MATLAB cell array
+x = MxArray(["a", 1, 2.3])  # converts a Julia array to a MATLAB cell array
 
-x = mxarray(Dict("a"=>1, "b"=>"string", "c"=>[1,2,3])) # converts a Julia dictionary to a MATLAB struct
+x = MxArray(Dict("a"=>1, "b"=>"string", "c"=>[1,2,3])) # converts a Julia dictionary to a MATLAB struct
 ```
 
-The function ``mxarray`` can also converts a compound type to a Julia struct:
+The function `MxArray` can also converts a compound type to a Julia struct:
 ```julia
 type S
 	x::Float64
@@ -98,8 +98,8 @@ end
 
 s = S(1.2, Int32[1, 2], false)
 
-x = mxarray(s)   # creates a MATLAB struct with three fields: x, y, z
-xc = mxarray([s, s])  # creates a MATLAB cell array, each cell is a struct.
+x = MxArray(s)   # creates a MATLAB struct with three fields: x, y, z
+xc = MxArray([s, s])  # creates a MATLAB cell array, each cell is a struct.
 xs = mxstructarray([s, s])  # creates a MATLAB array of structs
 ```
 
@@ -153,14 +153,14 @@ is_empty(x)    # returns whether x is empty
 #### Convert MATLAB variables to Julia
 
 ```julia
-a = jarray(x)   # converts x to a Julia array
-a = jvector(x)  # converts x to a Julia vector (1D array) when x is a vector
-a = jscalar(x)  # converts x to a Julia scalar
-a = jmatrix(x)  # converts x to a Julia matrix
-a = jstring(x)  # converts x to a Julia string
-a = jdict(x)    # converts a MATLAB struct to a Julia dictionary (using fieldnames as keys)
+a = Array(x)   # converts x to a Julia array
+a = Vector(x)  # converts x to a Julia vector (1D array) when x is a vector
+a = Number(x)  # converts x to a Julia scalar
+a = Matrix(x)  # converts x to a Julia matrix
+a = String(x)  # converts x to a Julia string
+a = Dict(x)    # converts a MATLAB struct to a Julia dictionary (using fieldnames as keys)
 
-a = jvariable(x)  # converts x to a Julia variable in default manner
+a = Any(x)  # converts x to a Julia variable in default manner
 ```
 
 ### Read/Write MAT Files
@@ -337,8 +337,9 @@ eval_string(s2, "r = sin(y)")  # evaluate sin(y) in session s2
 r1_mx = get_mvariable(s1, :r)  # get r from s1
 r2_mx = get_mvariable(s2, :r)  # get r from s2
 
-r1 = jarray(r1_mx)
-r2 = jarray(r2_mx)
+# convert the variables to Julia 
+r1 = Array(r1_mx) 
+r2 = Array(r2_mx)
 
 # ... do other stuff on r1 and r2
 

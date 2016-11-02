@@ -132,7 +132,7 @@ function put_variable(session::MSession, name::Symbol, v::MxArray)
     return nothing
 end
 
-put_variable(session::MSession, name::Symbol, v) = put_variable(session, name, mxarray(v))
+put_variable(session::MSession, name::Symbol, v) = put_variable(session, name, MxArray(v))
 
 put_variable(name::Symbol, v) = put_variable(get_default_msession(), name, v)
 
@@ -147,13 +147,13 @@ function get_mvariable(session::MSession, name::Symbol)
     if pv == C_NULL
         throw(MEngineError("Failed to get the variable $(name) from a MATLAB session."))
     end
-    MxArray(pv)
+    return MxArray(pv)
 end
 
 get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
 
-get_variable(name::Symbol) = jvariable(get_mvariable(name))
-get_variable(name::Symbol, kind) = jvariable(get_mvariable(name), kind)
+get_variable(name::Symbol) = Any(get_mvariable(name))
+get_variable(name::Symbol, kind) = convert(kind, get_mvariable(name))
 
 
 ###########################################################
@@ -279,11 +279,11 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     # get results from MATLAB
     
     ret = if nout == 1
-        jvariable(get_mvariable(session, Symbol(out_arg_names[1])))
+        Any(get_mvariable(session, Symbol(out_arg_names[1])))
     elseif nout >= 2
         results = Array(Any, nout)
         for i = 1 : nout
-            results[i] = jvariable(get_mvariable(session, Symbol(out_arg_names[i])))
+            results[i] = Any(get_mvariable(session, Symbol(out_arg_names[i])))
         end
         tuple(results...)
     else

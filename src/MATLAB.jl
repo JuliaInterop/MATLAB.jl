@@ -2,7 +2,7 @@ module MATLAB
 
 using Base.Libdl: dlopen, dlsym, RTLD_LAZY, RTLD_GLOBAL
 
-import Base: eltype, close, size, copy, ndims, unsafe_convert
+import Base: eltype, close, size, copy, ndims, unsafe_convert, convert, Dict
 
 # mxarray
 export MxArray, mxClassID, mxComplexity,
@@ -17,8 +17,7 @@ export is_double, is_single,
 
 export mxarray, mxempty, mxsparse, delete, duplicate,
        mxcellarray, get_cell, set_cell,
-       mxstruct, mxstructarray, mxnfields, get_fieldname, get_field, set_field,
-       jvariable, jarray, jscalar, jvector, jmatrix, jsparse, jstring, jdict
+       mxstruct, mxstructarray, mxnfields, get_fieldname, get_field, set_field
 
 # mstatments
 export mstatement
