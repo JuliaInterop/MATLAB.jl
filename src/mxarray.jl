@@ -279,9 +279,6 @@ const _mx_set_field = mxfunc(:mxSetField_730)
 const _mx_get_field_bynum = mxfunc(:mxGetFieldByNumber_730)
 const _mx_get_fieldname = mxfunc(:mxGetFieldNameByNumber)
 
-# create zero arrays
-
-mxempty() = mxarray(Float64, 0, 0)
 
 function _dims_to_mwSize(dims::Tuple{Vararg{Int}})
     ndim = length(dims)

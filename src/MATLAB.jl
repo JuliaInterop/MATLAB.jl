@@ -15,7 +15,7 @@ export is_double, is_single,
        is_numeric, is_complex, is_sparse, is_empty,
        is_logical, is_char, is_struct, is_cell
 
-export mxarray, mxempty, mxsparse, delete, duplicate,
+export mxarray, mxsparse, delete,
        mxcellarray, get_cell, set_cell,
        mxstruct, mxstructarray, mxnfields, get_fieldname, get_field, set_field,
        jvariable, jarray, jscalar, jvector, jmatrix, jsparse, jstring, jdict
@@ -30,6 +30,7 @@ export MSession, MatFile,
        variable_names, read_matfile, write_matfile,
        mxcall,
        @mput, @mget, @matlab, @mat_str, @mat_mstr
+
 
 # exceptions
 type MEngineError <: Exception
@@ -69,5 +70,8 @@ function jvariable(mx::MxArray, ty::Type{AbstractString})
 end
 
 @deprecate duplicate(mx::MxArray) copy(mx::MxArray)
+
+@deprecate mxempty() mxarray(Float64,0,0)
+
 
 end

@@ -45,7 +45,7 @@ end
 
 # empty array
 
-a = mxempty()
+a = mxarray(Float64, 0, 0)
 @test nrows(a) == 0
 @test ncols(a) == 0
 @test nelems(a) == 0
