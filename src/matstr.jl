@@ -166,8 +166,3 @@ end
 macro mat_str(ex)
     do_mat_str(ex)
 end
-
-# Only needed for Julia 0.3
-macro mat_mstr(ex)
-    do_mat_str(ex)
-end
