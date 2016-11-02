@@ -26,7 +26,7 @@ function release(mx::MxArray)
     return nothing
 end
 
-# delete & duplicate
+# delete & copy
 
 function delete(mx::MxArray)
     if mx.own
@@ -36,12 +36,10 @@ function delete(mx::MxArray)
     return nothing
 end
 
-function duplicate(mx::MxArray)
+function copy(mx::MxArray)
     pm = ccall(mxfunc(:mxDuplicateArray), Ptr{Void}, (Ptr{Void},), mx)
     return MxArray(pm)
 end
-
-copy(mx::MxArray) = duplicate(mx)
 
 function unsafe_convert(::Type{Ptr{Void}}, mx::MxArray)
     ptr = mx.ptr

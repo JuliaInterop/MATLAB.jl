@@ -68,4 +68,6 @@ function jvariable(mx::MxArray, ty::Type{AbstractString})
     return jstring(mx)::String
 end
 
+@deprecate duplicate(mx::MxArray) copy(mx::MxArray)
+
 end
