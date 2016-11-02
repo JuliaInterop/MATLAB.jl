@@ -117,7 +117,7 @@ const classid_type_map = Dict{mxClassID,Type}(
 )
 
 function mxclassid_to_type(cid::mxClassID)
-    ty = get(classid_type_map::Dict{mxClassID, Type}, cid, nothing)
+    ty = get(classid_type_map, cid, nothing)
     ty === nothing && throw(ArgumentError("The input class id is not a primitive type id."))
     return ty
 end
@@ -331,9 +331,8 @@ mxarray{T<:MxComplexNum}(x::T) = mxarray([x])
 
 function mxarray{T<:MxRealNum}(a::Array{T})
     mx = mxarray(T, size(a))
-    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt),
-        data_ptr(mx), a, length(a) * sizeof(T))
-    mx
+    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), data_ptr(mx), a, length(a)*sizeof(T))
+    return mx
 end
 
 function mxarray{T<:MxComplexNum}(a::Array{T})
@@ -386,7 +385,7 @@ function _copy_sparse_mat{V,I}(a::SparseMatrixCSC{V,I},
         jc[i] = colptr[i] - 1
     end
     
-    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), pr_p, v, nnz * sizeof(V))
+    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), pr_p, v, nnz*sizeof(V))
 end
 
 function mxarray{V<:Union{Float64,Bool},I}(a::SparseMatrixCSC{V,I})
@@ -565,18 +564,17 @@ function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
         else
             a = Array(T, siz)
             if !isempty(a)
-                ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), 
-                    a, data_ptr(mx), sizeof(T) * length(a))
+                ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), a, data_ptr(mx), length(a)*sizeof(T))
             end
         end
-        a
+        return a
         #unsafe_wrap(Array, data_ptr(mx), siz)
     elseif is_cell(mx)
         a = Array(Any, siz)
         for i = 1:length(a)
             a[i] = jvariable(get_cell(mx, i))
         end
-        a
+        return a
     else
         throw(ArgumentError("$(fun) only applies to numeric, logical or cell arrays."))
     end

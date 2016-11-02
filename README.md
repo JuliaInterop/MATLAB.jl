@@ -1,4 +1,4 @@
-## MATLAB.jl
+## MATLAB
 
 The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from [Julia](http://julialang.org).  In other words, this package allows users to call MATLAB functions within Julia, thus making it easy to interoperate with MATLAB from the Julia language.
 

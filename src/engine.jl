@@ -49,7 +49,6 @@ function unsafe_convert(::Type{Ptr{Void}}, m::MSession)
 end
 
 function release(session::MSession)
-    # Close a MATLAB Engine session
     ptr = session.ptr
     if ptr != C_NULL
         ccall(engfunc(:engClose), Cint, (Ptr{Void},), ptr)

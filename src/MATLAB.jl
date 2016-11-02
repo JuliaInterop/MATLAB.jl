@@ -29,7 +29,7 @@ export MSession, MatFile,
        eval_string, get_mvariable, get_variable, put_variable, put_variables,
        variable_names, read_matfile, write_matfile,
        mxcall,
-       @mput, @mget, @matlab, @mat_str, @mat_mstr
+       @mput, @mget, @matlab, @mat_str
 
 # exceptions
 type MEngineError <: Exception
