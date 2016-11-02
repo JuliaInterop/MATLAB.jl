@@ -319,42 +319,42 @@ delete(a)
 # bi-directional conversions
 
 x = mxarray(12.0)
-y = jvariable(x)
+y = jvalue(x)
 delete(x)
 @test isa(y, Float64)
 @test y == 12.0
 
 a = rand(5)
 x = mxarray(a)
-y = jvariable(x)
+y = jvalue(x)
 delete(x)
 @test isa(y, Vector{Float64})
 @test isequal(y, a)
 
 a = rand(3, 4)
 x = mxarray(a)
-y = jvariable(x)
+y = jvalue(x)
 delete(x)
 @test isa(y, Matrix{Float64})
 @test isequal(y, a)
 
 a = rand(3, 4, 5)
 x = mxarray(a)
-y = jvariable(x)
+y = jvalue(x)
 delete(x)
 @test isa(y, Array{Float64, 3})
 @test isequal(y, a)
 
 a = "MATLAB"
 x = mxarray(a)
-y = jvariable(x)
+y = jvalue(x)
 delete(x)
 @test isa(y, String)
 @test y == a
 
 a = ["abc", 3, "efg"]
 x = mxarray(a)
-y = jvariable(x)
+y = jvalue(x)
 delete(x)
 @test isa(y, Vector{Any})
 @test length(y) == 3
@@ -364,7 +364,7 @@ delete(x)
 
 a = Dict("abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB")
 x = mxarray(a)
-y = jvariable(x)
+y = jvalue(x)
 delete(x)
 @test isa(y, Dict{String, Any})
 

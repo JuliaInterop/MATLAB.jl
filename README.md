@@ -160,7 +160,7 @@ a = jmatrix(x)  # converts x to a Julia matrix
 a = jstring(x)  # converts x to a Julia string
 a = jdict(x)    # converts a MATLAB struct to a Julia dictionary (using fieldnames as keys)
 
-a = jvariable(x)  # converts x to a Julia variable in default manner
+a = jvalue(x)  # converts x to a Julia value in default manner
 ```
 
 ### Read/Write MAT Files
@@ -173,8 +173,7 @@ mf = MatFile(filename)          # opens a MAT file for reading, equivalent to Ma
 close(mf)                       # closes a MAT file.
 
 get_mvariable(mf, name)   # gets a variable and returns an mxArray
-get_variable(mf, name)    # gets a variable, but converts it to a Julia variable
-                          # using `jvariable`
+get_variable(mf, name)    # gets a variable, but converts it to a Julia value using `jvalue`
 
 put_variable(mf, name, v)   # puts a variable v to the MAT file
                             # v can be either an MxArray instance or normal variable

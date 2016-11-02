@@ -26,7 +26,7 @@ r = read_matfile("test.mat")
 ra32 = jmatrix(r["a32"])
 ra64 = jmatrix(r["a64"])
 rb = jvector(r["b"])
-rc = jvariable(r["c"])
+rc = jvalue(r["c"])
 rd = jdict(r["d"])
 rss = r["ss"]
 

@@ -39,8 +39,8 @@ end
 
 get_mvariable(f::MatFile, name::Symbol) = get_mvariable(f, string(name))
 
-get_variable(f::MatFile, name::String) = jvariable(get_mvariable(f, name))
-get_variable(f::MatFile, name::Symbol) = jvariable(get_mvariable(f, name))
+get_variable(f::MatFile, name::String) = jvalue(get_mvariable(f, name))
+get_variable(f::MatFile, name::Symbol) = jvalue(get_mvariable(f, name))
 
 function put_variable(f::MatFile, name::String, v::MxArray)
     f.ptr != C_NULL || error("Cannot put variable to a null file.")
