@@ -20,7 +20,7 @@ function get_paths()
                 matlab_homepath = joinpath("/Applications", maximum(apps))
             end
         elseif is_windows()
-            default_dir = Sys.WORD_SIZE == 32 ? "C:\\Program Files (x86)\\MATLAB" : "C:\\Program Files\\MATLAB"
+            default_dir = Sys.ARCH === :i686 ? "C:\\Program Files (x86)\\MATLAB" : "C:\\Program Files\\MATLAB"
             if isdir(default_dir)
                 dirs = readdir(default_dir)
                 filter!(dir -> ismatch(r"^R[0-9]+[ab]$", dir), dirs)
@@ -42,7 +42,7 @@ function get_paths()
         end
         default_startcmd = "exec $(Base.shell_escape(default_startcmd)) -nosplash"
     elseif is_windows()
-        default_startcmd = joinpath(matlab_homepath, "bin", (Sys.WORD_SIZE == 32 ? "win32" : "win64"), "MATLAB.exe")
+        default_startcmd = joinpath(matlab_homepath, "bin", (Sys.ARCH === :i686  ? "win32" : "win64"), "MATLAB.exe")
         if !isfile(default_startcmd)
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
         end
@@ -50,16 +50,16 @@ function get_paths()
     end
 
     # Get path to MATLAB libraries
-    if is_linux()
-        matlab_library_dir = Sys.WORD_SIZE == 32 ? "glnx86" : "glnxa64"
+    matlab_library_dir = if is_linux()
+        Sys.ARCH === :i686 ? "glnx86" : "glnxa64"
     elseif is_apple()
-        matlab_library_dir = Sys.WORD_SIZE == 32 ? "maci" : "maci64"
+        Sys.ARCH === :i686 ? "maci" : "maci64"
     elseif is_windows()
-        matlab_library_dir = Sys.WORD_SIZE == 32 ? "win32" : "win64"
+        Sys.ARCH === :i686 ? "win32" : "win64"
     end
     matlab_library_path = joinpath(matlab_homepath, "bin", matlab_library_dir)
 
-    if matlab_library_path != nothing && !isdir(matlab_library_path)
+    if matlab_library_path !== nothing && !isdir(matlab_library_path)
         matlab_library_path = nothing
     end
 end
