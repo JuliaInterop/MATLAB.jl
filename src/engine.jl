@@ -21,6 +21,8 @@ type MSession
 
         ep = ccall(engfunc(:engOpen), Ptr{Void}, (Ptr{UInt8},), default_startcmd)
         ep == C_NULL && throw(MEngineError("Failed to open a MATLAB engine session."))
+        # hide the MATLAB command window on Windows
+        is_windows() && ccall(engfunc(:engSetVisible ), Cint, (Ptr{Void}, Cint), ep, 0)
 
         buf = Array(UInt8, bufsize)
 
@@ -32,10 +34,6 @@ type MSession
             bufptr = convert(Ptr{UInt8}, C_NULL)
         end
         
-        if is_windows()
-            # Hide the MATLAB Command Window on Windows
-            ccall(engfunc(:engSetVisible ), Cint, (Ptr{Void}, Cint), ep, 0)
-        end
         self = new(ep, buf, bufptr)
         finalizer(self, release)
         return self
