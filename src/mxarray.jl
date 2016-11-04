@@ -569,7 +569,7 @@ function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
     elseif is_cell(mx)
         a = Array(Any, siz)
         for i = 1:length(a)
-            a[i] = jvariable(get_cell(mx, i))
+            a[i] = jvalue(get_cell(mx, i))
         end
         return a
     else
@@ -658,12 +658,12 @@ function jdict(mx::MxArray)
         pv::Ptr{Void} = ccall(_mx_get_field_bynum, 
             Ptr{Void}, (Ptr{Void}, mwIndex, Cint), mx, 0, i-1)
         fx = MxArray(pv, false)
-        fvals[i] = jvariable(fx)
+        fvals[i] = jvalue(fx)
     end
     Dict(zip(fnames, fvals))
 end
 
-function jvariable(mx::MxArray)
+function jvalue(mx::MxArray)
     if is_numeric(mx) || is_logical(mx)
         if !is_sparse(mx)
             nelems(mx) == 1 ? jscalar(mx) :
@@ -686,11 +686,11 @@ end
 
 # deep conversion from MATLAB variable to Julia array
 
-jvariable(mx::MxArray, ty::Type{Array})  = jarray(mx)
-jvariable(mx::MxArray, ty::Type{Vector}) = jvector(mx)
-jvariable(mx::MxArray, ty::Type{Matrix}) = jmatrix(mx)
-jvariable(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
-jvariable(mx::MxArray, ty::Type{String}) = jstring(mx)::String
-jvariable(mx::MxArray, ty::Type{Dict}) = jdict(mx)
-jvariable(mx::MxArray, ty::Type{SparseMatrixCSC}) = jsparse(mx)
+jvalue(mx::MxArray, ty::Type{Array})  = jarray(mx)
+jvalue(mx::MxArray, ty::Type{Vector}) = jvector(mx)
+jvalue(mx::MxArray, ty::Type{Matrix}) = jmatrix(mx)
+jvalue(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
+jvalue(mx::MxArray, ty::Type{String}) = jstring(mx)::String
+jvalue(mx::MxArray, ty::Type{Dict}) = jdict(mx)
+jvalue(mx::MxArray, ty::Type{SparseMatrixCSC}) = jsparse(mx)
 

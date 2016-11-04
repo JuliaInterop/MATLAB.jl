@@ -151,8 +151,8 @@ end
 
 get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
 
-get_variable(name::Symbol) = jvariable(get_mvariable(name))
-get_variable(name::Symbol, kind) = jvariable(get_mvariable(name), kind)
+get_variable(name::Symbol) = jvalue(get_mvariable(name))
+get_variable(name::Symbol, kind) = jvalue(get_mvariable(name), kind)
 
 
 ###########################################################
@@ -278,11 +278,11 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     # get results from MATLAB
     
     ret = if nout == 1
-        jvariable(get_mvariable(session, Symbol(out_arg_names[1])))
+        jvalue(get_mvariable(session, Symbol(out_arg_names[1])))
     elseif nout >= 2
         results = Array(Any, nout)
         for i = 1 : nout
-            results[i] = jvariable(get_mvariable(session, Symbol(out_arg_names[i])))
+            results[i] = jvalue(get_mvariable(session, Symbol(out_arg_names[i])))
         end
         tuple(results...)
     else
