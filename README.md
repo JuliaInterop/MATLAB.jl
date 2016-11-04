@@ -51,6 +51,14 @@ By default, `MATLAB.jl` uses the MATLAB installation with the greatest version n
 
 ## Usage
 
+### Display
+
+If the ``DISPLAY`` environment variable is not set or if the ``MATLAB_NO_DISPLAY`` environment variable is set, MATLAB will be run in 'no display'/'no jvm' mode. This allows:
+
+1. To run matlab on a server without any display server
+
+2. Speedup the matlab session startup.
+
 ### MxArray class
 
 An instance of ``MxArray`` encapsulates a MATLAB variable. This package provides a series of functions to manipulate such instances.
