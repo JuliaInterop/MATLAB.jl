@@ -60,6 +60,7 @@ typealias MxNum Union{MxRealNum, MxComplexNum}
 
 typealias mwSize UInt
 typealias mwIndex Int
+typealias mxChar UInt16
 typealias mxClassID Cint
 typealias mxComplexity Cint
 
@@ -639,11 +640,7 @@ function jstring(mx::MxArray)
     if !(classid(mx) == mxCHAR_CLASS && ((ndims(mx) == 2 && nrows(mx) == 1) || is_empty(mx)))
         throw(ArgumentError("jstring only applies to strings (i.e. char vectors)."))
     end
-    len = ncols(mx) + 1
-    tmp = Array(UInt8, len)
-    ccall(_mx_get_string, Cint, (Ptr{Void}, Ptr{UInt8}, mwSize), mx, tmp, len)
-    pop!(tmp)
-    String(tmp)
+    return transcode(String, unsafe_wrap(Array, Ptr{mxChar}(data_ptr(mx)), ncols(mx)))
 end
 
 function jdict(mx::MxArray)
