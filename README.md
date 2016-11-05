@@ -20,11 +20,9 @@ By default, `MATLAB.jl` uses the MATLAB installation with the greatest version n
 
 ### Windows
 
-1. Start a Command Prompt as an Administrator.
+1. Start a Command Prompt as an Administrator and enter `matlab /regserver`.
 
-2. Enter `matlab /regserver` in the command prompt.
-
-3. From Julia run: `Pkg.add("MATLAB")`
+2. From Julia run: `Pkg.add("MATLAB")`
 
 
 ### Linux
