@@ -15,10 +15,6 @@ type MSession
     bufptr::Ptr{UInt8}
 
     function MSession(bufsize::Integer = default_output_buffer_size)
-        global libeng
-        libeng == C_NULL && load_libeng()
-        @assert libeng != C_NULL
-
         ep = ccall(engfunc(:engOpen), Ptr{Void}, (Ptr{UInt8},), default_startcmd)
         ep == C_NULL && throw(MEngineError("failed to open a MATLAB engine session"))
         # hide the MATLAB command window on Windows
@@ -56,8 +52,7 @@ function release(session::MSession)
 end
 
 function close(session::MSession)
-    # Close a MATLAB Engine session
-    @assert libeng::Ptr{Void} != C_NULL
+    # close a MATLAB Engine session
     ret = ccall(engfunc(:engClose), Cint, (Ptr{Void},), session)
     ret != 0 && throw(MEngineError("failed to close a MATLAB engine session (err = $ret)"))
     session.ptr = C_NULL
@@ -115,27 +110,25 @@ end
 ###########################################################
 
 function eval_string(session::MSession, stmt::String)
-    # Evaluate a MATLAB statement in a given MATLAB session
-    @assert libeng::Ptr{Void} != C_NULL
-
+    # evaluate a MATLAB statement in a given MATLAB session
     ret = ccall(engfunc(:engEvalString), Cint, (Ptr{Void}, Ptr{UInt8}), session, stmt)
     ret != 0 && throw(MEngineError("invalid engine session (err = $ret)"))
 
-    bufptr::Ptr{UInt8} = session.bufptr
+    bufptr = session.bufptr
     if bufptr != C_NULL
         bs = unsafe_string(bufptr)
         if ~isempty(bs)
             print(bs)
         end
     end
+    return nothing
 end
 
 eval_string(stmt::String) = eval_string(get_default_msession(), stmt)
 
 
 function put_variable(session::MSession, name::Symbol, v::MxArray)
-    # Put a variable into a MATLAB engine session
-    @assert libeng::Ptr{Void} != C_NULL
+    # put a variable into a MATLAB engine session
     ret = ccall(engfunc(:engPutVariable), Cint, (Ptr{Void}, Ptr{UInt8}, Ptr{Void}), session, string(name), v)
     ret != 0 && throw(MEngineError("failed to put the variable $(name) into a MATLAB session (err = $ret)"))
     return nothing
@@ -147,7 +140,6 @@ put_variable(name::Symbol, v) = put_variable(get_default_msession(), name, v)
 
 
 function get_mvariable(session::MSession, name::Symbol)
-    @assert libeng::Ptr{Void} != C_NULL
     pv = ccall(engfunc(:engGetVariable), Ptr{Void}, (Ptr{Void}, Ptr{UInt8}), session, string(name))
     pv == C_NULL && throw(MEngineError("failed to get the variable $(name) from a MATLAB session"))
     return MxArray(pv)
@@ -307,5 +299,3 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
 end
 
 mxcall(mfun::Symbol, nout::Integer, in_args...) = mxcall(get_default_msession(), mfun, nout, in_args...)
-
-
