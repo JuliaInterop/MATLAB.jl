@@ -551,6 +551,11 @@ const _mx_get_string = mxfunc(:mxGetString_730)
 # use deep-copy from MATLAB variable to Julia array
 # in practice, MATLAB variable often has shorter life-cycle
 
+function same_type(xs::AbstractArray, T::Type)::Bool
+    S = eltype(xs)
+    return S == Any ? all(isa(element, T) for element in xs) : true
+end
+
 function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
     if is_numeric(mx) || is_logical(mx)
         @assert !is_sparse(mx)
@@ -572,7 +577,8 @@ function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
         for i = 1:length(a)
             a[i] = jvalue(get_cell(mx, i))
         end
-        return a
+        kind = typeof(first(a))
+        return same_type(a, kind) ? convert(Array{kind}, a) : a
     else
         throw(ArgumentError("$(fun) only applies to numeric, logical or cell arrays."))
     end
