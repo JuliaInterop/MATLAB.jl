@@ -374,4 +374,7 @@ delete(x)
 
 gc()
 
+# Test string encoding
+str = "λ α γ"
+@test jstring(mxarray(str)) == str
 
