@@ -264,8 +264,8 @@ const _mx_create_logical_scalar = mxfunc(:mxCreateLogicalScalar)
 const _mx_create_sparse = mxfunc(:mxCreateSparse_730)
 const _mx_create_sparse_logical = mxfunc(:mxCreateSparseLogicalMatrix_730)
 
-const _mx_create_string = mxfunc(:mxCreateString)
-#const _mx_create_char_array = mxfunc(:mxCreateCharArray_730)
+# const _mx_create_string = mxfunc(:mxCreateString)
+const _mx_create_char_array = mxfunc(:mxCreateCharArray_730)
 
 const _mx_create_cell_array = mxfunc(:mxCreateCellArray_730)
 
@@ -406,8 +406,13 @@ end
 # char arrays and string
 
 function mxarray(s::String)
-    pm = ccall(_mx_create_string, Ptr{Void}, (Ptr{UInt8},), s)
-    MxArray(pm)
+    utf16string = transcode(UInt16, s)
+    pm = ccall(_mx_create_char_array, Ptr{Void}, (mwSize, Ptr{mwSize},), 2,
+               _dims_to_mwSize((1, length(utf16string))))
+    mx = MxArray(pm)
+    ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), data_ptr(mx), utf16string,
+          length(utf16string)*sizeof(UInt16))
+    mx
 end
 
 # cell arrays
