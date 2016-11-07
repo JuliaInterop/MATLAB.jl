@@ -29,7 +29,8 @@ export MSession, MatFile,
        eval_string, get_mvariable, get_variable, put_variable, put_variables,
        variable_names, read_matfile, write_matfile,
        mxcall,
-       @mput, @mget, @matlab, @mat_str
+       @mput, @mget, @matlab, @mat_str,
+       show_msession, hide_msession
 
 
 # exceptions

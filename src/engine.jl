@@ -20,7 +20,7 @@ type MSession
         @assert libeng != C_NULL
 
         ep = ccall(engfunc(:engOpen), Ptr{Void}, (Ptr{UInt8},), default_startcmd)
-        ep == C_NULL && throw(MEngineError("Failed to open a MATLAB engine session."))
+        ep == C_NULL && throw(MEngineError("failed to open a MATLAB engine session"))
         # hide the MATLAB command window on Windows
         is_windows() && ccall(engfunc(:engSetVisible ), Cint, (Ptr{Void}, Cint), ep, 0)
 
@@ -33,7 +33,7 @@ type MSession
         else
             bufptr = convert(Ptr{UInt8}, C_NULL)
         end
-        
+
         self = new(ep, buf, bufptr)
         finalizer(self, release)
         return self
@@ -59,7 +59,7 @@ function close(session::MSession)
     # Close a MATLAB Engine session
     @assert libeng::Ptr{Void} != C_NULL
     ret = ccall(engfunc(:engClose), Cint, (Ptr{Void},), session)
-    ret != 0 && throw(MEngineError("Failed to close a MATLAB engine session (err = $r)"))
+    ret != 0 && throw(MEngineError("failed to close a MATLAB engine session (err = $ret)"))
     session.ptr = C_NULL
     return nothing
 end
@@ -95,6 +95,18 @@ function close_default_msession()
     return nothing
 end
 
+function show_msession(m::MSession = get_default_msession())
+    ret = ccall(engfunc(:engSetVisible), Cint, (Ptr{Void}, Cint), m, 1)
+    ret != 0 && throw(MEngineError("failed to show MATLAB engine session (err = $ret)"))
+    return nothing
+end
+
+function hide_msession(m::MSession = get_default_msession())
+    ret = ccall(engfunc(:engSetVisible), Cint, (Ptr{Void}, Cint), m, 0)
+    ret != 0 && throw(MEngineError("failed to hide MATLAB engine session (err = $ret)"))
+    return nothing
+end
+
 
 ###########################################################
 #
@@ -106,8 +118,8 @@ function eval_string(session::MSession, stmt::String)
     # Evaluate a MATLAB statement in a given MATLAB session
     @assert libeng::Ptr{Void} != C_NULL
 
-    r = ccall(engfunc(:engEvalString), Cint, (Ptr{Void}, Ptr{UInt8}), session, stmt)
-    r != 0 && throw(MEngineError("Invalid engine session."))
+    ret = ccall(engfunc(:engEvalString), Cint, (Ptr{Void}, Ptr{UInt8}), session, stmt)
+    ret != 0 && throw(MEngineError("invalid engine session (err = $ret)"))
 
     bufptr::Ptr{UInt8} = session.bufptr
     if bufptr != C_NULL
@@ -124,8 +136,8 @@ eval_string(stmt::String) = eval_string(get_default_msession(), stmt)
 function put_variable(session::MSession, name::Symbol, v::MxArray)
     # Put a variable into a MATLAB engine session
     @assert libeng::Ptr{Void} != C_NULL
-    r = ccall(engfunc(:engPutVariable), Cint, (Ptr{Void}, Ptr{UInt8}, Ptr{Void}), session, string(name), v)
-    r != 0 && throw(MEngineError("Failed to put the variable $(name) into a MATLAB session."))
+    ret = ccall(engfunc(:engPutVariable), Cint, (Ptr{Void}, Ptr{UInt8}, Ptr{Void}), session, string(name), v)
+    ret != 0 && throw(MEngineError("failed to put the variable $(name) into a MATLAB session (err = $ret)"))
     return nothing
 end
 
@@ -135,16 +147,10 @@ put_variable(name::Symbol, v) = put_variable(get_default_msession(), name, v)
 
 
 function get_mvariable(session::MSession, name::Symbol)
-
     @assert libeng::Ptr{Void} != C_NULL
-
-    pv = ccall(engfunc(:engGetVariable), Ptr{Void},
-        (Ptr{Void}, Ptr{UInt8}), session, string(name))
-
-    if pv == C_NULL
-        throw(MEngineError("Failed to get the variable $(name) from a MATLAB session."))
-    end
-    MxArray(pv)
+    pv = ccall(engfunc(:engGetVariable), Ptr{Void}, (Ptr{Void}, Ptr{UInt8}), session, string(name))
+    pv == C_NULL && throw(MEngineError("failed to get the variable $(name) from a MATLAB session"))
+    return MxArray(pv)
 end
 
 get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
@@ -189,7 +195,7 @@ function make_getvar_statement(ex::Expr)
     end
     v::Symbol = ex.args[1]
     k::Symbol = ex.args[2]
-    
+
     :( $(v) = MATLAB.get_variable($(Meta.quot(v)), $(k)) )
 end
 
@@ -223,25 +229,25 @@ end
 
 # MATLAB does not allow underscore as prefix of a variable name
 _gen_marg_name(mfun::Symbol, prefix::String, i::Int) = "jx_$(mfun)_arg_$(prefix)_$(i)"
- 
+
 function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     nin = length(in_args)
-    
+
     # generate temporary variable names
-    
+
     in_arg_names = Array(String, nin)
     out_arg_names = Array(String, nout)
-     
+
     for i = 1:nin
         in_arg_names[i] = _gen_marg_name(mfun, "in", i)
     end
-    
+
     for i = 1:nout
         out_arg_names[i] = _gen_marg_name(mfun, "out", i)
     end
-    
+
     # generate MATLAB statement
-    
+
     buf = IOBuffer()
     if nout > 0
         if nout > 1
@@ -253,28 +259,28 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
         end
         print(buf, " = ")
     end
-    
+
     print(buf, string(mfun))
     print(buf, "(")
     if nin > 0
         join(buf, in_arg_names, ", ")
     end
     print(buf, ");")
-    
+
     stmt = takebuf_string(buf)
-    
+
     # put variables to MATLAB
-    
+
     for i = 1:nin
         put_variable(session, Symbol(in_arg_names[i]), in_args[i])
     end
-    
+
     # execute MATLAB statement
-    
+
     eval_string(session, stmt)
-    
+
     # get results from MATLAB
-    
+
     ret = if nout == 1
         jvalue(get_mvariable(session, Symbol(out_arg_names[1])))
     elseif nout >= 2
@@ -286,17 +292,17 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     else
         nothing
     end
-    
+
     # clear temporaries from MATLAB workspace
-    
+
     for i = 1:nin
         eval_string(session, string("clear ", in_arg_names[i], ";"))
     end
-    
+
     for i = 1:nout
         eval_string(session, string("clear ", out_arg_names[i], ";"))
     end
-    
+
     return ret
 end
 

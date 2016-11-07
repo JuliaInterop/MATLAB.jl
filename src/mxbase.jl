@@ -102,5 +102,3 @@ end
 engfunc(fun::Symbol) = dlsym(libeng::Ptr{Void}, fun)
 mxfunc(fun::Symbol) = dlsym(libmx::Ptr{Void}, fun)
 matfunc(fun::Symbol) = dlsym(libmat::Ptr{Void}, fun)
-
-
