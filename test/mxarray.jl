@@ -373,5 +373,3 @@ delete(x)
 @test y["xyz"] == "MATLAB"
 
 gc()
-
-
