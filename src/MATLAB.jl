@@ -48,12 +48,11 @@ include("matstr.jl")
 
 function __init__()
     if is_windows()
-        global persistent_msession
         # workaround "primary message table for module 77" error
         # creates a dummy Engine session and keeps it open so the libraries used by all other
         # Engine clients are not loaded and unloaded repeatedly
         # see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
-        persistent_msession = MSession(0)
+        global const persistent_msession = MSession(0)
     end
 end
 
@@ -75,6 +74,5 @@ end
 @deprecate duplicate(mx::MxArray) copy(mx::MxArray)
 
 @deprecate mxempty() mxarray(Float64,0,0)
-
 
 end
