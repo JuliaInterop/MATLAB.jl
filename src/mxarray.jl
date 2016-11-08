@@ -406,13 +406,13 @@ end
 # char arrays and string
 
 function mxarray(s::String)
-    utf16string = transcode(UInt16, s)
+    utf16string = transcode(mxChar, s)
     pm = ccall(_mx_create_char_array, Ptr{Void}, (mwSize, Ptr{mwSize},), 2,
                _dims_to_mwSize((1, length(utf16string))))
     mx = MxArray(pm)
     ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), data_ptr(mx), utf16string,
-          length(utf16string)*sizeof(UInt16))
-    mx
+          length(utf16string)*sizeof(mxChar))
+    return mx
 end
 
 # cell arrays
