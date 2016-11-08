@@ -372,4 +372,9 @@ delete(x)
 @test isequal(y["efg"], [1, 2, 3])
 @test y["xyz"] == "MATLAB"
 
+# Test string encoding
+str = "λ α γ"
+@test jstring(mxarray(str)) == str
+@test mat"all($str == [955 32 945 32 947])"
+
 gc()
