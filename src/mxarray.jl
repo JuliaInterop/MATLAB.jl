@@ -134,44 +134,6 @@ end
 #
 ###########################################################
 
-# initialize some useful functions
-
-const _mx_free         = Ref{Ptr{Void}}(0)
-
-const _mx_get_classid  = Ref{Ptr{Void}}(0)
-const _mx_get_m        = Ref{Ptr{Void}}(0)
-const _mx_get_n        = Ref{Ptr{Void}}(0)
-const _mx_get_nelems   = Ref{Ptr{Void}}(0)
-const _mx_get_ndims    = Ref{Ptr{Void}}(0)
-const _mx_get_elemsize = Ref{Ptr{Void}}(0)
-const _mx_get_data     = Ref{Ptr{Void}}(0)
-const _mx_get_dims     = Ref{Ptr{Void}}(0)
-const _mx_get_nfields  = Ref{Ptr{Void}}(0)
-const _mx_get_pr       = Ref{Ptr{Void}}(0)
-const _mx_get_pi       = Ref{Ptr{Void}}(0)
-const _mx_get_ir       = Ref{Ptr{Void}}(0)
-const _mx_get_jc       = Ref{Ptr{Void}}(0)
-
-const _mx_is_double    = Ref{Ptr{Void}}(0)
-const _mx_is_single    = Ref{Ptr{Void}}(0)
-const _mx_is_int64     = Ref{Ptr{Void}}(0)
-const _mx_is_uint64    = Ref{Ptr{Void}}(0)
-const _mx_is_int32     = Ref{Ptr{Void}}(0)
-const _mx_is_uint32    = Ref{Ptr{Void}}(0)
-const _mx_is_int16     = Ref{Ptr{Void}}(0)
-const _mx_is_uint16    = Ref{Ptr{Void}}(0)
-const _mx_is_int8      = Ref{Ptr{Void}}(0)
-const _mx_is_uint8     = Ref{Ptr{Void}}(0)
-const _mx_is_char      = Ref{Ptr{Void}}(0)
-
-const _mx_is_numeric   = Ref{Ptr{Void}}(0)
-const _mx_is_logical   = Ref{Ptr{Void}}(0)
-const _mx_is_complex   = Ref{Ptr{Void}}(0)
-const _mx_is_sparse    = Ref{Ptr{Void}}(0)
-const _mx_is_empty     = Ref{Ptr{Void}}(0)
-const _mx_is_struct    = Ref{Ptr{Void}}(0)
-const _mx_is_cell      = Ref{Ptr{Void}}(0)
-
 macro mxget_attr(fun, ret, mx)
     :(ccall($(esc(fun)), $(esc(ret)), (Ptr{Void},), $(esc(mx))))
 end
@@ -246,39 +208,11 @@ function size(mx::MxArray, d::Integer)
 end
 
 
-
 ###########################################################
 #
 #  functions to create & delete MATLAB arrays
 #
 ###########################################################
-
-# initialize some useful functions
-
-const _mx_create_numeric_mat    = Ref{Ptr{Void}}(0)
-const _mx_create_numeric_arr    = Ref{Ptr{Void}}(0)
-
-const _mx_create_double_scalar  = Ref{Ptr{Void}}(0)
-const _mx_create_logical_scalar = Ref{Ptr{Void}}(0)
-
-const _mx_create_sparse         = Ref{Ptr{Void}}(0)
-const _mx_create_sparse_logical = Ref{Ptr{Void}}(0)
-
-const _mx_create_string         = Ref{Ptr{Void}}(0)
-const _mx_create_char_array    = Ref{Ptr{Void}}(0)
-
-const _mx_create_cell_array     = Ref{Ptr{Void}}(0)
-
-const _mx_create_struct_matrix  = Ref{Ptr{Void}}(0)
-const _mx_create_struct_array   = Ref{Ptr{Void}}(0)
-
-const _mx_get_cell              = Ref{Ptr{Void}}(0)
-const _mx_set_cell              = Ref{Ptr{Void}}(0)
-
-const _mx_get_field             = Ref{Ptr{Void}}(0)
-const _mx_set_field             = Ref{Ptr{Void}}(0)
-const _mx_get_field_bynum       = Ref{Ptr{Void}}(0)
-const _mx_get_fieldname         = Ref{Ptr{Void}}(0)
 
 
 function _dims_to_mwSize(dims::Tuple{Vararg{Int}})
@@ -407,7 +341,7 @@ end
 
 function mxarray(s::String)
     utf16string = transcode(UInt16, s)
-    pm = ccall(_mx_create_char_array, Ptr{Void}, (mwSize, Ptr{mwSize},), 2,
+    pm = ccall(_mx_create_char_array[], Ptr{Void}, (mwSize, Ptr{mwSize},), 2,
                _dims_to_mwSize((1, length(utf16string))))
     mx = MxArray(pm)
     ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), data_ptr(mx), utf16string,
@@ -550,8 +484,6 @@ mxarray(d) = mxstruct(d)
 #  convert from MATLAB to Julia
 #
 ###########################################################
-
-const _mx_get_string = Ref{Ptr{Void}}(0)
 
 # use deep-copy from MATLAB variable to Julia array
 # in practice, MATLAB variable often has shorter life-cycle

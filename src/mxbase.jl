@@ -61,12 +61,8 @@ end
 
 default_startcmd, matlab_lib_path = get_paths()
 
-# initialize libraries
+# helper library access function
 
-const libeng = Ref{Ptr{Void}}(0)
-const libmx  = Ref{Ptr{Void}}(0)
-const libmat = Ref{Ptr{Void}}(0)
-
-engfunc(fun::Symbol) = Libdl.dlsym(libeng[], fun)
-mxfunc(fun::Symbol)  = Libdl.dlsym(libmx[], fun)
-matfunc(fun::Symbol) = Libdl.dlsym(libmat[], fun)
+engfunc(fun::Symbol) = Libdl.dlsym(_libeng[], fun)
+mxfunc(fun::Symbol)  = Libdl.dlsym(_libmx[], fun)
+matfunc(fun::Symbol) = Libdl.dlsym(_libmat[], fun)

@@ -1,11 +1,3 @@
- # I/O with mat files
-
-const _mat_open = Ref{Ptr{Void}}(0)
-const _mat_close = Ref{Ptr{Void}}(0)
-const _mat_get_variable = Ref{Ptr{Void}}(0)
-const _mat_put_variable = Ref{Ptr{Void}}(0)
-const _mat_get_dir = Ref{Ptr{Void}}(0)
-
 # mat file open & close
 
 type MatFile

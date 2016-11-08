@@ -38,6 +38,7 @@ type MEngineError <: Exception
     message::String
 end
 
+include("init.jl") # initialize Refs
 include("mxbase.jl")
 include("mxarray.jl")
 include("matfile.jl")
@@ -49,9 +50,9 @@ function __init__()
 
     # load libraries
 
-    libmx[] = Libdl.dlopen(joinpath(matlab_lib_path, "libmx"), Libdl.RTLD_GLOBAL)
-    libmat[] = Libdl.dlopen(joinpath(matlab_lib_path, "libmat"), Libdl.RTLD_GLOBAL)
-    libeng[] = Libdl.dlopen(joinpath(matlab_lib_path, "libeng"), Libdl.RTLD_GLOBAL)
+    _libmx[] = Libdl.dlopen(joinpath(matlab_lib_path, "libmx"), Libdl.RTLD_GLOBAL)
+    _libmat[] = Libdl.dlopen(joinpath(matlab_lib_path, "libmat"), Libdl.RTLD_GLOBAL)
+    _libeng[] = Libdl.dlopen(joinpath(matlab_lib_path, "libeng"), Libdl.RTLD_GLOBAL)
 
 
     # load functions to access mxArray
