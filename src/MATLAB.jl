@@ -48,11 +48,15 @@ include("matstr.jl")
 
 function __init__()
 
-    # load libraries
+    # initialize library paths
 
-    _libmx[] = Libdl.dlopen(joinpath(matlab_lib_path, "libmx"), Libdl.RTLD_GLOBAL)
-    _libmat[] = Libdl.dlopen(joinpath(matlab_lib_path, "libmat"), Libdl.RTLD_GLOBAL)
-    _libeng[] = Libdl.dlopen(joinpath(matlab_lib_path, "libeng"), Libdl.RTLD_GLOBAL)
+    lib_path = matlab_lib_path()
+
+    # load libraries
+    
+    _libmx[]  = Libdl.dlopen(joinpath(lib_path, "libmx"), Libdl.RTLD_GLOBAL)
+    _libmat[] = Libdl.dlopen(joinpath(lib_path, "libmat"), Libdl.RTLD_GLOBAL)
+    _libeng[] = Libdl.dlopen(joinpath(lib_path, "libeng"), Libdl.RTLD_GLOBAL)
 
 
     # load functions to access mxArray

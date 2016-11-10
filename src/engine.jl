@@ -5,6 +5,7 @@
 #   Session open & close
 #
 ###########################################################
+const default_startcmd = matlab_startcmd() * " -nosplash"
 
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
@@ -21,7 +22,6 @@ type MSession
         is_windows() && ccall(engfunc(:engSetVisible ), Cint, (Ptr{Void}, Cint), ep, 0)
 
         buf = Array(UInt8, bufsize)
-
         if bufsize > 0
             bufptr = pointer(buf)
             ccall(engfunc(:engOutputBuffer), Cint, (Ptr{Void}, Ptr{UInt8}, Cint),
