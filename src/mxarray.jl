@@ -60,7 +60,6 @@ typealias MxNum Union{MxRealNum, MxComplexNum}
 
 typealias mwSize UInt
 typealias mwIndex Int
-typealias mxChar UInt16
 typealias mxClassID Cint
 typealias mxComplexity Cint
 
@@ -643,7 +642,7 @@ function String(mx::MxArray)
     if !(classid(mx) == mxCHAR_CLASS && ((ndims(mx) == 2 && nrows(mx) == 1) || is_empty(mx)))
         throw(ArgumentError("String(mx::MxArray) only applies to strings (i.e. char vectors)"))
     end
-    return transcode(String, unsafe_wrap(Array, Ptr{mxChar}(data_ptr(mx)), ncols(mx)))
+    return transcode(String, unsafe_wrap(Array, Ptr{UInt16}(data_ptr(mx)), ncols(mx)))
 end
 
 function Dict(mx::MxArray)
