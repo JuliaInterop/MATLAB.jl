@@ -5,7 +5,7 @@ type MatFile
     filename::String
 
     function MatFile(filename::String, mode::String)
-        p = ccall(_mat_open[], Ptr{Void}, (Ptr{Cchar}, Ptr{Cchar}), 
+        p = ccall(mat_open[], Ptr{Void}, (Ptr{Cchar}, Ptr{Cchar}), 
             filename, mode)
         new(p, filename)        
     end
@@ -14,7 +14,7 @@ MatFile(filename::String) = MatFile(filename, "r")
 
 function close(f::MatFile) 
     if f.ptr != C_NULL
-        ret = ccall(_mat_close[], Cint, (Ptr{Void},), f.ptr)
+        ret = ccall(mat_close[], Cint, (Ptr{Void},), f.ptr)
         ret == 0 || error("Failed to close file.")
     end
 end
@@ -23,7 +23,7 @@ end
 
 function get_mvariable(f::MatFile, name::String)
     f.ptr != C_NULL || error("Cannot get variable from a null file.")
-    pm = ccall(_mat_get_variable[], Ptr{Void}, (Ptr{Void}, Ptr{Cchar}), 
+    pm = ccall(mat_get_variable[], Ptr{Void}, (Ptr{Void}, Ptr{Cchar}), 
         f.ptr, name)
     pm != C_NULL || error("Attempt to get variable $(name) failed.")
     MxArray(pm)
@@ -37,7 +37,7 @@ get_variable(f::MatFile, name::Symbol) = jvalue(get_mvariable(f, name))
 function put_variable(f::MatFile, name::String, v::MxArray)
     f.ptr != C_NULL || error("Cannot put variable to a null file.")
     v.ptr != C_NULL || error("Cannot put an null variable.")
-    ret = ccall(_mat_put_variable[], Cint, (Ptr{Void}, Ptr{Cchar}, Ptr{Void}), 
+    ret = ccall(mat_put_variable[], Cint, (Ptr{Void}, Ptr{Cchar}, Ptr{Void}), 
         f.ptr, name, v.ptr)
     ret == 0 || error("Attempt to put variable $(name) failed.")
 end
@@ -67,14 +67,14 @@ end
 function variable_names(f::MatFile)
     # get a list of all variable names
     _n = Cint[0]
-    _a = ccall(_mat_get_dir[], Ptr{Ptr{Cchar}}, (Ptr{Void}, Ptr{Cint}), 
+    _a = ccall(mat_get_dir[], Ptr{Ptr{Cchar}}, (Ptr{Void}, Ptr{Cint}), 
         f.ptr, _n)
 
     n = Int(_n[1])
     a = unsafe_wrap(Array, _a, (n,))
 
     names = String[unsafe_string(s) for s in a]
-    ccall(_mx_free[], Void, (Ptr{Void},), _a)
+    ccall(mx_free[], Void, (Ptr{Void},), _a)
     return names
 end
 

@@ -68,6 +68,6 @@ end
 
 # helper library access function
 
-engfunc(fun::Symbol) = Libdl.dlsym(_libeng[], fun)
-mxfunc(fun::Symbol)  = Libdl.dlsym(_libmx[], fun)
-matfunc(fun::Symbol) = Libdl.dlsym(_libmat[], fun)
+engfunc(fun::Symbol) = Libdl.dlsym(libeng[], fun)
+mxfunc(fun::Symbol)  = Libdl.dlsym(libmx[], fun)
+matfunc(fun::Symbol) = Libdl.dlsym(libmat[], fun)
