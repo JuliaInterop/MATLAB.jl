@@ -41,6 +41,12 @@ function get_paths()
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
         end
         default_startcmd = "exec $(Base.shell_escape(default_startcmd)) -nosplash"
+
+        # Disable DISPLAY if asked or not avaible
+        if get(ENV, "DISPLAY", nothing) == nothing ||
+            get(ENV, "MATLAB_NO_DISPLAY", nothing) != nothing
+            default_startcmd *= " -nodisplay -nojvm"
+        end
     elseif is_windows()
         default_startcmd = joinpath(matlab_homepath, "bin", (Sys.WORD_SIZE == 32 ? "win32" : "win64"), "MATLAB.exe")
         if !isfile(default_startcmd)
