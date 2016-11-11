@@ -4,7 +4,12 @@ const libeng = Ref{Ptr{Void}}()
 const libmx  = Ref{Ptr{Void}}()
 const libmat = Ref{Ptr{Void}}()
 
-# functions to access mxArray
+# mxarray function
+
+const mx_destroy_array   = Ref{Ptr{Void}}()
+const mx_duplicate_array = Ref{Ptr{Void}}()
+
+# functions to access mxarray
 
 const mx_free         = Ref{Ptr{Void}}()
 
@@ -44,8 +49,8 @@ const mx_is_cell      = Ref{Ptr{Void}}()
 
 # functions to create & delete MATLAB arrays
 
-const mx_create_numeric_mat    = Ref{Ptr{Void}}()
-const mx_create_numeric_arr    = Ref{Ptr{Void}}()
+const mx_create_numeric_matrix = Ref{Ptr{Void}}()
+const mx_create_numeric_array  = Ref{Ptr{Void}}()
 
 const mx_create_double_scalar  = Ref{Ptr{Void}}()
 const mx_create_logical_scalar = Ref{Ptr{Void}}()

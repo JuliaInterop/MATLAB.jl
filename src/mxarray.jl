@@ -20,7 +20,7 @@ mxarray(mx::MxArray) = mx
 
 function release(mx::MxArray)
     if mx.own && mx.ptr != C_NULL
-        ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx.ptr)
+        ccall(mx_destroy_array[], Void, (Ptr{Void},), mx.ptr)
     end
     mx.ptr = C_NULL
     return nothing
@@ -30,14 +30,14 @@ end
 
 function delete(mx::MxArray)
     if mx.own
-        ccall(mxfunc(:mxDestroyArray), Void, (Ptr{Void},), mx)
+        ccall(mx_destroy_array[], Void, (Ptr{Void},), mx)
     end
     mx.ptr = C_NULL
     return nothing
 end
 
 function copy(mx::MxArray)
-    pm = ccall(mxfunc(:mxDuplicateArray), Ptr{Void}, (Ptr{Void},), mx)
+    pm = ccall(mx_duplicate_array[], Ptr{Void}, (Ptr{Void},), mx)
     return MxArray(pm)
 end
 
@@ -225,7 +225,7 @@ function _dims_to_mwSize(dims::Tuple{Vararg{Int}})
 end
 
 function mxarray{T<:MxNum}(ty::Type{T}, dims::Tuple{Vararg{Int}})
-    pm = ccall(mx_create_numeric_arr[], Ptr{Void},
+    pm = ccall(mx_create_numeric_array[], Ptr{Void},
         (mwSize, Ptr{mwSize}, mxClassID, mxComplexity),
         length(dims), _dims_to_mwSize(dims), mxclassid(ty), mxcomplexflag(ty))
 
@@ -246,7 +246,7 @@ function mxarray(x::Bool)
 end
 
 function mxarray{T<:MxRealNum}(x::T)
-    pm = ccall(mx_create_numeric_mat[], Ptr{Void},
+    pm = ccall(mx_create_numeric_matrix[], Ptr{Void},
         (mwSize, mwSize, mxClassID, mxComplexity),
         1, 1, mxclassid(T), mxcomplexflag(T))
 

@@ -58,8 +58,12 @@ function __init__()
     libmat[] = Libdl.dlopen(joinpath(lib_path, "libmat"), Libdl.RTLD_GLOBAL)
     libeng[] = Libdl.dlopen(joinpath(lib_path, "libeng"), Libdl.RTLD_GLOBAL)
 
+    # mxarray function
 
-    # load functions to access mxArray
+    mx_destroy_array[]   = mxfunc(:mxDestroyArray)
+    mx_duplicate_array[] = mxfunc(:mxDuplicateArray)
+
+    # load functions to access mxarray
 
     mx_free[]         = mxfunc(:mxFree)
 
@@ -100,8 +104,8 @@ function __init__()
 
     # load functions to create & delete MATLAB array
 
-    mx_create_numeric_mat[]    = mxfunc(:mxCreateNumericMatrix_730)
-    mx_create_numeric_arr[]    = mxfunc(:mxCreateNumericArray_730)
+    mx_create_numeric_matrix[]   = mxfunc(:mxCreateNumericMatrix_730)
+    mx_create_numeric_array[]    = mxfunc(:mxCreateNumericArray_730)
 
     mx_create_double_scalar[]  = mxfunc(:mxCreateDoubleScalar)
     mx_create_logical_scalar[] = mxfunc(:mxCreateLogicalScalar)
