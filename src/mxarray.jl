@@ -456,7 +456,7 @@ function mxstruct{T}(d::T)
     for i = 1:length(names)
         set_field(mx, names_str[i], mxarray(getfield(d, names[i])))
     end
-    mx
+    return mx
 end
 
 function mxstructarray{T}(d::Array{T})
