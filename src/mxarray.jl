@@ -586,8 +586,7 @@ function Dict(mx::MxArray)
     fvals = Array(Any, nf)
     for i = 1:nf
         fnames[i] = get_fieldname(mx, i)
-        pv::Ptr{Void} = ccall(mx_get_field_bynum[],
-            Ptr{Void}, (Ptr{Void}, mwIndex, Cint), mx, 0, i-1)
+        pv = ccall(mx_get_field_bynum[], Ptr{Void}, (Ptr{Void}, mwIndex, Cint), mx, 0, i-1)
         fx = MxArray(pv, false)
         fvals[i] = jvalue(fx)
     end
