@@ -58,7 +58,17 @@ function __init__()
     libmat[] = Libdl.dlopen(joinpath(lib_path, "libmat"), Libdl.RTLD_GLOBAL)
     libeng[] = Libdl.dlopen(joinpath(lib_path, "libeng"), Libdl.RTLD_GLOBAL)
 
-    # mxarray function
+    # engine functions
+
+    eng_open[]          = engfunc(:engOpen)
+    eng_close[]         = engfunc(:engClose)
+    eng_set_visible[]   = engfunc(:engSetVisible)
+    eng_output_buffer[] = engfunc(:engOutputBuffer)
+    eng_eval_string[]   = engfunc(:engEvalString)
+    eng_put_variable[]  = engfunc(:engPutVariable)
+    eng_get_variable[]  = engfunc(:engGetVariable)
+
+    # mxarray functions
 
     mx_destroy_array[]   = mxfunc(:mxDestroyArray)
     mx_duplicate_array[] = mxfunc(:mxDuplicateArray)
