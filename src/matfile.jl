@@ -5,27 +5,42 @@ type MatFile
     filename::String
 
     function MatFile(filename::String, mode::String)
-        p = ccall(mat_open[], Ptr{Void}, (Ptr{Cchar}, Ptr{Cchar}), 
-            filename, mode)
-        new(p, filename)        
+        p = ccall(mat_open[], Ptr{Void}, (Ptr{Cchar}, Ptr{Cchar}), filename, mode)
+        self = new(p, filename)
+        finalizer(self, release)
+        return self
     end
 end
 MatFile(filename::String) = MatFile(filename, "r")
 
-function close(f::MatFile) 
-    if f.ptr != C_NULL
-        ret = ccall(mat_close[], Cint, (Ptr{Void},), f.ptr)
-        ret == 0 || error("Failed to close file.")
-    end
+function unsafe_convert(::Type{Ptr{Void}}, f::MatFile)
+    ptr = f.ptr
+    ptr == C_NULL && throw(UndefRefError())
+    return ptr
 end
+
+function release(f::MatFile)
+    ptr = f.ptr
+    if ptr != C_NULL
+        ccall(mat_close[], Cint, (Ptr{Void},), ptr)
+    end
+    f.ptr = C_NULL
+    return nothing
+end
+
+function close(f::MatFile)
+    ret = ccall(mat_close[], Cint, (Ptr{Void},), f)
+    ret != 0 && throw(MEngineError("failed to close file (err = $ret)"))
+    f.ptr = C_NULL
+    return nothing
+end
+
 
 # get & put variables
 
 function get_mvariable(f::MatFile, name::String)
-    f.ptr != C_NULL || error("Cannot get variable from a null file.")
-    pm = ccall(mat_get_variable[], Ptr{Void}, (Ptr{Void}, Ptr{Cchar}), 
-        f.ptr, name)
-    pm != C_NULL || error("Attempt to get variable $(name) failed.")
+    pm = ccall(mat_get_variable[], Ptr{Void}, (Ptr{Void}, Ptr{Cchar}), f, name)
+    pm == C_NULL && error("Attempt to get variable $(name) failed.")
     MxArray(pm)
 end
 
@@ -35,11 +50,9 @@ get_variable(f::MatFile, name::String) = jvalue(get_mvariable(f, name))
 get_variable(f::MatFile, name::Symbol) = jvalue(get_mvariable(f, name))
 
 function put_variable(f::MatFile, name::String, v::MxArray)
-    f.ptr != C_NULL || error("Cannot put variable to a null file.")
-    v.ptr != C_NULL || error("Cannot put an null variable.")
-    ret = ccall(mat_put_variable[], Cint, (Ptr{Void}, Ptr{Cchar}, Ptr{Void}), 
-        f.ptr, name, v.ptr)
-    ret == 0 || error("Attempt to put variable $(name) failed.")
+    ret = ccall(mat_put_variable[], Cint, (Ptr{Void}, Ptr{Cchar}, Ptr{Void}), f, name, v)
+    ret != 0 && error("Attempt to put variable $(name) failed.")
+    return nothing
 end
 
 put_variable(f::MatFile, name::Symbol, v::MxArray) = put_variable(f, string(name), v)
@@ -57,18 +70,14 @@ end
 
 function write_matfile(filename::String; kwargs...)
     mf = MatFile(filename, "w")
-    try
-        put_variables(mf; kwargs...)
-    finally
-        close(mf)
-    end
+    put_variables(mf; kwargs...)
+    close(mf)
 end
 
 function variable_names(f::MatFile)
     # get a list of all variable names
     _n = Cint[0]
-    _a = ccall(mat_get_dir[], Ptr{Ptr{Cchar}}, (Ptr{Void}, Ptr{Cint}), 
-        f.ptr, _n)
+    _a = ccall(mat_get_dir[], Ptr{Ptr{Cchar}}, (Ptr{Void}, Ptr{Cint}), f, _n)
 
     n = Int(_n[1])
     a = unsafe_wrap(Array, _a, (n,))
@@ -91,11 +100,7 @@ end
 
 function read_matfile(filename::String)
     f = MatFile(filename, "r")
-    local r
-    try
-        r = read_matfile(f)
-    finally
-        close(f)
-    end
+    r = read_matfile(f)
+    close(f)
     return r
 end

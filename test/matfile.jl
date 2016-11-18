@@ -48,3 +48,7 @@ gc()  # make sure that ra, rb, rc, rd remain valid
 @test !jscalar(get_field(rss, 2, "y")) 
 @test jvector(get_field(rss, 2, "z")) == ss[2].z
 
+# segfault on deleted references
+s = MatFile("test.mat", "r")
+close(s)
+@test_throws UndefRefError close(s)
