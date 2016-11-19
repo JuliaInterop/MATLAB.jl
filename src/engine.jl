@@ -115,11 +115,9 @@ function eval_string(session::MSession, stmt::String)
     ret != 0 && throw(MEngineError("invalid engine session (err = $ret)"))
 
     bufptr = session.bufptr
-    if bufptr != C_NULL
-        bs = unsafe_string(bufptr)
-        if ~isempty(bs)
-            print(bs)
-        end
+    bs = unsafe_string(bufptr)
+    if ~isempty(bs)
+        print(bs)
     end
     return nothing
 end
