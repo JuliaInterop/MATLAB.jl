@@ -315,6 +315,8 @@ xx, yy = mxcall(:meshgrid, 2, x, y)
 
 To open an interactive window for the MATLAB session, use the command `show_msession()`. To hide the window, use `hide_msession()`. Note that closing this window will result in a errors, so it is advised that one uses the `hide_msession()` command instead.
 
+Note that this feature only works on Windows.
+
 #### Advanced use of MATLAB Engines
 
 This package provides a series of functions for users to control the communication with MATLAB sessions.
