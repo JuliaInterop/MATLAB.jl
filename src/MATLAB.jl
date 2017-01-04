@@ -2,6 +2,8 @@ __precompile__()
 
 module MATLAB
 
+using Compat.take!
+
 import Base: eltype, close, size, copy, ndims, unsafe_convert
 
 # mxarray

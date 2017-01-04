@@ -259,7 +259,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     end
     print(buf, ");")
 
-    stmt = takebuf_string(buf)
+    stmt = String(take!(buf))
 
     # put variables to MATLAB
 

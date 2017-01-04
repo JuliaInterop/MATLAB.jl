@@ -151,5 +151,5 @@ end
 function mstatement(ex::Expr)
     ss = IOBuffer()
     write_mstatement(ss, ex)
-    takebuf_string(ss)
+    String(take!((ss)))
 end
