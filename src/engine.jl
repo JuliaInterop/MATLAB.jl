@@ -21,7 +21,7 @@ type MSession
         # hide the MATLAB command window on Windows
         is_windows() && ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), ep, 0)
 
-        buf = Array(UInt8, bufsize)
+        buf = Array{UInt8}(bufsize)
         if bufsize > 0
             bufptr = pointer(buf)
             ccall(eng_output_buffer[], Cint, (Ptr{Void}, Ptr{UInt8}, Cint),
@@ -163,7 +163,7 @@ function _mput_multi(vs::Symbol...)
         v = vs[1]
         :( MATLAB.put_variable($(Meta.quot(v)), $(v)) )
     else
-        stmts = Array(Expr, nv)
+        stmts = Array{Expr}(nv)
         for i = 1 : nv
             v = vs[i]
             stmts[i] = :( MATLAB.put_variable($(Meta.quot(v)), $(v)) )
@@ -196,7 +196,7 @@ function _mget_multi(vs::Union{Symbol, Expr}...)
     if nv == 1
         make_getvar_statement(vs[1])
     else
-        stmts = Array(Expr, nv)
+        stmts = Array{Expr}(nv)
         for i = 1:nv
             stmts[i] = make_getvar_statement(vs[i])
         end
@@ -227,8 +227,8 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
 
     # generate temporary variable names
 
-    in_arg_names = Array(String, nin)
-    out_arg_names = Array(String, nout)
+    in_arg_names = Array{String}(nin)
+    out_arg_names = Array{String}(nout)
 
     for i = 1:nin
         in_arg_names[i] = _gen_marg_name(mfun, "in", i)
@@ -276,7 +276,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     ret = if nout == 1
         jvalue(get_mvariable(session, Symbol(out_arg_names[1])))
     elseif nout >= 2
-        results = Array(Any, nout)
+        results = Array{Any}(nout)
         for i = 1 : nout
             results[i] = jvalue(get_mvariable(session, Symbol(out_arg_names[i])))
         end
