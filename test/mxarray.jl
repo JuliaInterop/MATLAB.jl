@@ -342,7 +342,7 @@ a = rand(3, 4, 5)
 x = mxarray(a)
 y = jvalue(x)
 delete(x)
-@test isa(y, Array{Float64, 3})
+@test isa(y, Array{Float64,3})
 @test isequal(y, a)
 
 a = "MATLAB"
