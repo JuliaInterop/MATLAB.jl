@@ -90,18 +90,25 @@ function close_default_msession()
     return nothing
 end
 
-function show_msession(m::MSession = get_default_msession())
-    ret = ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), m, 1)
-    ret != 0 && throw(MEngineError("failed to show MATLAB engine session (err = $ret)"))
-    return nothing
-end
+if is_windows()
+    function show_msession(m::MSession = get_default_msession())
+        ret = ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), m, 1)
+        ret != 0 && throw(MEngineError("failed to show MATLAB engine session (err = $ret)"))
+        return nothing
+    end
 
-function hide_msession(m::MSession = get_default_msession())
-    ret = ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), m, 0)
-    ret != 0 && throw(MEngineError("failed to hide MATLAB engine session (err = $ret)"))
-    return nothing
-end
+    function hide_msession(m::MSession = get_default_msession())
+        ret = ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), m, 0)
+        ret != 0 && throw(MEngineError("failed to hide MATLAB engine session (err = $ret)"))
+        return nothing
+    end
 
+    function get_msession_visiblity(m::MSession = get_default_msession())
+        vis = Ref{Cint}(true)
+        ccall(eng_get_visible[], Int, (Ptr{Void}, Ptr{Cint}), m, vis)
+        return vis[] == 1 ? true : false
+    end
+end
 
 ###########################################################
 #
