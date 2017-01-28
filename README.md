@@ -313,7 +313,7 @@ xx, yy = mxcall(:meshgrid, 2, x, y)
 
 #### Viewing the MATLAB Session (Windows only)
 
-To open an interactive window for the MATLAB session, use the command `show_msession()`. To hide the window, use `hide_msession()`. *Warning: manually closing this window will result in an error or worse result in a segfault; it is advised that you only use the `hide_msession()` command to hide the interactive window.*
+To open an interactive window for the MATLAB session, use the command `show_msession()` and to hide the window, use `hide_msession()`. *Warning: manually closing this window will result in an error or result in a segfault; it is advised that you only use the `hide_msession()` command to hide the interactive window.*
 
 Note that this feature only works on Windows.
 
