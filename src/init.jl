@@ -84,7 +84,7 @@ const mx_set_field             = Ref{Ptr{Void}}()
 const mx_get_field_bynum       = Ref{Ptr{Void}}()
 const mx_get_fieldname         = Ref{Ptr{Void}}()
 
-const mx_get_string = Ref{Ptr{Void}}(0)
+const mx_get_string = Ref{Ptr{Void}}()
 
 # load I/O mat functions
 
