@@ -311,11 +311,25 @@ xx, yy = mxcall(:meshgrid, 2, x, y)
 
 ``mxcall`` puts the input arguments to the MATLAB workspace (using mangled names), evaluates the function call in MATLAB, and retrievs the variable from the MATLAB session. This function is mainly provided for convenience. However, you should keep in mind that it may incur considerable overhead due to the communication between MATLAB and Julia domain.
 
-#### Viewing the MATLAB Session
+#### Viewing the MATLAB Session (Windows only)
 
-To open an interactive window for the MATLAB session, use the command `show_msession()`. To hide the window, use `hide_msession()`. Note that closing this window will result in an error, so it is advised that one uses the `hide_msession()` command instead.
+To open an interactive window for the MATLAB session, use the command `show_msession()` and to hide the window, use `hide_msession()`. *Warning: manually closing this window will result in an error or result in a segfault; it is advised that you only use the `hide_msession()` command to hide the interactive window.*
 
 Note that this feature only works on Windows.
+
+```julia
+# default
+show_msession() # open the default MATLAB session interactive window
+get_msession_visiblity() # get the session's visibility state
+hide_msession() # hide the default MATLAB session interactive window
+
+# similarily
+s = MSession()
+show_msession(s)
+get_msession_visiblity(a)
+hide_msession(s)
+```
+
 
 #### Advanced use of MATLAB Engines
 

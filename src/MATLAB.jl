@@ -31,9 +31,11 @@ export MSession, MatFile,
        eval_string, get_mvariable, get_variable, put_variable, put_variables,
        variable_names, read_matfile, write_matfile,
        mxcall,
-       @mput, @mget, @matlab, @mat_str,
-       show_msession, hide_msession
+       @mput, @mget, @matlab, @mat_str
 
+if is_windows()
+    export show_msession, hide_msession, get_msession_visiblity
+end
 
 # exceptions
 type MEngineError <: Exception
@@ -65,6 +67,7 @@ function __init__()
     eng_open[]          = engfunc(:engOpen)
     eng_close[]         = engfunc(:engClose)
     eng_set_visible[]   = engfunc(:engSetVisible)
+    eng_get_visible[]   = engfunc(:engGetVisible)
     eng_output_buffer[] = engfunc(:engOutputBuffer)
     eng_eval_string[]   = engfunc(:engEvalString)
     eng_put_variable[]  = engfunc(:engPutVariable)
