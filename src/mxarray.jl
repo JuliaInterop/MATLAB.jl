@@ -48,9 +48,9 @@ function unsafe_convert(::Type{Ptr{Void}}, mx::MxArray)
 end
 # functions to create mxArray from Julia values/arrays
 
-typealias MxRealNum Union{Float64,Float32,Int32,UInt32,Int64,UInt64,Int16,UInt16,Int8,UInt8,Bool}
-typealias MxComplexNum Union{Complex64, Complex128}
-typealias MxNum Union{MxRealNum, MxComplexNum}
+const MxRealNum = Union{Float64, Float32, Int32, UInt32, Int64, UInt64, Int16, UInt16, Int8, UInt8, Bool}
+const MxComplexNum = Union{Complex64, Complex128}
+const MxNum = Union{MxRealNum, MxComplexNum}
 
 ###########################################################
 #
@@ -58,10 +58,10 @@ typealias MxNum Union{MxRealNum, MxComplexNum}
 #
 ###########################################################
 
-typealias mwSize UInt
-typealias mwIndex Int
-typealias mxClassID Cint
-typealias mxComplexity Cint
+const mwSize = UInt
+const mwIndex = Int
+const mxClassID = Cint
+const mxComplexity = Cint
 
 const mxUNKNOWN_CLASS  = convert(mxClassID, 0)
 const mxCELL_CLASS     = convert(mxClassID, 1)
@@ -432,7 +432,7 @@ function get_fieldname(mx::MxArray, i::Integer)
     unsafe_string(p)
 end
 
-typealias Pairs Union{Pair,NTuple{2}}
+const Pairs = Union{Pair, NTuple{2}}
 
 function mxstruct(pairs::Pairs...)
     nf = length(pairs)
