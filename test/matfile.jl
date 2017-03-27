@@ -2,6 +2,7 @@ using MATLAB
 using Base.Test
 
 # test MMAT file I/O
+fn = "$(tempname()).mat"
 
 a32 = Int32[1 2 3; 4 5 6]
 a64 = Int64[1 2 3; 4 5 6]
@@ -17,9 +18,9 @@ end
 
 ss = S[S(1.0, true, [1., 2.]), S(2.0, false, [3., 4.])]
 
-write_matfile("test.mat"; a32=a32, a64=a64, b=b, c=c, d=d, ss=mxstructarray(ss))
+write_matfile(fn; a32=a32, a64=a64, b=b, c=c, d=d, ss=mxstructarray(ss))
 
-r = read_matfile("test.mat")
+r = read_matfile(fn)
 @test isa(r, Dict{String, MxArray})
 @test length(r) == 6
 
@@ -49,6 +50,8 @@ gc()  # make sure that ra, rb, rc, rd remain valid
 @test jvector(get_field(rss, 2, "z")) == ss[2].z
 
 # segfault on deleted references
-s = MatFile("test.mat", "r")
+s = MatFile(fn)
 close(s)
 @test_throws UndefRefError close(s)
+
+rm(fn)
