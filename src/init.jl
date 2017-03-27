@@ -9,6 +9,7 @@ const libmat = Ref{Ptr{Void}}()
 const eng_open          = Ref{Ptr{Void}}()
 const eng_close         = Ref{Ptr{Void}}()
 const eng_set_visible   = Ref{Ptr{Void}}()
+const eng_get_visible   = Ref{Ptr{Void}}()
 const eng_output_buffer = Ref{Ptr{Void}}()
 const eng_eval_string   = Ref{Ptr{Void}}()
 const eng_put_variable  = Ref{Ptr{Void}}()
@@ -84,7 +85,7 @@ const mx_set_field             = Ref{Ptr{Void}}()
 const mx_get_field_bynum       = Ref{Ptr{Void}}()
 const mx_get_fieldname         = Ref{Ptr{Void}}()
 
-const mx_get_string = Ref{Ptr{Void}}(0)
+const mx_get_string = Ref{Ptr{Void}}()
 
 # load I/O mat functions
 

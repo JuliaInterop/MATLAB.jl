@@ -10,8 +10,8 @@ function matlab_home_path()
             default_dir = "/Applications"
             if isdir(default_dir)
                 dirs = readdir(default_dir)
-                filter!(app -> ismatch(r"^MATLAB_R[0-9]+[ab]\.app$", dirs), dirs)
-                if ~isempty(dirs)
+                filter!(app -> ismatch(r"^MATLAB_R[0-9]+[ab]\.app$", app), dirs)
+                if !isempty(dirs)
                     matlab_home = joinpath(default_dir, maximum(dirs))
                 end
             end
@@ -20,7 +20,7 @@ function matlab_home_path()
             if isdir(default_dir)
                 dirs = readdir(default_dir)
                 filter!(dir -> ismatch(r"^R[0-9]+[ab]$", dir), dirs)
-                if ~isempty(dirs)
+                if !isempty(dirs)
                     matlab_home = joinpath(default_dir, maximum(dirs))
                 end
             end
