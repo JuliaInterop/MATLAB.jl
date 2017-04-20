@@ -263,6 +263,7 @@ s = ["abc", "efg"]
 s_mx = mxcellarray(s)
 @test jstring(get_cell(s_mx, 1)) == "abc"
 @test jstring(get_cell(s_mx, 2)) == "efg"
+@test typeof(s) == typeof(jvalue(s_mx))
 delete(s_mx)
 
 # struct 
