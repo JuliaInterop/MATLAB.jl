@@ -613,6 +613,7 @@ function jvalue(mx::MxArray)
     end
 end
 
+
 # deep conversion from MATLAB variable to Julia array
 
 jvalue(mx::MxArray, ty::Type{Array})  = jarray(mx)
@@ -624,5 +625,14 @@ jvalue(mx::MxArray, ty::Type{Dict}) = Dict(mx)
 jvalue(mx::MxArray, ty::Type{SparseMatrixCSC}) = jsparse(mx)
 
 # legacy support (eventually drop, when all constructors added)
+
 jdict(mx::MxArray) = Dict(mx)
 jstring(mx::MxArray) = String(mx)
+
+
+# show MxArray value for interactive use
+function show(io::IO, x::MxArray)
+    println(io, "$(typeof(x)) $(x.ptr)")
+    print(io, jvalue(x))
+    return
+end

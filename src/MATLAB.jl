@@ -4,7 +4,7 @@ module MATLAB
 
 using Compat.take!
 
-import Base: eltype, close, size, copy, ndims, unsafe_convert
+import Base: eltype, close, size, copy, ndims, unsafe_convert, show
 
 # mxarray
 export MxArray, mxClassID, mxComplexity,
