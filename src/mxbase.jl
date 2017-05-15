@@ -3,7 +3,7 @@
 
 function matlab_home_path()
     matlab_home = get(ENV, "MATLAB_HOME", "")
-    if matlab_home == ""
+    if isempty(matlab_home)
         if is_linux()
             matlab_home = dirname(dirname(realpath(chomp(readstring(`which matlab`)))))
         elseif is_apple()
@@ -26,7 +26,7 @@ function matlab_home_path()
             end
         end
     end
-    if matlab_home == ""
+    if isempty(matlab_home)
         error("The MATLAB path could not be found. Set the MATLAB_HOME environmental variable to specify the MATLAB path.")
     end
     return matlab_home
