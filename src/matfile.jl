@@ -1,6 +1,6 @@
 # mat file open & close
 
-type MatFile
+mutable struct MatFile
     ptr::Ptr{Void}
     filename::String
 

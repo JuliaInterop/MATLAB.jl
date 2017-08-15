@@ -10,7 +10,7 @@ const default_startcmd = matlab_startcmd() * " -nosplash"
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
 
-type MSession
+mutable struct MSession
     ptr::Ptr{Void}
     buffer::Vector{UInt8}
     bufptr::Ptr{UInt8}

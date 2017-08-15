@@ -1,6 +1,6 @@
 # functions to deal with MATLAB arrays
 
-type MxArray
+mutable struct MxArray
     ptr::Ptr{Void}
     own::Bool
 
@@ -98,8 +98,8 @@ mxclassid(::Type{UInt32})  = mxUINT32_CLASS::Cint
 mxclassid(::Type{Int64})   = mxINT64_CLASS::Cint
 mxclassid(::Type{UInt64})  = mxUINT64_CLASS::Cint
 
-mxcomplexflag{T<:MxRealNum}(::Type{T})    = mxREAL
-mxcomplexflag{T<:MxComplexNum}(::Type{T}) = mxCOMPLEX
+mxcomplexflag(::Type{T}) where {T<:MxRealNum}    = mxREAL
+mxcomplexflag(::Type{T}) where {T<:MxComplexNum} = mxCOMPLEX
 
 const classid_type_map = Dict{mxClassID,Type}(
     mxLOGICAL_CLASS => Bool,
@@ -223,13 +223,13 @@ function _dims_to_mwSize(dims::Tuple{Vararg{Int}})
     _dims
 end
 
-function mxarray{T<:MxNum}(ty::Type{T}, dims::Tuple{Vararg{Int}})
+function mxarray(ty::Type{T}, dims::Tuple{Vararg{Int}}) where T<:MxNum
     pm = ccall(mx_create_numeric_array[], Ptr{Void},
         (mwSize, Ptr{mwSize}, mxClassID, mxComplexity),
         length(dims), _dims_to_mwSize(dims), mxclassid(ty), mxcomplexflag(ty))
     MxArray(pm)
 end
-mxarray{T<:MxNum}(ty::Type{T}, dims::Int...) = mxarray(ty, dims)
+mxarray(ty::Type{T}, dims::Int...) where {T<:MxNum} = mxarray(ty, dims)
 
 # create scalars
 
@@ -243,7 +243,7 @@ function mxarray(x::Bool)
     MxArray(pm)
 end
 
-function mxarray{T<:MxRealNum}(x::T)
+function mxarray(x::T) where T<:MxRealNum
     pm = ccall(mx_create_numeric_matrix[], Ptr{Void},
         (mwSize, mwSize, mxClassID, mxComplexity),
         1, 1, mxclassid(T), mxcomplexflag(T))
@@ -253,19 +253,19 @@ function mxarray{T<:MxRealNum}(x::T)
     unsafe_wrap(Array, pdat, (1,))[1] = x
     MxArray(pm)
 end
-mxarray{T<:MxComplexNum}(x::T) = mxarray([x])
+mxarray(x::T) where {T<:MxComplexNum} = mxarray([x])
 
 # conversion from Julia variables to MATLAB
 # Note: the conversion is deep-copy, as there is no way to let
 # mxArray use Julia array's memory
 
-function mxarray{T<:MxRealNum}(a::Array{T})
+function mxarray(a::Array{T}) where T<:MxRealNum
     mx = mxarray(T, size(a))
     ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), data_ptr(mx), a, length(a)*sizeof(T))
     return mx
 end
 
-function mxarray{T<:MxComplexNum}(a::Array{T})
+function mxarray(a::Array{T}) where T<:MxComplexNum
     mx = mxarray(T, size(a))
     na = length(a)
     rdat = unsafe_wrap(Array, real_ptr(mx), na)
@@ -294,8 +294,8 @@ function mxsparse(ty::Type{Bool}, m::Integer, n::Integer, nzmax::Integer)
     MxArray(pm)
 end
 
-function _copy_sparse_mat{V,I}(a::SparseMatrixCSC{V,I},
-    ir_p::Ptr{mwIndex}, jc_p::Ptr{mwIndex}, pr_p::Ptr{V})
+function _copy_sparse_mat(a::SparseMatrixCSC{V,I},
+    ir_p::Ptr{mwIndex}, jc_p::Ptr{mwIndex}, pr_p::Ptr{V}) where {V,I}
 
     colptr::Vector{I} = a.colptr
     rinds::Vector{I} = a.rowval
@@ -318,7 +318,7 @@ function _copy_sparse_mat{V,I}(a::SparseMatrixCSC{V,I},
     ccall(:memcpy, Ptr{Void}, (Ptr{Void}, Ptr{Void}, UInt), pr_p, v, nnz*sizeof(V))
 end
 
-function mxarray{V<:Union{Float64,Bool},I}(a::SparseMatrixCSC{V,I})
+function mxarray(a::SparseMatrixCSC{V,I}) where {V<:Union{Float64,Bool},I}
     m::Int = a.m
     n::Int = a.n
     nnz = length(a.nzval)
@@ -448,7 +448,7 @@ function mxstruct(pairs::Pairs...)
     return mx
 end
 
-function mxstruct{T}(d::T)
+function mxstruct(d::T) where T
     names = fieldnames(T)
     names_str = map(string, names)
     mx = mxstruct(names_str...)
@@ -458,7 +458,7 @@ function mxstruct{T}(d::T)
     return mx
 end
 
-function mxstructarray{T}(d::Array{T})
+function mxstructarray(d::Array{T}) where T
     names = fieldnames(T)
     names_str = map(string, names)
     a = _fieldname_array(names_str...)
@@ -535,7 +535,7 @@ function jscalar(mx::MxArray)
     end
 end
 
-function _jsparse{T<:MxRealNum}(ty::Type{T}, mx::MxArray)
+function _jsparse(ty::Type{T}, mx::MxArray) where T<:MxRealNum
     m = nrows(mx)
     n = ncols(mx)
     ir_ptr = ccall(mx_get_ir[], Ptr{mwIndex}, (Ptr{Void},), mx)
