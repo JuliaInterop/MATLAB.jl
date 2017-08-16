@@ -2,7 +2,7 @@
 
 # A really basic parser intended only to handle checking whether
 # a variable is on the left or right hand side of an expression
-type DumbParserState
+mutable struct DumbParserState
     paren_depth::Int
     in_string::Bool
 end
