@@ -38,7 +38,7 @@ if is_windows()
 end
 
 # exceptions
-mutable struct MEngineError <: Exception
+struct MEngineError <: Exception
     message::String
 end
 
