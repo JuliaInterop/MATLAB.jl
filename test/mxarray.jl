@@ -289,7 +289,7 @@ a = mxstruct(s)
 @test isequal(jvector(get_field(a, "data")), [1,2,3])
 delete(a)
 
-type TestType
+mutable struct TestType
     name::String
     version::Float64
     data::Vector{Int}
