@@ -2,7 +2,7 @@ __precompile__()
 
 module MATLAB
 
-using Compat.take!
+using Compat.Sys: islinux, iswindows, isapple
 
 import Base: eltype, close, size, copy, ndims, unsafe_convert
 
@@ -33,7 +33,7 @@ export MSession, MatFile,
        mxcall,
        @mput, @mget, @mat_str
 
-if is_windows()
+if iswindows()
     export show_msession, hide_msession, get_msession_visiblity
 end
 
@@ -156,7 +156,7 @@ function __init__()
     mat_get_dir[]      = matfunc(:matGetDir)
 
 
-    if is_windows()
+    if iswindows()
         # workaround "primary message table for module 77" error
         # creates a dummy Engine session and keeps it open so the libraries used by all other
         # Engine clients are not loaded and unloaded repeatedly
