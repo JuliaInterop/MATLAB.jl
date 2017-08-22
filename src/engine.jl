@@ -215,10 +215,6 @@ macro mget(vs...)
     esc( _mget_multi(vs...) )
 end
 
-macro matlab(ex)
-    :( MATLAB.eval_string($(mstatement(ex))) )
-end
-
 
 ###########################################################
 #
