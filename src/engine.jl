@@ -19,7 +19,7 @@ mutable struct MSession
         ep = ccall(eng_open[], Ptr{Void}, (Ptr{UInt8},), default_startcmd)
         ep == C_NULL && throw(MEngineError("failed to open a MATLAB engine session"))
         # hide the MATLAB command window on Windows
-        is_windows() && ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), ep, 0)
+        iswindows() && ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), ep, 0)
 
         buf = Vector{UInt8}(bufsize)
         if bufsize > 0
@@ -90,7 +90,7 @@ function close_default_msession()
     return nothing
 end
 
-if is_windows()
+if iswindows()
     function show_msession(m::MSession = get_default_msession())
         ret = ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), m, 1)
         ret != 0 && throw(MEngineError("failed to show MATLAB engine session (err = $ret)"))
