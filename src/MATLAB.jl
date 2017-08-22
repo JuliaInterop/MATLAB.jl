@@ -192,7 +192,7 @@ end
 
 export @matlab
 macro matlab(ex)
-    Base.depwarn("@matlab is deprecated, use custom string literal mat\"\" instead .", :matlab)
+    Base.depwarn("@matlab is deprecated, use custom string literal mat\"\" instead.", :matlab)
     :( MATLAB.eval_string($(mstatement(ex))) )
 end
 
