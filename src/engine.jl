@@ -18,9 +18,12 @@ mutable struct MSession
     function MSession(bufsize::Integer = default_output_buffer_size)
         ep = ccall(eng_open[], Ptr{Void}, (Ptr{UInt8},), default_startcmd)
         ep == C_NULL && throw(MEngineError("failed to open a MATLAB engine session"))
-        # hide the MATLAB command window on Windows
-        iswindows() && ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), ep, 0)
-
+        if iswindows()
+            # hide the MATLAB command window on Windows and change to current directory
+            ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), ep, 0)
+            ccall(eng_eval_string[], Cint, (Ptr{Void}, Ptr{UInt8}),
+                  ep, "try cd('$(escape_string(pwd()))'); end")
+        end
         buf = Vector{UInt8}(bufsize)
         if bufsize > 0
             bufptr = pointer(buf)
