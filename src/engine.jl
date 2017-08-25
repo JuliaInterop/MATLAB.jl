@@ -20,9 +20,9 @@ mutable struct MSession
          if ep == C_NULL
             Base.warn_once("Confirm MATLAB is installed and discoverable.")
             if iswindows()
-                Base.warn_once("\nAlso, ensure `matlab -regserver` has been run in a Command Prompt as Administrator.")
+                Base.warn_once("Also, ensure `matlab -regserver` has been run in a Command Prompt as Administrator.")
             elseif islinux()
-                Base.warn_once("\nAlso, ensure `csh` is installed, e.g. `sudo apt-get install csh`.")
+                Base.warn_once("Also, ensure `csh` is installed, e.g. `sudo apt-get install csh`.")
             end
             throw(MEngineError("failed to open MATLAB engine session"))
         end
