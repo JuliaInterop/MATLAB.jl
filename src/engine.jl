@@ -18,13 +18,12 @@ mutable struct MSession
     function MSession(bufsize::Integer = default_output_buffer_size)
         ep = ccall(eng_open[], Ptr{Void}, (Ptr{UInt8},), default_startcmd)
          if ep == C_NULL
-            warn_msg = ["Confirm MATLAB is installed and discoverable."]
+            Base.warn_once("Confirm MATLAB is installed and discoverable.")
             if iswindows()
-                push!(warn_msg, "Also, ensure `matlab -regserver` has been run in a Command Prompt as Administrator.")
+                Base.warn_once("\nAlso, ensure `matlab -regserver` has been run in a Command Prompt as Administrator.")
             elseif islinux()
-                push!(warn_msg, "Also, ensure `csh` is installed, e.g. `sudo apt-get install csh`.")
+                Base.warn_once("\nAlso, ensure `csh` is installed, e.g. `sudo apt-get install csh`.")
             end
-            Base.warn_once(join(warn_msg,'\n'))
             throw(MEngineError("failed to open MATLAB engine session"))
         end
         # hide the MATLAB command window on Windows
