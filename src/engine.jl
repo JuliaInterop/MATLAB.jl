@@ -17,12 +17,20 @@ mutable struct MSession
 
     function MSession(bufsize::Integer = default_output_buffer_size)
         ep = ccall(eng_open[], Ptr{Void}, (Ptr{UInt8},), default_startcmd)
-        ep == C_NULL && throw(MEngineError("failed to open a MATLAB engine session"))
+        if ep == C_NULL
+            Base.warn_once("Confirm MATLAB is installed and discoverable.")
+            if iswindows()
+                Base.warn_once("Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.")
+            elseif islinux()
+                Base.warn_once("Ensure `csh` is installed; this may require running `sudo apt-get install csh`.")
+            end
+            throw(MEngineError("failed to open MATLAB engine session"))
+        end
         if iswindows()
             # hide the MATLAB command window on Windows and change to current directory
             ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), ep, 0)
             ccall(eng_eval_string[], Cint, (Ptr{Void}, Ptr{UInt8}),
-                  ep, "try cd('$(escape_string(pwd()))'); end")
+                ep, "try cd('$(escape_string(pwd()))'); end")
         end
         buf = Vector{UInt8}(bufsize)
         if bufsize > 0
@@ -57,7 +65,7 @@ end
 function close(session::MSession)
     # close a MATLAB Engine session
     ret = ccall(eng_close[], Cint, (Ptr{Void},), session)
-    ret != 0 && throw(MEngineError("failed to close a MATLAB engine session (err = $ret)"))
+    ret != 0 && throw(MEngineError("failed to close MATLAB engine session (err = $ret)"))
     session.ptr = C_NULL
     return nothing
 end
@@ -140,7 +148,7 @@ eval_string(stmt::String) = eval_string(get_default_msession(), stmt)
 function put_variable(session::MSession, name::Symbol, v::MxArray)
     # put a variable into a MATLAB engine session
     ret = ccall(eng_put_variable[], Cint, (Ptr{Void}, Ptr{UInt8}, Ptr{Void}), session, string(name), v)
-    ret != 0 && throw(MEngineError("failed to put the variable $(name) into a MATLAB session (err = $ret)"))
+    ret != 0 && throw(MEngineError("failed to put variable $(name) into MATLAB session (err = $ret)"))
     return nothing
 end
 
@@ -151,7 +159,7 @@ put_variable(name::Symbol, v) = put_variable(get_default_msession(), name, v)
 
 function get_mvariable(session::MSession, name::Symbol)
     pv = ccall(eng_get_variable[], Ptr{Void}, (Ptr{Void}, Ptr{UInt8}), session, string(name))
-    pv == C_NULL && throw(MEngineError("failed to get the variable $(name) from a MATLAB session"))
+    pv == C_NULL && throw(MEngineError("failed to get variable $(name) from MATLAB session"))
     return MxArray(pv)
 end
 
