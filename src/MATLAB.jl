@@ -162,7 +162,9 @@ function __init__()
         # Engine clients are not loaded and unloaded repeatedly
         # see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
         global persistent_msession = MSession(0)
+        atexit(() -> release(persistent_msession))
     end
+    atexit(() -> default_msession !== nothing && release(default_msession))
 end
 
 
