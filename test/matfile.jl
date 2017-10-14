@@ -1,5 +1,5 @@
 using MATLAB
-using Base.Test
+using Compat.Test
 
 # test MMAT file I/O
 fn = "$(tempname()).mat"

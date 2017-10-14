@@ -1,5 +1,5 @@
 using MATLAB
-using Base.Test
+using Compat.Test
 
 @test mat"1" == 1
 @test mat"[1, 2, 3]" == [1 2 3]
