@@ -1,5 +1,5 @@
 using MATLAB
-using Base.Test
+using Compat.Test
 
 @test mstatement(:abc) == "abc"
 

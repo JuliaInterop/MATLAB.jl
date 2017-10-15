@@ -1,5 +1,5 @@
 using MATLAB
-using Base.Test
+using Compat.Test
 
 include("engine.jl")
 include("matfile.jl")
