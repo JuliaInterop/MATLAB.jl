@@ -86,7 +86,7 @@ x = mxarray(["a", 1, 2.3])  # converts a Julia array to a MATLAB cell array
 x = mxarray(Dict("a"=>1, "b"=>"string", "c"=>[1,2,3])) # converts a Julia dictionary to a MATLAB struct
 ```
 
-The function ``mxarray`` can also converts a compound type to a Julia struct:
+The function ``mxarray`` can also convert a compound type to a Julia struct:
 ```julia
 type S
 	x::Float64
