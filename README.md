@@ -228,7 +228,6 @@ This example will create a MAT file called ``test.mat``, which contains six MATL
 To evaluate expressions in MATLAB, one may open a MATLAB engine session and communicate with it. There are three ways to call MATLAB from Julia:
 
 - The `mat""` custom string literal allows you to write MATLAB syntax inside Julia and use Julia variables directly from MATLAB via interpolation
-- The `@matlab` macro, in combination with `@mput` and `@mget`, translates Julia syntax to MATLAB
 - The `mxcall` function calls a given MATLAB function and returns the result
 
 *Note:* There can be multiple (reasonable) ways to convert a MATLAB variable to Julia array. For example, MATLAB represents a scalar using a 1-by-1 matrix. Here we have two choices in terms of converting such a matrix back to Julia: (1) convert to a scalar number, or (2) convert to a matrix of size 1-by-1.
@@ -252,51 +251,6 @@ mat"""
 ```
 
 As with ordinary string literals, you can also interpolate whole Julia expressions, e.g. `mat"$(x[1]) = $(x[2]) + $(binomial(5, 2))"`.
-
-##### The `@matlab` macro
-
-The example above can also be written using the `@matlab` macro in combination with `@mput` and `@mget`.
-
-```julia
-using MATLAB
-
-x = linspace(-10., 10., 500)
-@mput x                  # put x to MATLAB's workspace
-@matlab plot(x, sin(x))  # evaluate a MATLAB function
-
-y = linspace(2., 3., 500)
-@mput y
-@matlab begin
-    u = x + y
-	v = x - y
-end
-@mget u v
-@show u v
-```
-
-###### Caveats of @matlab
-
-Note that some MATLAB expressions are not valid Julia expressions. This package provides some ways to work around this in the ``@matlab`` macro:
-
-```julia
- # MATLAB uses single-quote for strings, while Julia uses double-quote. 
-@matlab sprintf("%d", 10)   # ==> MATLAB: sprintf('%d', 10)
-
- # MATLAB does not allow [x, y] on the left hand side
-x = linspace(-5.0, 5.0, 100)
-y = x
-@mput x y
-@matlab begin
-    (xx, yy) = meshgrid(x, y)  # ==> MATLAB: [xx, yy] = meshgrid(x, y)
-	mesh(xx, yy, xx.^2 + yy.^2)
-end
-```
-
-While we try to cover most MATLAB statements, some valid MATLAB statements remain unsupported by ``@matlab``. For this case, one may always call the ``eval_string`` function, as follows
-
-```julia
-eval_string("[u, v] = myfun(x, y);")
-```
 
 ##### `mxcall`
 
