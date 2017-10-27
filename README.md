@@ -196,19 +196,19 @@ Both ``read_matfile`` and ``write_matfile`` will close the MAT file handle befor
 **Examples:**
 
 ```julia
-immutable S
-	x::Float64
-	y::Bool
-	z::Vector{Float64}
+struct S
+    x::Float64
+    y::Bool
+    z::Vector{Float64}
 end
 
 write_matfile("test.mat"; 
-	a = Int32[1 2 3; 4 5 6], 
-	b = [1.2, 3.4, 5.6, 7.8], 
-	c = [[0.0, 1.0], [1.0, 2.0], [1.0, 2.0, 3.0]], 
-	d = Dict("name"=>"MATLAB", "score"=>100.0), 
-	s = "abcde",
-	ss = [S(1.0, true, [1., 2.]), S(2.0, false, [3., 4.])] )
+    a = Int32[1 2 3; 4 5 6], 
+    b = [1.2, 3.4, 5.6, 7.8], 
+    c = [[0.0, 1.0], [1.0, 2.0], [1.0, 2.0, 3.0]], 
+    d = Dict("name"=>"MATLAB", "score"=>100.0), 
+    s = "abcde",
+    ss = [S(1.0, true, [1., 2.]), S(2.0, false, [3., 4.])] )
 ```
 
 This example will create a MAT file called ``test.mat``, which contains six MATLAB variables:
