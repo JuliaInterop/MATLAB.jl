@@ -252,6 +252,19 @@ mat"""
 
 As with ordinary string literals, you can also interpolate whole Julia expressions, e.g. `mat"$(x[1]) = $(x[2]) + $(binomial(5, 2))"`.
 
+##### `eval_string`
+
+You may also use the `eval_string` function to evaluate MATLAB code as follows		
+ ```julia
+eval_string("a = sum([1,2,3])")
+```
+
+The `eval_string` also takes an optional argument that specifies which MATLAB session to evaluate the code in, e.g.
+```julia
+s = MSession()
+eval_string(s, "a = sum([1,2,3])")
+```
+ 
 ##### `mxcall`
 
 You may also directly call a MATLAB function on Julia variables using `mxcall`:
