@@ -264,7 +264,7 @@ The `eval_string` also takes an optional argument that specifies which MATLAB se
 s = MSession()
 eval_string(s, "a = sum([1,2,3])")
 ```
- 
+
 ##### `mxcall`
 
 You may also directly call a MATLAB function on Julia variables using `mxcall`:
