@@ -259,7 +259,7 @@ You may also use the `eval_string` function to evaluate MATLAB code as follows
 eval_string("a = sum([1,2,3])")
 ```
 
-The `eval_string` also takes an optional argument that specifies which MATLAB session to evaluate the code in, e.g.
+The `eval_string` function also takes an optional argument that specifies which MATLAB session to evaluate the code in, e.g.
 ```julia
 s = MSession()
 eval_string(s, "a = sum([1,2,3])")
