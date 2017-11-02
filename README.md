@@ -233,7 +233,6 @@ To evaluate expressions in MATLAB, one may open a MATLAB engine session and comm
 
 In general, the `mat""` custom string literal is the preferred method to interact with the MATLAB engine.
 
-
 *Note:* There can be multiple (reasonable) ways to convert a MATLAB variable to Julia array. For example, MATLAB represents a scalar using a 1-by-1 matrix. Here we have two choices in terms of converting such a matrix back to Julia: (1) convert to a scalar number, or (2) convert to a matrix of size 1-by-1.
 
 ##### The `mat""` custom string literal
@@ -287,7 +286,6 @@ xx, yy = mxcall(:meshgrid, 2, x, y)
 ##### `@mget` and `@mput`
 
 The macro `@mget` can be used to extract the value of a MATLAB variable into Julia 
-
 ```julia
 julia> mat"a = 6"
 julia> @mget a
@@ -295,7 +293,6 @@ julia> @mget a
 ```
 
 The macro `@mput` can be used to translate a Julia variable into MATLAB
-
 ```julia
 julia> x = [1,2,3]
 julia> @mput x
