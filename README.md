@@ -231,7 +231,7 @@ To evaluate expressions in MATLAB, one may open a MATLAB engine session and comm
 - The `eval_string` evaluate a string containing MATLAB expressions (typically used with the helper macros `@mget` and `@mput`
 - The `mxcall` function calls a given MATLAB function and returns the result
 
-In general, the `mat""` custom string literal is the preferred method to interact with the MATLAB engine. In addition there are helper macros `@mget`, `@mput` to aid in translating variables from and to Julia and MATLAB
+In general, the `mat""` custom string literal is the preferred method to interact with the MATLAB engine.
 
 
 *Note:* There can be multiple (reasonable) ways to convert a MATLAB variable to Julia array. For example, MATLAB represents a scalar using a 1-by-1 matrix. Here we have two choices in terms of converting such a matrix back to Julia: (1) convert to a scalar number, or (2) convert to a matrix of size 1-by-1.
