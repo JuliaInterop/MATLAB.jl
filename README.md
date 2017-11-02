@@ -228,8 +228,10 @@ This example will create a MAT file called ``test.mat``, which contains six MATL
 To evaluate expressions in MATLAB, one may open a MATLAB engine session and communicate with it. There are three ways to call MATLAB from Julia:
 
 - The `mat""` custom string literal allows you to write MATLAB syntax inside Julia and use Julia variables directly from MATLAB via interpolation
-- The `@matlab` macro, in combination with `@mput` and `@mget`, translates Julia syntax to MATLAB
+- The `eval_string` evaluate a string containing MATLAB expressions (typically used with the helper macros `@mget` and `@mput`
 - The `mxcall` function calls a given MATLAB function and returns the result
+
+In general, the `mat""` custom string literal is the preferred method to interact with the MATLAB engine.
 
 *Note:* There can be multiple (reasonable) ways to convert a MATLAB variable to Julia array. For example, MATLAB represents a scalar using a 1-by-1 matrix. Here we have two choices in terms of converting such a matrix back to Julia: (1) convert to a scalar number, or (2) convert to a matrix of size 1-by-1.
 
@@ -253,49 +255,19 @@ mat"""
 
 As with ordinary string literals, you can also interpolate whole Julia expressions, e.g. `mat"$(x[1]) = $(x[2]) + $(binomial(5, 2))"`.
 
-##### The `@matlab` macro
+##### `eval_string`
 
-The example above can also be written using the `@matlab` macro in combination with `@mput` and `@mget`.
-
-```julia
-using MATLAB
-
-x = linspace(-10., 10., 500)
-@mput x                  # put x to MATLAB's workspace
-@matlab plot(x, sin(x))  # evaluate a MATLAB function
-
-y = linspace(2., 3., 500)
-@mput y
-@matlab begin
-    u = x + y
-	v = x - y
-end
-@mget u v
-@show u v
+You may also use the `eval_string` function to evaluate MATLAB code as follows		
+ ```julia
+eval_string("a = sum([1,2,3])")
 ```
 
-###### Caveats of @matlab
-
-Note that some MATLAB expressions are not valid Julia expressions. This package provides some ways to work around this in the ``@matlab`` macro:
-
+The `eval_string` function also takes an optional argument that specifies which MATLAB session to evaluate the code in, e.g.
 ```julia
- # MATLAB uses single-quote for strings, while Julia uses double-quote. 
-@matlab sprintf("%d", 10)   # ==> MATLAB: sprintf('%d', 10)
-
- # MATLAB does not allow [x, y] on the left hand side
-x = linspace(-5.0, 5.0, 100)
-y = x
-@mput x y
-@matlab begin
-    (xx, yy) = meshgrid(x, y)  # ==> MATLAB: [xx, yy] = meshgrid(x, y)
-	mesh(xx, yy, xx.^2 + yy.^2)
-end
-```
-
-While we try to cover most MATLAB statements, some valid MATLAB statements remain unsupported by ``@matlab``. For this case, one may always call the ``eval_string`` function, as follows
-
-```julia
-eval_string("[u, v] = myfun(x, y);")
+julia> s = MSession();
+julia> eval_string(s, "a = sum([1,2,3])")
+a =
+     6
 ```
 
 ##### `mxcall`
@@ -310,6 +282,26 @@ xx, yy = mxcall(:meshgrid, 2, x, y)
 *Note:* Since MATLAB functions behavior depends on the number of outputs, you have to specify the number of output arguments in ``mxcall`` as the second argument.
 
 ``mxcall`` puts the input arguments to the MATLAB workspace (using mangled names), evaluates the function call in MATLAB, and retrieves the variable from the MATLAB session. This function is mainly provided for convenience. However, you should keep in mind that it may incur considerable overhead due to the communication between MATLAB and Julia domain.
+
+##### `@mget` and `@mput`
+
+The macro `@mget` can be used to extract the value of a MATLAB variable into Julia 
+```julia
+julia> mat"a = 6"
+julia> @mget a
+6.0
+```
+
+The macro `@mput` can be used to translate a Julia variable into MATLAB
+```julia
+julia> x = [1,2,3]
+julia> @mput x
+julia> eval_string("y = sum(x)")
+julia> @mget y
+6.0
+julia> @show y
+a = 63.0
+```
 
 #### Viewing the MATLAB Session (Windows only)
 
