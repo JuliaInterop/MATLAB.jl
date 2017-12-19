@@ -2,7 +2,8 @@ __precompile__()
 
 module MATLAB
 
-using Compat.take!
+using Compat
+using Compat.Sys: islinux, iswindows, isapple
 
 import Base: eltype, close, size, copy, ndims, unsafe_convert
 
@@ -31,14 +32,14 @@ export MSession, MatFile,
        eval_string, get_mvariable, get_variable, put_variable, put_variables,
        variable_names, read_matfile, write_matfile,
        mxcall,
-       @mput, @mget, @matlab, @mat_str
+       @mput, @mget, @mat_str
 
-if is_windows()
+if iswindows()
     export show_msession, hide_msession, get_msession_visiblity
 end
 
 # exceptions
-type MEngineError <: Exception
+struct MEngineError <: Exception
     message::String
 end
 
@@ -156,7 +157,7 @@ function __init__()
     mat_get_dir[]      = matfunc(:matGetDir)
 
 
-    if is_windows()
+    if iswindows()
         # workaround "primary message table for module 77" error
         # creates a dummy Engine session and keeps it open so the libraries used by all other
         # Engine clients are not loaded and unloaded repeatedly
@@ -189,5 +190,11 @@ end
 @deprecate duplicate(mx::MxArray) copy(mx::MxArray)
 
 @deprecate mxempty() mxarray(Float64,0,0)
+
+export @matlab
+macro matlab(ex)
+    Base.depwarn("@matlab is deprecated, use custom string literal mat\"\" instead.", :matlab)
+    :( MATLAB.eval_string($(mstatement(ex))) )
+end
 
 end

@@ -1,5 +1,5 @@
 using MATLAB
-using Base.Test
+using Compat.Test
 
 # Unit testing for MxArray
 
@@ -192,7 +192,7 @@ a_mx = mxarray(a)
 
 a2 = jsparse(a_mx)
 @test size(a2) == (8, 9)
-@test countnz(a2) == countnz(a)
+@test count(!iszero, a2) == count(!iszero, a)
 @test isequal(a2, a)
 delete(a_mx)
 
@@ -205,7 +205,7 @@ a_mx = mxarray(a)
 
 a2 = jsparse(a_mx)
 @test size(a2) == (8, 9)
-@test countnz(a2) == countnz(a)
+@test count(!iszero, a2) == count(!iszero, a)
 @test isequal(a2, a)
 delete(a_mx)
 
@@ -289,7 +289,7 @@ a = mxstruct(s)
 @test isequal(jvector(get_field(a, "data")), [1,2,3])
 delete(a)
 
-type TestType
+mutable struct TestType
     name::String
     version::Float64
     data::Vector{Int}

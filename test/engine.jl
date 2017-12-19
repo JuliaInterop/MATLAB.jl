@@ -1,5 +1,5 @@
 using MATLAB
-using Base.Test
+using Compat.Test
 
 # test engine
 
@@ -9,10 +9,10 @@ a = [1. 2. 3.; 4. 5. 6.]
 b = [2. 3. 4.; 8. 7. 6.]
 
 @mput a b
-@matlab begin
-    r1 = a .* b
-    r2 = a + b
-end
+mat"""
+    r1 = a .* b;
+    r2 = a + b;
+"""
 @mget r1 r2
 
 @test isequal(r1, a .* b)
