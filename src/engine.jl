@@ -29,8 +29,12 @@ mutable struct MSession
         if iswindows()
             # hide the MATLAB command window on Windows and change to current directory
             ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), ep, 0)
-            ccall(eng_eval_string[], Cint, (Ptr{Void}, Ptr{UInt8}),
-                ep, "try cd('$(escape_string(pwd()))'); end")
+            ccall(eng_eval_string[], Cint, (Ptr{Void}, Ptr{UInt8}), ep,
+                "try cd('$(escape_string(pwd()))'); end")
+        end
+        if iswindows() || isapple() # issue 95
+            ccall(eng_eval_string[], Cint, (Ptr{Void}, Ptr{UInt8}), ep,
+                "feature('DefaultCharacterSet', 'UTF-8');")
         end
         buf = Vector{UInt8}(bufsize)
         if bufsize > 0
