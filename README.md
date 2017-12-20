@@ -88,10 +88,10 @@ x = mxarray(Dict("a"=>1, "b"=>"string", "c"=>[1,2,3])) # converts a Julia dictio
 
 The function ``mxarray`` can also convert a compound type to a Julia struct:
 ```julia
-type S
-	x::Float64
-	y::Vector{Int32}
-	z::Bool
+struct S
+    x::Float64
+    y::Vector{Int32}
+    z::Bool
 end
 
 s = S(1.2, Int32[1, 2], false)
