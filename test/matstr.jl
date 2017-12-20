@@ -70,3 +70,18 @@ $d ...
 # Test strings with =
 text = "hello = world"
 @test mat"strfind($text, 'o = w')" == 5
+
+# test proper encoding
+teststr = "Paul Erdős × 2"
+
+mat"s1 = 'Paul Erdős × 2'"
+mat"s2 = $teststr"
+MATLAB.eval_string("s3 = 'Paul Erdős × 2'")
+
+teststr1 = get_variable(:s1)
+teststr2 = get_variable(:s2)
+teststr3 = get_variable(:s3)
+
+@test teststr == teststr1
+@test teststr == teststr2
+@test teststr == teststr3
