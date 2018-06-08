@@ -33,12 +33,12 @@ using Compat.Test
 @test mstatement(:(a(1))) == "a(1)"
 @test mstatement(:(a(1, 1))) == "a(1, 1)"
 @test mstatement(:(a[1, 1])) == "a(1, 1)"
-@test mstatement(:(a[1:end])) == "a(1:end)"
+@test (mstatement(:(a[1:end])) == "a(1:end)") || (mstatement(:(a[1:end])) == "a((1) : (end))")
 @test mstatement(:(a{1})) == "a{1}"
 @test mstatement(:(a{1, 1})) == "a{1, 1}"
 
 @test mstatement(:(a.b)) == "a.b"
-@test mstatement(:(1:2)) == "1:2"
+@test (mstatement(:(1:2)) == "1:2") || (mstatement(:(1:2)) == "(1) : (2)")
 
 @test mstatement(:(x')) == "(x)'"
 @test mstatement(:(x.')) == "(x).'"

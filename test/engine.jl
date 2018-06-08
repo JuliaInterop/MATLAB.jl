@@ -1,5 +1,6 @@
 using MATLAB
 using Compat.Test
+using Compat.SparseArrays
 
 # test engine
 
