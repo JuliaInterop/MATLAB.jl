@@ -60,7 +60,7 @@ function __init__()
     lib_path = matlab_lib_path()
 
     # load libraries
-
+    
     libmx[]  = Libdl.dlopen(joinpath(lib_path, "libmx"), Libdl.RTLD_GLOBAL)
     libmat[] = Libdl.dlopen(joinpath(lib_path, "libmat"), Libdl.RTLD_GLOBAL)
     libeng[] = Libdl.dlopen(joinpath(lib_path, "libeng"), Libdl.RTLD_GLOBAL)
@@ -175,16 +175,16 @@ end
 #
 ###########################################################
 
-function nfields(mx::MxArray)
+function nfields(mx::MxArray) 
     Base.depwarn("MATLAB.nfields is deprecated, use mxnfields instead.", :nfields)
     return mxfields(mx)
 end
 
 @deprecate jvariable jvalue
 
-function jvariable(mx::MxArray, ty::Type{AbstractString})
-    Base.depwarn("jvariable(mx::MxArray,ty::Type{AbstractString}) is
-    deprecated, use jvalue(mx::MxArray,ty::Type{String}) instead.
+function jvariable(mx::MxArray, ty::Type{AbstractString}) 
+    Base.depwarn("jvariable(mx::MxArray,ty::Type{AbstractString}) is 
+    deprecated, use jvalue(mx::MxArray,ty::Type{String}) instead. 
     We now default to more strict typing on String types", :jvariable)
     return jstring(mx)::String
 end
