@@ -4,6 +4,8 @@ module MATLAB
 
 using Compat
 using Compat.Sys: islinux, iswindows, isapple
+using Compat.Libdl
+using Compat.SparseArrays
 
 import Base: eltype, close, size, copy, ndims, unsafe_convert
 

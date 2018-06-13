@@ -11,12 +11,12 @@ const default_startcmd = matlab_startcmd() * " -nosplash"
 const default_output_buffer_size = 64 * 1024
 
 mutable struct MSession
-    ptr::Ptr{Void}
+    ptr::Ptr{Cvoid}
     buffer::Vector{UInt8}
     bufptr::Ptr{UInt8}
 
     function MSession(bufsize::Integer = default_output_buffer_size)
-        ep = ccall(eng_open[], Ptr{Void}, (Ptr{UInt8},), default_startcmd)
+        ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), default_startcmd)
         if ep == C_NULL
             Base.warn_once("Confirm MATLAB is installed and discoverable.")
             if iswindows()
@@ -28,26 +28,26 @@ mutable struct MSession
         end
         if iswindows()
             # hide the MATLAB command window on Windows and change to current directory
-            ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), ep, 0)
-            ccall(eng_eval_string[], Cint, (Ptr{Void}, Ptr{UInt8}),
+            ccall(eng_set_visible[], Cint, (Ptr{Cvoid}, Cint), ep, 0)
+            ccall(eng_eval_string[], Cint, (Ptr{Cvoid}, Ptr{UInt8}),
                 ep, "try cd('$(escape_string(pwd()))'); end")
         end
-        buf = Vector{UInt8}(bufsize)
+        buf = Vector{UInt8}(undef, bufsize)
         if bufsize > 0
             bufptr = pointer(buf)
-            ccall(eng_output_buffer[], Cint, (Ptr{Void}, Ptr{UInt8}, Cint),
+            ccall(eng_output_buffer[], Cint, (Ptr{Cvoid}, Ptr{UInt8}, Cint),
                 ep, bufptr, bufsize)
         else
             bufptr = convert(Ptr{UInt8}, C_NULL)
         end
 
         self = new(ep, buf, bufptr)
-        finalizer(self, release)
+        @compat finalizer(release, self)
         return self
     end
 end
 
-function unsafe_convert(::Type{Ptr{Void}}, m::MSession)
+function unsafe_convert(::Type{Ptr{Cvoid}}, m::MSession)
     ptr = m.ptr
     ptr == C_NULL && throw(UndefRefError())
     return ptr
@@ -56,7 +56,7 @@ end
 function release(session::MSession)
     ptr = session.ptr
     if ptr != C_NULL
-        ccall(eng_close[], Cint, (Ptr{Void},), ptr)
+        ccall(eng_close[], Cint, (Ptr{Cvoid},), ptr)
     end
     session.ptr = C_NULL
     return nothing
@@ -64,7 +64,7 @@ end
 
 function close(session::MSession)
     # close a MATLAB Engine session
-    ret = ccall(eng_close[], Cint, (Ptr{Void},), session)
+    ret = ccall(eng_close[], Cint, (Ptr{Cvoid},), session)
     ret != 0 && throw(MEngineError("failed to close MATLAB engine session (err = $ret)"))
     session.ptr = C_NULL
     return nothing
@@ -103,20 +103,20 @@ end
 
 if iswindows()
     function show_msession(m::MSession = get_default_msession())
-        ret = ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), m, 1)
+        ret = ccall(eng_set_visible[], Cint, (Ptr{Cvoid}, Cint), m, 1)
         ret != 0 && throw(MEngineError("failed to show MATLAB engine session (err = $ret)"))
         return nothing
     end
 
     function hide_msession(m::MSession = get_default_msession())
-        ret = ccall(eng_set_visible[], Cint, (Ptr{Void}, Cint), m, 0)
+        ret = ccall(eng_set_visible[], Cint, (Ptr{Cvoid}, Cint), m, 0)
         ret != 0 && throw(MEngineError("failed to hide MATLAB engine session (err = $ret)"))
         return nothing
     end
 
     function get_msession_visiblity(m::MSession = get_default_msession())
         vis = Ref{Cint}(true)
-        ccall(eng_get_visible[], Int, (Ptr{Void}, Ptr{Cint}), m, vis)
+        ccall(eng_get_visible[], Int, (Ptr{Cvoid}, Ptr{Cint}), m, vis)
         return vis[] == 1 ? true : false
     end
 end
@@ -129,7 +129,7 @@ end
 
 function eval_string(session::MSession, stmt::String)
     # evaluate a MATLAB statement in a given MATLAB session
-    ret = ccall(eng_eval_string[], Cint, (Ptr{Void}, Ptr{UInt8}), session, stmt)
+    ret = ccall(eng_eval_string[], Cint, (Ptr{Cvoid}, Ptr{UInt8}), session, stmt)
     ret != 0 && throw(MEngineError("invalid engine session (err = $ret)"))
 
     bufptr = session.bufptr
@@ -147,7 +147,7 @@ eval_string(stmt::String) = eval_string(get_default_msession(), stmt)
 
 function put_variable(session::MSession, name::Symbol, v::MxArray)
     # put a variable into a MATLAB engine session
-    ret = ccall(eng_put_variable[], Cint, (Ptr{Void}, Ptr{UInt8}, Ptr{Void}), session, string(name), v)
+    ret = ccall(eng_put_variable[], Cint, (Ptr{Cvoid}, Ptr{UInt8}, Ptr{Cvoid}), session, string(name), v)
     ret != 0 && throw(MEngineError("failed to put variable $(name) into MATLAB session (err = $ret)"))
     return nothing
 end
@@ -158,7 +158,7 @@ put_variable(name::Symbol, v) = put_variable(get_default_msession(), name, v)
 
 
 function get_mvariable(session::MSession, name::Symbol)
-    pv = ccall(eng_get_variable[], Ptr{Void}, (Ptr{Void}, Ptr{UInt8}), session, string(name))
+    pv = ccall(eng_get_variable[], Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{UInt8}), session, string(name))
     pv == C_NULL && throw(MEngineError("failed to get variable $(name) from MATLAB session"))
     return MxArray(pv)
 end
@@ -181,7 +181,7 @@ function _mput_multi(vs::Symbol...)
         v = vs[1]
         :( MATLAB.put_variable($(Meta.quot(v)), $(v)) )
     else
-        stmts = Vector{Expr}(nv)
+        stmts = Vector{Expr}(undef, nv)
         for i = 1 : nv
             v = vs[i]
             stmts[i] = :( MATLAB.put_variable($(Meta.quot(v)), $(v)) )
@@ -214,7 +214,7 @@ function _mget_multi(vs::Union{Symbol, Expr}...)
     if nv == 1
         make_getvar_statement(vs[1])
     else
-        stmts = Vector{Expr}(nv)
+        stmts = Vector{Expr}(undef, nv)
         for i = 1:nv
             stmts[i] = make_getvar_statement(vs[i])
         end
@@ -241,8 +241,8 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
 
     # generate temporary variable names
 
-    in_arg_names = Vector{String}(nin)
-    out_arg_names = Vector{String}(nout)
+    in_arg_names = Vector{String}(undef, nin)
+    out_arg_names = Vector{String}(undef, nout)
 
     for i = 1:nin
         in_arg_names[i] = _gen_marg_name(mfun, "in", i)
@@ -290,7 +290,7 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     ret = if nout == 1
         jvalue(get_mvariable(session, Symbol(out_arg_names[1])))
     elseif nout >= 2
-        results = Vector{Any}(nout)
+        results = Vector{Any}(undef, nout)
         for i = 1:nout
             results[i] = jvalue(get_mvariable(session, Symbol(out_arg_names[i])))
         end

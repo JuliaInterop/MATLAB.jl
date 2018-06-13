@@ -1,5 +1,6 @@
 using MATLAB
 using Compat.Test
+using Compat.GC
 
 # Unit testing for MxArray
 
@@ -265,7 +266,7 @@ s_mx = mxcellarray(s)
 @test jstring(get_cell(s_mx, 2)) == "efg"
 delete(s_mx)
 
-# struct 
+# struct
 
 a = mxstruct("abc", "efg", "xyz")
 @test is_struct(a)
@@ -377,4 +378,4 @@ str = "λ α γ"
 @test jstring(mxarray(str)) == str
 @test mat"all($str == [955 32 945 32 947])"
 
-gc()
+GC.gc()

@@ -18,7 +18,7 @@ function write_mstatement(io::IO, s::Char)
     print(io, "'")
 end
 
-const matlab_infix_ops = Set([:+, :-, :*, :/, :\, :^, :.+, :.-, :.*, :./, :.\, :.^, :|, :&])
+const matlab_infix_ops = Set([:+, :-, :*, :/, :\, :^, :.+, :.-, :.*, :./, :.\, :.^, :|, :&, :(:)])
 
 function write_mstatement(io::IO, ex::Expr)
     h = ex.head

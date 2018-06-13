@@ -1,5 +1,6 @@
 using MATLAB
 using Compat.Test
+using Compat.GC
 
 # test MMAT file I/O
 fn = "$(tempname()).mat"
@@ -31,7 +32,7 @@ rc = jvalue(r["c"])
 rd = jdict(r["d"])
 rss = r["ss"]
 
-gc()  # make sure that ra, rb, rc, rd remain valid
+GC.gc()  # make sure that ra, rb, rc, rd remain valid
 
 @test ra32 == a32
 @test ra64 == a64
@@ -43,10 +44,10 @@ gc()  # make sure that ra, rb, rc, rd remain valid
 
 @test is_struct(rss)
 @test jscalar(get_field(rss, 1, "x")) == 1.0
-@test jscalar(get_field(rss, 1, "y")) 
+@test jscalar(get_field(rss, 1, "y"))
 @test jvector(get_field(rss, 1, "z")) == ss[1].z
 @test jscalar(get_field(rss, 2, "x")) == 2.0
-@test !jscalar(get_field(rss, 2, "y")) 
+@test !jscalar(get_field(rss, 2, "y"))
 @test jvector(get_field(rss, 2, "z")) == ss[2].z
 
 # segfault on deleted references

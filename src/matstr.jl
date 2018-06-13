@@ -13,14 +13,16 @@ function dumb_parse!(pstate::DumbParserState, str::String)
     paren_depth = pstate.paren_depth
     in_string = pstate.in_string
     x = '\0'
-    s = start(str)
-    while !done(str, s)
+    s = firstindex(str)
+    while s <= ncodeunits(str)
         lastx = x
-        (x, s) = next(str, s)
+        x = str[s]
+        s = nextind(str, s)
         if in_string
             if x == '\''
-                if !done(str, s) && next(str, s)[1] == '\''
-                    (x, s) = next(str, s)
+                if (s <= ncodeunits(str)) && (str[s] == '\'')
+                    x = str[s]
+                    s = nextind(str, s)
                 else
                     in_string = false
                 end
@@ -33,8 +35,9 @@ function dumb_parse!(pstate::DumbParserState, str::String)
             elseif x == '\'' && lastx in ",( \t\0;"
                 in_string = true
             elseif x == '=' && !(lastx in "<>~")
-                if !done(str, s) && next(str, s)[1] == '='
-                    (x, s) = next(str, s)
+                if (s <= ncodeunits(str)) && (str[s] == '=')
+                    x = str[s]
+                    s = nextind(str, s)
                 else
                     return true
                 end
@@ -56,10 +59,10 @@ function check_assignment(interp, i)
     for j = i-1:-1:1
         if isa(interp[j], String)
             sp = split(interp[j], "\n")
-            unshift!(before, sp[end])
+            pushfirst!(before, sp[end])
             for k = length(sp)-1:-1:1
                 match(r"\.\.\.[ \t]*\r?$", sp[k]) === nothing && @goto done_before
-                unshift!(before, sp[k])
+                pushfirst!(before, sp[k])
             end
         end
     end
@@ -93,7 +96,7 @@ end
 
 function do_mat_str(ex)
     # Hack to do interpolation
-    interp = parse(string("\"\"\"", replace(ex, "\"\"\"", "\\\"\"\""), "\"\"\""))
+    interp = Meta.parse(string("\"\"\"", replace(ex, "\"\"\"" => "\\\"\"\""), "\"\"\""))
     if isa(interp, String)
         interp = [interp]
     elseif interp.head == :string
@@ -131,7 +134,12 @@ function do_mat_str(ex)
             end
             if assigned && !(var in assignedvars)
                 push!(assignedvars, var)
-                push!(getblock.args, Expr(:(=), esc(interp[i]), :(get_variable($(Meta.quot(var))))))
+                if isa(interp[i], Expr) && (interp[i].head == :ref)
+                    # Assignment to a sliced variable, e.g., x[1:3], must use broadcasting in v0.7+
+                    push!(getblock.args, Expr(:(.=), esc(interp[i]), :(get_variable($(Meta.quot(var))))))
+                else
+                    push!(getblock.args, Expr(:(=), esc(interp[i]), :(get_variable($(Meta.quot(var))))))
+                end
             end
 
             interp[i] = var
@@ -139,7 +147,7 @@ function do_mat_str(ex)
     end
 
     # Clear `ans` and set `matlab_jl_has_ans` before we run the code
-    unshift!(interp, "clear ans;\nmatlab_jl_has_ans = 0;\n")
+    pushfirst!(interp, "clear ans;\nmatlab_jl_has_ans = 0;\n")
 
     # Add a semicolon to the end of the last statement to suppress output
     isa(interp[end], String) && (interp[end] = rstrip(interp[end]))
