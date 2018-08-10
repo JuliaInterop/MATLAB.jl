@@ -22,9 +22,6 @@ export mxarray, mxsparse, delete,
        mxstruct, mxstructarray, mxnfields, get_fieldname, get_field, set_field,
        jvalue, jarray, jscalar, jvector, jmatrix, jsparse, jstring, jdict
 
-# mstatments
-export mstatement
-
 # engine & matfile
 export MSession, MatFile,
        get_default_msession, restart_default_msession, close_default_msession,
@@ -46,7 +43,6 @@ include("init.jl") # initialize Refs
 include("mxbase.jl")
 include("mxarray.jl")
 include("matfile.jl")
-include("mstatements.jl")
 include("engine.jl")
 include("matstr.jl")
 
@@ -172,28 +168,5 @@ end
 #
 ###########################################################
 
-function nfields(mx::MxArray) 
-    Base.depwarn("MATLAB.nfields is deprecated, use mxnfields instead.", :nfields)
-    return mxfields(mx)
-end
-
-@deprecate jvariable jvalue
-
-function jvariable(mx::MxArray, ty::Type{AbstractString}) 
-    Base.depwarn("jvariable(mx::MxArray,ty::Type{AbstractString}) is 
-    deprecated, use jvalue(mx::MxArray,ty::Type{String}) instead. 
-    We now default to more strict typing on String types", :jvariable)
-    return jstring(mx)::String
-end
-
-@deprecate duplicate(mx::MxArray) copy(mx::MxArray)
-
-@deprecate mxempty() mxarray(Float64,0,0)
-
-export @matlab
-macro matlab(ex)
-    Base.depwarn("@matlab is deprecated, use custom string literal mat\"\" instead.", :matlab)
-    :( MATLAB.eval_string($(mstatement(ex))) )
-end
 
 end
