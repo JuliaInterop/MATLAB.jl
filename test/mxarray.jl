@@ -1,6 +1,5 @@
 using MATLAB
-using Compat.Test
-using Compat.GC
+using Test
 
 # Unit testing for MxArray
 

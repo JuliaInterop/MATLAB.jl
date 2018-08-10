@@ -1,6 +1,6 @@
 using MATLAB
-using Compat.Test
-using Compat.SparseArrays
+using Test
+using SparseArrays
 
 # test engine
 

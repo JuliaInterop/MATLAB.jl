@@ -18,11 +18,11 @@ mutable struct MSession
     function MSession(bufsize::Integer = default_output_buffer_size)
         ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), default_startcmd)
         if ep == C_NULL
-            Base.warn_once("Confirm MATLAB is installed and discoverable.")
+            @warn "Confirm MATLAB is installed and discoverable."
             if iswindows()
-                Base.warn_once("Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.")
+                @warn "Ensure `matlab -regserver` has been run in a Command Prompt as Administrator."
             elseif islinux()
-                Base.warn_once("Ensure `csh` is installed; this may require running `sudo apt-get install csh`.")
+                @warn "Ensure `csh` is installed; this may require running `sudo apt-get install csh`."
             end
             throw(MEngineError("failed to open MATLAB engine session"))
         end
@@ -42,7 +42,7 @@ mutable struct MSession
         end
 
         self = new(ep, buf, bufptr)
-        @compat finalizer(release, self)
+        finalizer(release, self)
         return self
     end
 end
