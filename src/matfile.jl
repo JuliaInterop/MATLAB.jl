@@ -7,7 +7,7 @@ mutable struct MatFile
     function MatFile(filename::String, mode::String)
         p = ccall(mat_open[], Ptr{Cvoid}, (Ptr{Cchar}, Ptr{Cchar}), filename, mode)
         self = new(p, filename)
-        @compat finalizer(release, self)
+        finalizer(release, self)
         return self
     end
 end

@@ -1,11 +1,8 @@
-__precompile__()
-
 module MATLAB
 
-using Compat
-using Compat.Sys: islinux, iswindows, isapple
-using Compat.Libdl
-using Compat.SparseArrays
+using Base.Sys: islinux, iswindows, isapple
+using Libdl
+using SparseArrays
 
 import Base: eltype, close, size, copy, ndims, unsafe_convert
 

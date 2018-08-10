@@ -8,7 +8,7 @@ mutable struct MxArray
         p == C_NULL && error("NULL pointer for MxArray.")
         self = new(p, own)
         if own
-            @compat finalizer(release, self)
+            finalizer(release, self)
         end
         return self
     end
@@ -294,9 +294,7 @@ function mxsparse(ty::Type{Bool}, m::Integer, n::Integer, nzmax::Integer)
     MxArray(pm)
 end
 
-function _copy_sparse_mat(a::SparseMatrixCSC{V,I},
-    ir_p::Ptr{mwIndex}, jc_p::Ptr{mwIndex}, pr_p::Ptr{V}) where {V,I}
-
+function _copy_sparse_mat(a::SparseMatrixCSC{V,I}, ir_p::Ptr{mwIndex}, jc_p::Ptr{mwIndex}, pr_p::Ptr{V}) where {V,I}
     colptr::Vector{I} = a.colptr
     rinds::Vector{I} = a.rowval
     v::Vector{V} = a.nzval
@@ -473,7 +471,7 @@ function mxstructarray(d::Array{T}) where T
     return mx
 end
 
-mxstruct(d::Compat.AbstractDict) = mxstruct(collect(d)...)
+mxstruct(d::AbstractDict) = mxstruct(collect(d)...)
 mxarray(d) = mxstruct(d)
 
 
