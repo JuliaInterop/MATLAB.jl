@@ -5,7 +5,11 @@
 #   Session open & close
 #
 ###########################################################
-const default_startcmd = matlab_startcmd() * " -nosplash"
+const default_startflag = "-nosplash"
+# pass matlab flags directly or as a Vector of flags, i.e. "-a" or ["-a", "-b", "-c"]
+startcmd(flag::AbstractString = default_startflag) = matlab_startcmd() * " " * flag
+startcmd(flags::AbstractVector{T}) where {T<:AbstractString} = matlab_startcmd() * " " * join(flags, " ")
+
 
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
@@ -15,8 +19,8 @@ mutable struct MSession
     buffer::Vector{UInt8}
     bufptr::Ptr{UInt8}
 
-    function MSession(bufsize::Integer = default_output_buffer_size)
-        ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), default_startcmd)
+    function MSession(bufsize::Integer = default_output_buffer_size; flags=default_startflag)
+        ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), startcmd(flags))
         if ep == C_NULL
             Base.warn_once("Confirm MATLAB is installed and discoverable.")
             if iswindows()
