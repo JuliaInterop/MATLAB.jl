@@ -5,7 +5,7 @@ function matlab_home_path()
     matlab_home = get(ENV, "MATLAB_HOME", "")
     if isempty(matlab_home)
         if islinux()
-            matlab_home = dirname(dirname(realpath(chomp(readstring(`which matlab`)))))
+            matlab_home = dirname(dirname(realpath(chomp(read(`which matlab`, String)))))
         elseif isapple()
             default_dir = "/Applications"
             if isdir(default_dir)
