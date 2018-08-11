@@ -46,6 +46,24 @@ include("matfile.jl")
 include("engine.jl")
 include("matstr.jl")
 
+if iswindows()
+    # workaround "primary message table for module 77" error
+    # creates a dummy Engine session and keeps it open so the libraries used by all other
+    # Engine clients are not loaded and unloaded repeatedly
+    # see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
+
+    # initialization is delayed untill first call to MSession
+    const persistent_msession_ref = Ref{MSession}()
+    const persistent_msession_assigned = Ref(false) 
+
+    function assign_persistent_msession()
+        if persistent_msession_assigned[] == false
+            persistent_msession_assigned[] = true
+            persistent_msession_ref[] = MSession(0)
+        end
+    end
+end
+
 function __init__()
 
     # initialize library paths
@@ -151,14 +169,6 @@ function __init__()
     mat_put_variable[] = matfunc(:matPutVariable)
     mat_get_dir[]      = matfunc(:matGetDir)
 
-
-    if iswindows()
-        # workaround "primary message table for module 77" error
-        # creates a dummy Engine session and keeps it open so the libraries used by all other
-        # Engine clients are not loaded and unloaded repeatedly
-        # see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
-        global persistent_msession = MSession(0)
-    end
 end
 
 

@@ -16,6 +16,10 @@ mutable struct MSession
     bufptr::Ptr{UInt8}
 
     function MSession(bufsize::Integer = default_output_buffer_size)
+        if iswindows()
+            assign_persistent_msession()
+        end
+        
         ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), default_startcmd)
         if ep == C_NULL
             @warn "Confirm MATLAB is installed and discoverable."
