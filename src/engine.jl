@@ -72,31 +72,26 @@ end
 
 # default session
 
-default_msession = nothing
+const default_msession_ref = Ref{MSession}()
+
+# this function will start an MSession if default_msession_ref is undefined or if the
+# MSession has been closed so that the engine ptr is void
+function get_default_msession()
+    if !isassigned(default_msession_ref) || default_msession_ref[].ptr == C_NULL
+        default_msession_ref[] = MSession()
+    end
+    return default_msession_ref[]
+end
 
 function restart_default_msession(bufsize::Integer = default_output_buffer_size)
-    global default_msession
-    if default_msession !== nothing && default_msession.ptr != C_NULL
-        close(default_msession)
-    end
-    default_msession = MSession(bufsize)
+    close_default_msession()
+    default_msession_ref[] = MSession(bufsize)
     return nothing
 end
 
-
-function get_default_msession()
-    global default_msession
-    if default_msession === nothing
-        default_msession = MSession()
-    end
-    return default_msession::MSession
-end
-
 function close_default_msession()
-    global default_msession
-    if default_msession !== nothing
-        close(default_msession)
-        default_msession = nothing
+    if isassigned(default_msession_ref) && default_msession_ref[].ptr !== C_NULL
+        close(default_msession_ref[])
     end
     return nothing
 end
