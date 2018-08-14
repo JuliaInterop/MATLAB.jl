@@ -20,13 +20,17 @@ mutable struct MSession
     bufptr::Ptr{UInt8}
 
     function MSession(bufsize::Integer = default_output_buffer_size; flags=default_startflag)
+        if iswindows()
+            assign_persistent_msession()
+        end
+        
         ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), startcmd(flags))
         if ep == C_NULL
-            Base.warn_once("Confirm MATLAB is installed and discoverable.")
+            @warn "Confirm MATLAB is installed and discoverable."
             if iswindows()
-                Base.warn_once("Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.")
+                @warn "Ensure `matlab -regserver` has been run in a Command Prompt as Administrator."
             elseif islinux()
-                Base.warn_once("Ensure `csh` is installed; this may require running `sudo apt-get install csh`.")
+                @warn "Ensure `csh` is installed; this may require running `sudo apt-get install csh`."
             end
             throw(MEngineError("failed to open MATLAB engine session"))
         end
@@ -46,7 +50,7 @@ mutable struct MSession
         end
 
         self = new(ep, buf, bufptr)
-        @compat finalizer(release, self)
+        finalizer(release, self)
         return self
     end
 end
@@ -76,31 +80,26 @@ end
 
 # default session
 
-default_msession = nothing
+const default_msession_ref = Ref{MSession}()
+
+# this function will start an MSession if default_msession_ref is undefined or if the
+# MSession has been closed so that the engine ptr is void
+function get_default_msession()
+    if !isassigned(default_msession_ref) || default_msession_ref[].ptr == C_NULL
+        default_msession_ref[] = MSession()
+    end
+    return default_msession_ref[]
+end
 
 function restart_default_msession(bufsize::Integer = default_output_buffer_size)
-    global default_msession
-    if default_msession !== nothing && default_msession.ptr != C_NULL
-        close(default_msession)
-    end
-    default_msession = MSession(bufsize)
+    close_default_msession()
+    default_msession_ref[] = MSession(bufsize)
     return nothing
 end
 
-
-function get_default_msession()
-    global default_msession
-    if default_msession === nothing
-        default_msession = MSession()
-    end
-    return default_msession::MSession
-end
-
 function close_default_msession()
-    global default_msession
-    if default_msession !== nothing
-        close(default_msession)
-        default_msession = nothing
+    if isassigned(default_msession_ref) && default_msession_ref[].ptr !== C_NULL
+        close(default_msession_ref[])
     end
     return nothing
 end

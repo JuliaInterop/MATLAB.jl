@@ -1,11 +1,8 @@
-__precompile__()
-
 module MATLAB
 
-using Compat
-using Compat.Sys: islinux, iswindows, isapple
-using Compat.Libdl
-using Compat.SparseArrays
+using Base.Sys: islinux, iswindows, isapple
+using Libdl
+using SparseArrays
 
 import Base: eltype, close, size, copy, ndims, unsafe_convert
 
@@ -24,9 +21,6 @@ export mxarray, mxsparse, delete,
        mxcellarray, get_cell, set_cell,
        mxstruct, mxstructarray, mxnfields, get_fieldname, get_field, set_field,
        jvalue, jarray, jscalar, jvector, jmatrix, jsparse, jstring, jdict
-
-# mstatments
-export mstatement
 
 # engine & matfile
 export MSession, MatFile,
@@ -49,9 +43,26 @@ include("init.jl") # initialize Refs
 include("mxbase.jl")
 include("mxarray.jl")
 include("matfile.jl")
-include("mstatements.jl")
 include("engine.jl")
 include("matstr.jl")
+
+if iswindows()
+    # workaround "primary message table for module 77" error
+    # creates a dummy Engine session and keeps it open so the libraries used by all other
+    # Engine clients are not loaded and unloaded repeatedly
+    # see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
+
+    # initialization is delayed untill first call to MSession
+    const persistent_msession_ref = Ref{MSession}()
+    const persistent_msession_assigned = Ref(false) 
+
+    function assign_persistent_msession()
+        if persistent_msession_assigned[] == false
+            persistent_msession_assigned[] = true
+            persistent_msession_ref[] = MSession(0)
+        end
+    end
+end
 
 function __init__()
 
@@ -158,14 +169,6 @@ function __init__()
     mat_put_variable[] = matfunc(:matPutVariable)
     mat_get_dir[]      = matfunc(:matGetDir)
 
-
-    if iswindows()
-        # workaround "primary message table for module 77" error
-        # creates a dummy Engine session and keeps it open so the libraries used by all other
-        # Engine clients are not loaded and unloaded repeatedly
-        # see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
-        global persistent_msession = MSession(0)
-    end
 end
 
 
@@ -175,28 +178,5 @@ end
 #
 ###########################################################
 
-function nfields(mx::MxArray) 
-    Base.depwarn("MATLAB.nfields is deprecated, use mxnfields instead.", :nfields)
-    return mxfields(mx)
-end
-
-@deprecate jvariable jvalue
-
-function jvariable(mx::MxArray, ty::Type{AbstractString}) 
-    Base.depwarn("jvariable(mx::MxArray,ty::Type{AbstractString}) is 
-    deprecated, use jvalue(mx::MxArray,ty::Type{String}) instead. 
-    We now default to more strict typing on String types", :jvariable)
-    return jstring(mx)::String
-end
-
-@deprecate duplicate(mx::MxArray) copy(mx::MxArray)
-
-@deprecate mxempty() mxarray(Float64,0,0)
-
-export @matlab
-macro matlab(ex)
-    Base.depwarn("@matlab is deprecated, use custom string literal mat\"\" instead.", :matlab)
-    :( MATLAB.eval_string($(mstatement(ex))) )
-end
 
 end
