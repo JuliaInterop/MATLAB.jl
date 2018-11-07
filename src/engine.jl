@@ -5,7 +5,7 @@
 #   Session open & close
 #
 ###########################################################
-const default_startcmd = matlab_startcmd() * " -nosplash"
+const default_matlabcmd = matlabcmd * " -nosplash"
 
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
@@ -19,14 +19,14 @@ mutable struct MSession
         if iswindows()
             assign_persistent_msession()
         end
-        
-        ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), default_startcmd)
+
+        ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), default_matlabcmd)
         if ep == C_NULL
-            @warn "Confirm MATLAB is installed and discoverable."
+            @warn("Confirm MATLAB is installed and discoverable.", maxlog=1)
             if iswindows()
-                @warn "Ensure `matlab -regserver` has been run in a Command Prompt as Administrator."
+                @warn("Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.", maxlog=1)
             elseif islinux()
-                @warn "Ensure `csh` is installed; this may require running `sudo apt-get install csh`."
+                @warn("Ensure `csh` is installed; this may require running `sudo apt-get install csh`.", maxlog=1)
             end
             throw(MEngineError("failed to open MATLAB engine session"))
         end
