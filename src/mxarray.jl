@@ -344,12 +344,12 @@ end
 
 # cell arrays
 
-function mxcellarray(dims::Tuple{Vararg{Int}})
+function mxcellarray(dims::Tuple{Vararg{Integer,N}}) where {N}
     pm = ccall(mx_create_cell_array[], Ptr{Cvoid}, (mwSize, Ptr{mwSize}),
-        length(dims), _dims_to_mwSize(dims))
+        N, _dims_to_mwSize(dims))
     MxArray(pm)
 end
-mxcellarray(dims::Int...) = mxcellarray(dims)
+mxcellarray(dims::Integer...) = mxcellarray(dims)
 
 function get_cell(mx::MxArray, i::Integer)
     pm = ccall(mx_get_cell[], Ptr{Cvoid}, (Ptr{Cvoid}, mwIndex), mx, i-1)
