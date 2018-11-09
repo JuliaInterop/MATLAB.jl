@@ -193,11 +193,9 @@ function size(mx::MxArray)
 end
 
 function size(mx::MxArray, d::Integer)
-    nd = ndims(mx)
-    if d <= 0
-        throw(ArgumentError("The dimension must be a positive integer."))
-    end
+    d <= 0 && throw(ArgumentError("The dimension must be a positive integer."))
 
+    nd = ndims(mx)
     if nd == 2
         d == 1 ? nrows(mx) :
         d == 2 ? ncols(mx) : 1
@@ -216,22 +214,21 @@ end
 ###########################################################
 
 
-function _dims_to_mwSize(dims::Tuple{Vararg{Int}})
-    ndim = length(dims)
-    _dims = Vector{mwSize}(undef, ndim)
-    for i = 1:ndim
+function _dims_to_mwSize(dims::Tuple{Vararg{Integer,N}}) where {N}
+    _dims = Vector{mwSize}(undef,N)
+    for i = 1:N
         _dims[i] = mwSize(dims[i])
     end
     _dims
 end
 
-function mxarray(::Type{T}, dims::Tuple{Vararg{Int}}) where T<:MxNum
+function mxarray(::Type{T}, dims::Tuple{Vararg{Integer,N}}) where {T<:MxNum,N}
     pm = ccall(mx_create_numeric_array[], Ptr{Cvoid},
         (mwSize, Ptr{mwSize}, mxClassID, mxComplexity),
-        length(dims), _dims_to_mwSize(dims), mxclassid(T), mxcomplexflag(T))
+        N, _dims_to_mwSize(dims), mxclassid(T), mxcomplexflag(T))
     MxArray(pm)
 end
-mxarray(::Type{T}, dims::Int...) where {T<:MxNum} = mxarray(T, dims)
+mxarray(::Type{T}, dims::Integer...) where {T<:MxNum} = mxarray(T, dims)
 
 # create scalars
 
@@ -349,12 +346,12 @@ end
 
 # cell arrays
 
-function mxcellarray(dims::Tuple{Vararg{Int}})
+function mxcellarray(dims::Tuple{Vararg{Integer,N}}) where {N}
     pm = ccall(mx_create_cell_array[], Ptr{Cvoid}, (mwSize, Ptr{mwSize}),
-        length(dims), _dims_to_mwSize(dims))
+        N, _dims_to_mwSize(dims))
     MxArray(pm)
 end
-mxcellarray(dims::Int...) = mxcellarray(dims)
+mxcellarray(dims::Integer...) = mxcellarray(dims)
 
 function get_cell(mx::MxArray, i::Integer)
     pm = ccall(mx_get_cell[], Ptr{Cvoid}, (Ptr{Cvoid}, mwIndex), mx, i-1)
