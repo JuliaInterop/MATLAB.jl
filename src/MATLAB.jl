@@ -54,7 +54,7 @@ if iswindows()
 
     # initialization is delayed untill first call to MSession
     const persistent_msession_ref = Ref{MSession}()
-    const persistent_msession_assigned = Ref(false) 
+    const persistent_msession_assigned = Ref(false)
 
     function assign_persistent_msession()
         if persistent_msession_assigned[] == false
@@ -66,15 +66,15 @@ end
 
 function __init__()
 
-    # initialize library paths
-
-    lib_path = matlab_lib_path()
+    if matlabcmd != matlab_cmd()
+        error("MATLAB.jl built with version at $(matlabcmd), but detected new installation at $(matlab_cmd()).\nRun `import Pkg; Pkg.build(\"MATLAB\")` and restart Julia.")
+    end
 
     # load libraries
-    
-    libmx[]  = Libdl.dlopen(joinpath(lib_path, "libmx"), Libdl.RTLD_GLOBAL)
-    libmat[] = Libdl.dlopen(joinpath(lib_path, "libmat"), Libdl.RTLD_GLOBAL)
-    libeng[] = Libdl.dlopen(joinpath(lib_path, "libeng"), Libdl.RTLD_GLOBAL)
+
+    libmx[]  = Libdl.dlopen(joinpath(matlablibpath, "libmx"), Libdl.RTLD_GLOBAL)
+    libmat[] = Libdl.dlopen(joinpath(matlablibpath, "libmat"), Libdl.RTLD_GLOBAL)
+    libeng[] = Libdl.dlopen(joinpath(matlablibpath, "libeng"), Libdl.RTLD_GLOBAL)
 
     # engine functions
 

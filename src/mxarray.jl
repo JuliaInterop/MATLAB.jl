@@ -60,43 +60,45 @@ const MxNum = Union{MxRealNum, MxComplexNum}
 
 const mwSize = UInt
 const mwIndex = Int
-const mxClassID = Cint
-const mxComplexity = Cint
 
-const mxUNKNOWN_CLASS  = convert(mxClassID, 0)
-const mxCELL_CLASS     = convert(mxClassID, 1)
-const mxSTRUCT_CLASS   = convert(mxClassID, 2)
-const mxLOGICAL_CLASS  = convert(mxClassID, 3)
-const mxCHAR_CLASS     = convert(mxClassID, 4)
-const mxVOID_CLASS     = convert(mxClassID, 5)
-const mxDOUBLE_CLASS   = convert(mxClassID, 6)
-const mxSINGLE_CLASS   = convert(mxClassID, 7)
-const mxINT8_CLASS     = convert(mxClassID, 8)
-const mxUINT8_CLASS    = convert(mxClassID, 9)
-const mxINT16_CLASS    = convert(mxClassID, 10)
-const mxUINT16_CLASS   = convert(mxClassID, 11)
-const mxINT32_CLASS    = convert(mxClassID, 12)
-const mxUINT32_CLASS   = convert(mxClassID, 13)
-const mxINT64_CLASS    = convert(mxClassID, 14)
-const mxUINT64_CLASS   = convert(mxClassID, 15)
-const mxFUNCTION_CLASS = convert(mxClassID, 16)
-const mxOPAQUE_CLASS   = convert(mxClassID, 17)
-const mxOBJECT_CLASS   = convert(mxClassID, 18)
+@enum mxClassID::Cint begin
+    mxUNKNOWN_CLASS
+    mxCELL_CLASS
+    mxSTRUCT_CLASS
+    mxLOGICAL_CLASS
+    mxCHAR_CLASS
+    mxVOID_CLASS
+    mxDOUBLE_CLASS
+    mxSINGLE_CLASS
+    mxINT8_CLASS
+    mxUINT8_CLASS
+    mxINT16_CLASS
+    mxUINT16_CLASS
+    mxINT32_CLASS
+    mxUINT32_CLASS
+    mxINT64_CLASS
+    mxUINT64_CLASS
+    mxFUNCTION_CLASS
+    mxOPAQUE_CLASS
+    mxOBJECT_CLASS
+end
 
-const mxREAL    = convert(mxComplexity, 0)
-const mxCOMPLEX = convert(mxComplexity, 1)
+@enum mxComplexity::Cint begin
+    mxREAL
+    mxCOMPLEX
+end
 
-mxclassid(::Type{Bool})    = mxLOGICAL_CLASS::Cint
-mxclassid(::Union{Type{Float64}, Type{ComplexF64}}) = mxDOUBLE_CLASS::Cint
-mxclassid(::Union{Type{Float32}, Type{ComplexF32}}) = mxSINGLE_CLASS::Cint
-mxclassid(::Type{Int8})    = mxINT8_CLASS::Cint
-mxclassid(::Type{UInt8})   = mxUINT8_CLASS::Cint
-mxclassid(::Type{Int16})   = mxINT16_CLASS::Cint
-mxclassid(::Type{UInt16})  = mxUINT16_CLASS::Cint
-mxclassid(::Type{Int32})   = mxINT32_CLASS::Cint
-mxclassid(::Type{UInt32})  = mxUINT32_CLASS::Cint
-mxclassid(::Type{Int64})   = mxINT64_CLASS::Cint
-mxclassid(::Type{UInt64})  = mxUINT64_CLASS::Cint
+mxclassid(::Type{Bool})    = mxLOGICAL_CLASS
+mxclassid(::Union{Type{Float64}, Type{ComplexF64}}) = mxDOUBLE_CLASS
+mxclassid(::Union{Type{Float32}, Type{ComplexF32}}) = mxSINGLE_CLASS
+mxclassid(::Type{Int8})    = mxINT8_CLASS
+mxclassid(::Type{UInt8})   = mxUINT8_CLASS
+mxclassid(::Type{Int16})   = mxINT16_CLASS
+mxclassid(::Type{UInt16})  = mxUINT16_CLASS
+mxclassid(::Type{Int32})   = mxINT32_CLASS
+mxclassid(::Type{UInt32})  = mxUINT32_CLASS
+mxclassid(::Type{Int64})   = mxINT64_CLASS
+mxclassid(::Type{UInt64})  = mxUINT64_CLASS
 
 mxcomplexflag(::Type{T}) where {T<:MxRealNum}    = mxREAL
 mxcomplexflag(::Type{T}) where {T<:MxComplexNum} = mxCOMPLEX
@@ -185,24 +187,22 @@ function size(mx::MxArray)
     _dims = unsafe_wrap(Array, pdims, (nd,))
     dims = Vector{Int}(undef, nd)
     for i = 1:nd
-        dims[i] = convert(Int, _dims[i])
+        dims[i] = Int(_dims[i])
     end
     tuple(dims...)
 end
 
 function size(mx::MxArray, d::Integer)
-    nd = ndims(mx)
-    if d <= 0
-        throw(ArgumentError("The dimension must be a positive integer."))
-    end
+    d <= 0 && throw(ArgumentError("The dimension must be a positive integer."))
 
+    nd = ndims(mx)
     if nd == 2
         d == 1 ? nrows(mx) :
         d == 2 ? ncols(mx) : 1
     else
         pdims::Ptr{mwSize} = @mxget_attr(mx_get_dims[], Ptr{mwSize}, mx)
         _dims = unsafe_wrap(Array, pdims, (nd,))
-        d <= nd ? convert(Int, _dims[d]) : 1
+        d <= nd ? Int(_dims[d]) : 1
     end
 end
 
@@ -214,22 +214,21 @@ end
 ###########################################################
 
 
-function _dims_to_mwSize(dims::Tuple{Vararg{Int}})
-    ndim = length(dims)
-    _dims = Vector{mwSize}(undef, ndim)
-    for i = 1:ndim
-        _dims[i] = convert(mwSize, dims[i])
+function _dims_to_mwSize(dims::Tuple{Vararg{Integer,N}}) where {N}
+    _dims = Vector{mwSize}(undef,N)
+    for i = 1:N
+        _dims[i] = mwSize(dims[i])
     end
     _dims
 end
 
-function mxarray(ty::Type{T}, dims::Tuple{Vararg{Int}}) where T<:MxNum
+function mxarray(::Type{T}, dims::Tuple{Vararg{Integer,N}}) where {T<:MxNum,N}
     pm = ccall(mx_create_numeric_array[], Ptr{Cvoid},
         (mwSize, Ptr{mwSize}, mxClassID, mxComplexity),
-        length(dims), _dims_to_mwSize(dims), mxclassid(ty), mxcomplexflag(ty))
+        N, _dims_to_mwSize(dims), mxclassid(T), mxcomplexflag(T))
     MxArray(pm)
 end
-mxarray(ty::Type{T}, dims::Int...) where {T<:MxNum} = mxarray(ty, dims)
+mxarray(::Type{T}, dims::Integer...) where {T<:MxNum} = mxarray(T, dims)
 
 # create scalars
 
@@ -347,12 +346,12 @@ end
 
 # cell arrays
 
-function mxcellarray(dims::Tuple{Vararg{Int}})
+function mxcellarray(dims::Tuple{Vararg{Integer,N}}) where {N}
     pm = ccall(mx_create_cell_array[], Ptr{Cvoid}, (mwSize, Ptr{mwSize}),
-        length(dims), _dims_to_mwSize(dims))
+        N, _dims_to_mwSize(dims))
     MxArray(pm)
 end
-mxcellarray(dims::Int...) = mxcellarray(dims)
+mxcellarray(dims::Integer...) = mxcellarray(dims)
 
 function get_cell(mx::MxArray, i::Integer)
     pm = ccall(mx_get_cell[], Ptr{Cvoid}, (Ptr{Cvoid}, mwIndex), mx, i-1)
@@ -613,13 +612,13 @@ end
 
 # deep conversion from MATLAB variable to Julia array
 
-jvalue(mx::MxArray, ty::Type{Array})  = jarray(mx)
-jvalue(mx::MxArray, ty::Type{Vector}) = jvector(mx)
-jvalue(mx::MxArray, ty::Type{Matrix}) = jmatrix(mx)
-jvalue(mx::MxArray, ty::Type{Number}) = jscalar(mx)::Number
-jvalue(mx::MxArray, ty::Type{String}) = String(mx)
-jvalue(mx::MxArray, ty::Type{Dict}) = Dict(mx)
-jvalue(mx::MxArray, ty::Type{SparseMatrixCSC}) = jsparse(mx)
+jvalue(mx::MxArray, ::Type{Array})  = jarray(mx)
+jvalue(mx::MxArray, ::Type{Vector}) = jvector(mx)
+jvalue(mx::MxArray, ::Type{Matrix}) = jmatrix(mx)
+jvalue(mx::MxArray, ::Type{Number}) = jscalar(mx)::Number
+jvalue(mx::MxArray, ::Type{String}) = String(mx)
+jvalue(mx::MxArray, ::Type{Dict}) = Dict(mx)
+jvalue(mx::MxArray, ::Type{SparseMatrixCSC}) = jsparse(mx)
 
 # legacy support (eventually drop, when all constructors added)
 jdict(mx::MxArray) = Dict(mx)

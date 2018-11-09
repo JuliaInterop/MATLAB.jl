@@ -5,11 +5,11 @@
 #   Session open & close
 #
 ###########################################################
+const default_matlabcmd = matlabcmd * " -nosplash"
 const default_startflag = "-nosplash"
 # pass matlab flags directly or as a Vector of flags, i.e. "-a" or ["-a", "-b", "-c"]
-startcmd(flag::AbstractString = default_startflag) = matlab_startcmd() * " " * flag
-startcmd(flags::AbstractVector{T}) where {T<:AbstractString} = matlab_startcmd() * " " * join(flags, " ")
-
+startcmd(flag::AbstractString = default_startflag) = default_matlabcmd * " " * flag
+startcmd(flags::AbstractVector{T}) where {T<:AbstractString} = default_matlabcmd * " " * join(flags, " ")
 
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
@@ -23,14 +23,13 @@ mutable struct MSession
         if iswindows()
             assign_persistent_msession()
         end
-        
         ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), startcmd(flags))
         if ep == C_NULL
-            @warn "Confirm MATLAB is installed and discoverable."
+            @warn("Confirm MATLAB is installed and discoverable.", maxlog=1)
             if iswindows()
-                @warn "Ensure `matlab -regserver` has been run in a Command Prompt as Administrator."
+                @warn("Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.", maxlog=1)
             elseif islinux()
-                @warn "Ensure `csh` is installed; this may require running `sudo apt-get install csh`."
+                @warn("Ensure `csh` is installed; this may require running `sudo apt-get install csh`.", maxlog=1)
             end
             throw(MEngineError("failed to open MATLAB engine session"))
         end
