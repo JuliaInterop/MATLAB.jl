@@ -1,7 +1,7 @@
 # Determine MATLAB library path and provide facilities to load libraries with
 # this path
 
-function matlab_home_path()
+function matlab_homepath()
     matlab_home = get(ENV, "MATLAB_HOME", "")
     if isempty(matlab_home)
         if islinux()
@@ -32,9 +32,9 @@ function matlab_home_path()
     return matlab_home
 end
 
-function matlab_lib_path()
+function matlab_libpath()
     # get path to MATLAB libraries
-    matlab_home = matlab_home_path()
+    matlab_home = matlab_homepath()
     matlab_lib_dir = if islinux()
         Sys.WORD_SIZE == 32 ? "glnx86" : "glnxa64"
     elseif isapple()
@@ -42,29 +42,33 @@ function matlab_lib_path()
     elseif iswindows()
         Sys.WORD_SIZE == 32 ? "win32" : "win64"
     end
-    matlab_lib_path = joinpath(matlab_home, "bin", matlab_lib_dir)
-    if !isdir(matlab_lib_path)
+    matlab_libpath = joinpath(matlab_home, "bin", matlab_lib_dir)
+    if !isdir(matlab_libpath)
         error("The MATLAB library path could not be found.")
     end
-    return matlab_lib_path
+    return matlab_libpath
 end
 
-function matlab_startcmd()
-    matlab_home = matlab_home_path()
+function matlab_cmd()
+    matlab_home = matlab_homepath()
     if !iswindows()
-        default_startcmd = joinpath(matlab_home, "bin", "matlab")
-        if !isfile(default_startcmd)
+        matlab_cmd = joinpath(matlab_home, "bin", "matlab")
+        if !isfile(matlab_cmd)
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
         end
-        default_startcmd = "exec $(Base.shell_escape(default_startcmd))"
+        matlab_cmd = "exec $(Base.shell_escape(matlab_cmd))"
     elseif iswindows()
-        default_startcmd = joinpath(matlab_home, "bin", (Sys.WORD_SIZE == 32 ? "win32" : "win64"), "MATLAB.exe")
-        if !isfile(default_startcmd)
+        matlab_cmd = joinpath(matlab_home, "bin", (Sys.WORD_SIZE == 32 ? "win32" : "win64"), "MATLAB.exe")
+        if !isfile(matlab_cmd)
             error("The MATLAB path is invalid. Set the MATLAB_HOME evironmental variable to the MATLAB root.")
         end
     end
-    return default_startcmd
+    return matlab_cmd
 end
+
+
+const matlablibpath = matlab_libpath()
+const matlabcmd = matlab_cmd()
 
 # helper library access function
 
