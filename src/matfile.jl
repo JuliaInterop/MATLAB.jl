@@ -76,10 +76,10 @@ end
 
 function variable_names(f::MatFile)
     # get a list of all variable names
-    _n = Cint[0]
-    _a = ccall(mat_get_dir[], Ptr{Ptr{Cchar}}, (Ptr{Cvoid}, Ptr{Cint}), f, _n)
+    _n = Ref{Cint}()
+    _a = ccall(mat_get_dir[], Ptr{Ptr{Cchar}}, (Ptr{Cvoid}, Ref{Cint}), f, _n)
 
-    n = Int(_n[1])
+    n = Int(_n[])
     a = unsafe_wrap(Array, _a, (n,))
 
     names = String[unsafe_string(s) for s in a]
