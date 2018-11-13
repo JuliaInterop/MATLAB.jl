@@ -1,6 +1,6 @@
 ## MATLAB
 
-The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from [Julia](http://julialang.org).  In other words, this package allows users to call MATLAB functions within Julia, thus making it easy to interoperate with MATLAB from the Julia language.
+The `MATLAB.jl` package provides an interface for using [MATLAB™](http://www.mathworks.com/products/matlab/) from [Julia](http://julialang.org) using the MATLAB C api.  In other words, this package allows users to call MATLAB functions within Julia, thus making it easy to interoperate with MATLAB from the Julia language.
 
 You cannot use `MATLAB.jl` without having purchased and installed a copy of MATLAB™ from [MathWorks](http://www.mathworks.com/). This package is available free of charge and in no way replaces or alters any functionality of MathWorks's MATLAB product.
 
@@ -11,6 +11,10 @@ Generally, this package is comprised of two aspects:
 * Creating and manipulating mxArrays (the data structure that MATLAB used to represent arrays and other kinds of data)
 
 * Communicating with MATLAB engine sessions
+
+### Note
+MATLAB string arrays are not supported, and will throw an error. This also applies if they are nested within a MATLAB struct. This is a limitation of the MATLAB C api. The MATLAB function 'convertContainedStringsToChars' may be used to facilitate conversion to a compatible format for use with `MATLAB.jl`.
+
 
 ## Installation
 
