@@ -5,11 +5,11 @@
 #   Session open & close
 #
 ###########################################################
-const default_matlabcmd = matlabcmd * " -nosplash"
-const default_startflag = "-nosplash"
+const default_startflag = "" # no additional flags
+default_matlabcmd() = matlab_cmd() * " -nosplash"
 # pass matlab flags directly or as a Vector of flags, i.e. "-a" or ["-a", "-b", "-c"]
-startcmd(flag::AbstractString = default_startflag) = default_matlabcmd * " " * flag
-startcmd(flags::AbstractVector{T}) where {T<:AbstractString} = default_matlabcmd * " " * join(flags, " ")
+startcmd(flag::AbstractString = default_startflag) = isempty(flag) ? default_matlabcmd() : default_matlabcmd() * " " * flag
+startcmd(flags::AbstractVector{T}) where {T<:AbstractString} = isempty(flags) ? default_matlabcmd() : default_matlabcmd() * " " * join(flags, " ")
 
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
