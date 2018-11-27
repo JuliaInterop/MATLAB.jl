@@ -67,9 +67,6 @@ function matlab_cmd()
 end
 
 
-const matlablibpath = matlab_libpath()
-const matlabcmd = matlab_cmd()
-
 # helper library access function
 
 engfunc(fun::Symbol) = Libdl.dlsym(libeng[], fun)
