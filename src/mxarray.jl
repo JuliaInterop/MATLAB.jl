@@ -312,7 +312,7 @@ function _copy_sparse_mat(a::SparseMatrixCSC{V,I}, ir_p::Ptr{mwIndex}, jc_p::Ptr
         jc[i] = colptr[i] - 1
     end
 
-    ccall(:memcpy, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, UInt), pr_p, v, nnz*sizeof(V))
+    copyto!(unsafe_wrap(Array, pr_p, (nnz,)), v)
 end
 
 function mxarray(a::SparseMatrixCSC{V,I}) where {V<:Union{Float64,Bool},I}
