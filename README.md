@@ -13,7 +13,10 @@ Generally, this package is comprised of two aspects:
 * Communicating with MATLAB engine sessions
 
 **Warning**:
-MATLAB string arrays are not supported, and will throw an error exception. This also applies if they are nested within a MATLAB struct. This is a limitation of the MATLAB C api. The MATLAB function `convertContainedStringsToChars` may be used to facilitate conversion to a compatible format for use with `MATLAB.jl`.
+
+* MATLAB string arrays are not supported, and will throw an error exception. This also applies if they are nested within a MATLAB struct. This is a limitation of the MATLAB C api. The MATLAB function `convertContainedStringsToChars` may be used to facilitate conversion to a compatible format for use with `MATLAB.jl`.
+
+* Threading is also not supported within Julia when using the MATLAB.jl library.
 
 
 ## Installation
