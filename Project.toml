@@ -2,10 +2,11 @@ name = "MATLAB"
 uuid = "10e44e05-a98a-55b3-a45b-ba969058deb6"
 repo = "https://github.com/JuliaInterop/MATLAB.jl.git"
 license = "MIT"
-version = "v0.7.0"
+version = "v0.8.0"
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+ReplMaker = "b873ce64-0db9-51f5-a568-4457d8e49576"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [extras]

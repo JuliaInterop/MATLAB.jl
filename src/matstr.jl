@@ -94,7 +94,7 @@ function check_assignment(interp, i)
     return (assigned, used)
 end
 
-function do_mat_str(ex)
+function do_mat_str(ex, interactive=false)
     # Hack to do interpolation
     interp = Meta.parse(string("\"\"\"", replace(ex, "\"\"\"" => "\\\"\"\""), "\"\"\""))
     if isa(interp, String)
@@ -151,7 +151,9 @@ function do_mat_str(ex)
 
     # Add a semicolon to the end of the last statement to suppress output
     isa(interp[end], String) && (interp[end] = rstrip(interp[end]))
-    push!(interp, ";")
+    if !interactive || !isempty(assignedvars)
+        push!(interp, ";")
+    end
 
     # Figure out if `ans` exists in code to avoid an error if it doesn't
     push!(interp, "\nmatlab_jl_has_ans = exist('ans', 'var');")
@@ -164,7 +166,7 @@ function do_mat_str(ex)
             # Clear variables we created
             :(eval_string($(string("clear ", join(union(usedvars, assignedvars), " "), ";"))))
         end)
-        if get_variable(:matlab_jl_has_ans) != 0
+        if $(!interactive) && get_variable(:matlab_jl_has_ans) != 0
             # Return ans if it was set
             get_variable(:ans)
         end
@@ -173,4 +175,8 @@ end
 
 macro mat_str(ex)
     do_mat_str(ex)
+end
+
+macro replmat_str(ex)
+    do_mat_str(ex, true)
 end
