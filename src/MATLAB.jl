@@ -46,7 +46,6 @@ include("mxarray.jl")
 include("matfile.jl")
 include("engine.jl")
 include("matstr.jl")
-# include("repl.jl")
 
 if iswindows()
     # workaround "primary message table for module 77" error
@@ -173,7 +172,7 @@ function __init__()
         initrepl(str -> Meta.parse("MATLAB.replmat\"$str\"");
             prompt_text = ">> ",
             start_key = ">",
-        mode_name = "MATLAB-Mode",
+            mode_name = "MATLAB-Mode",
         )
     end
 end
