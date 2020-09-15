@@ -2,6 +2,7 @@ module MATLAB
 
 using Base.Sys: islinux, iswindows, isapple
 using Libdl
+using ReplMaker
 using SparseArrays
 
 import Base: eltype, close, size, copy, ndims, unsafe_convert
@@ -45,6 +46,7 @@ include("mxarray.jl")
 include("matfile.jl")
 include("engine.jl")
 include("matstr.jl")
+# include("repl.jl")
 
 if iswindows()
     # workaround "primary message table for module 77" error
@@ -166,6 +168,14 @@ function __init__()
     mat_put_variable[] = matfunc(:matPutVariable)
     mat_get_dir[]      = matfunc(:matGetDir)
 
+    
+    if isinteractive()
+        initrepl(str -> Meta.parse("MATLAB.replmat\"$str\"");
+            prompt_text = ">> ",
+            start_key = ">",
+        mode_name = "MATLAB-Mode",
+        )
+    end
 end
 
 
