@@ -354,10 +354,11 @@ delete(x)
 @test isa(y, Array{Float64,3})
 @test isequal(y, a)
 
-a = sparse([1.0 1.0im])
+a = sparse([1.0 2.0im; 0 -1.0im])
 a_mx = mxarray(a)
 a_jl = jvalue(a_mx)
 delete(a_mx)
+@test a == a_jl
 @test isa(a_jl, SparseMatrixCSC{Complex{Float64}})
 
 a = "MATLAB"
