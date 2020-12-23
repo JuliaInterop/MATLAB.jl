@@ -299,7 +299,7 @@ function mxsparse(ty::Type{Bool}, m::Integer, n::Integer, nzmax::Integer)
     MxArray(pm)
 end
 
-function _copy_sparse_mat(a::SparseMatrixCSC{V,I}, ir_p::Ptr{mwIndex}, jc_p::Ptr{mwIndex}, pr_p::Ptr{Float64}, pi_p::Ptr{Float64}) where {V <: ComplexF64,I}
+function _copy_sparse_mat(a::SparseMatrixCSC{V,I}, ir_p::Ptr{mwIndex}, jc_p::Ptr{mwIndex}, pr_p::Ptr{Float64}, pi_p::Ptr{Float64}) where {V<:ComplexF64,I}
     colptr::Vector{I} = a.colptr
     rinds::Vector{I} = a.rowval
     vr::Vector{Float64} = real(a.nzval)
