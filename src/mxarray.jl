@@ -287,10 +287,40 @@ function mxsparse(ty::Type{Float64}, m::Integer, n::Integer, nzmax::Integer)
     MxArray(pm)
 end
 
+function mxsparse(ty::Type{ComplexF64}, m::Integer, n::Integer, nzmax::Integer)
+    pm = ccall(mx_create_sparse[], Ptr{Cvoid},
+        (mwSize, mwSize, mwSize, mxComplexity), m, n, nzmax, mxCOMPLEX)
+    MxArray(pm)
+end
+
 function mxsparse(ty::Type{Bool}, m::Integer, n::Integer, nzmax::Integer)
     pm = ccall(mx_create_sparse_logical[], Ptr{Cvoid},
         (mwSize, mwSize, mwSize), m, n, nzmax)
     MxArray(pm)
+end
+
+function _copy_sparse_mat(a::SparseMatrixCSC{V,I}, ir_p::Ptr{mwIndex}, jc_p::Ptr{mwIndex}, pr_p::Ptr{Float64}, pi_p::Ptr{Float64}) where {V<:ComplexF64,I}
+    colptr::Vector{I} = a.colptr
+    rinds::Vector{I} = a.rowval
+    vr::Vector{Float64} = real(a.nzval)
+    vi::Vector{Float64} = imag(a.nzval)
+    n::Int = a.n
+    nnz::Int = length(vr)
+
+    # Note: ir and jc contain zero-based indices
+
+    ir = unsafe_wrap(Array, ir_p, (nnz,))
+    for i = 1:nnz
+        ir[i] = rinds[i] - 1
+    end
+
+    jc = unsafe_wrap(Array, jc_p, (n+1,))
+    for i = 1:n+1
+        jc[i] = colptr[i] - 1
+    end
+
+    copyto!(unsafe_wrap(Array, pr_p, (nnz,)), vr)
+    copyto!(unsafe_wrap(Array, pi_p, (nnz,)), vi)
 end
 
 function _copy_sparse_mat(a::SparseMatrixCSC{V,I}, ir_p::Ptr{mwIndex}, jc_p::Ptr{mwIndex}, pr_p::Ptr{V}) where {V,I}
@@ -315,19 +345,24 @@ function _copy_sparse_mat(a::SparseMatrixCSC{V,I}, ir_p::Ptr{mwIndex}, jc_p::Ptr
     copyto!(unsafe_wrap(Array, pr_p, (nnz,)), v)
 end
 
-function mxarray(a::SparseMatrixCSC{V,I}) where {V<:Union{Float64,Bool},I}
+function mxarray(a::SparseMatrixCSC{V,I}) where {V<:Union{Float64,ComplexF64,Bool},I}
     m::Int = a.m
     n::Int = a.n
     nnz = length(a.nzval)
     @assert nnz == a.colptr[n+1]-1
 
     mx = mxsparse(V, m, n, nnz)
-
     ir_p = ccall(mx_get_ir[], Ptr{mwIndex}, (Ptr{Cvoid},), mx)
     jc_p = ccall(mx_get_jc[], Ptr{mwIndex}, (Ptr{Cvoid},), mx)
-    pr_p = ccall(mx_get_pr[], Ptr{V}, (Ptr{Cvoid},), mx)
 
-    _copy_sparse_mat(a, ir_p, jc_p, pr_p)
+    if V <: ComplexF64
+        pr_p = ccall(mx_get_pr[], Ptr{Float64}, (Ptr{Cvoid},), mx)
+        pi_p = ccall(mx_get_pi[], Ptr{Float64}, (Ptr{Cvoid},), mx)
+        _copy_sparse_mat(a, ir_p, jc_p, pr_p, pi_p)
+    else
+        pr_p = ccall(mx_get_pr[], Ptr{V}, (Ptr{Cvoid},), mx)
+        _copy_sparse_mat(a, ir_p, jc_p, pr_p)
+    end
     return mx
 end
 
@@ -537,7 +572,6 @@ function _jsparse(ty::Type{T}, mx::MxArray) where T<:MxRealNum
     n = ncols(mx)
     ir_ptr = ccall(mx_get_ir[], Ptr{mwIndex}, (Ptr{Cvoid},), mx)
     jc_ptr = ccall(mx_get_jc[], Ptr{mwIndex}, (Ptr{Cvoid},), mx)
-    pr_ptr = ccall(mx_get_pr[], Ptr{T}, (Ptr{Cvoid},), mx)
 
     jc_a::Vector{mwIndex} = unsafe_wrap(Array, jc_ptr, (n+1,))
     nnz = jc_a[n+1]
@@ -555,8 +589,15 @@ function _jsparse(ty::Type{T}, mx::MxArray) where T<:MxRealNum
         jc[i] = jc_x[i] + 1
     end
 
+    pr_ptr = ccall(mx_get_pr[], Ptr{T}, (Ptr{Cvoid},), mx)
     pr::Vector{T} = copy(unsafe_wrap(Array, pr_ptr, (nnz,)))
-    return SparseMatrixCSC(m, n, jc, ir, pr)
+    if is_complex(mx)
+        pi_ptr = ccall(mx_get_pi[], Ptr{T}, (Ptr{Cvoid},), mx)
+        pi::Vector{T} = copy(unsafe_wrap(Array, pi_ptr, (nnz,)))
+        return SparseMatrixCSC(m, n, jc, ir, pr + im.*pi)
+    else
+        return SparseMatrixCSC(m, n, jc, ir, pr)
+    end
 end
 
 function jsparse(mx::MxArray)

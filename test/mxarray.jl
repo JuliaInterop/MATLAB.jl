@@ -209,6 +209,15 @@ a2 = jsparse(a_mx)
 @test isequal(a2, a)
 delete(a_mx)
 
+a = sparse([1.0 1.0im])
+a_mx = mxarray(a)
+@test is_sparse(a_mx)
+@test is_double(a_mx)
+@test is_complex(a_mx)
+@test nrows(a_mx) == 1
+@test ncols(a_mx) == 2
+delete(a_mx)
+
 # strings
 
 s = "MATLAB.jl"
@@ -344,6 +353,13 @@ y = jvalue(x)
 delete(x)
 @test isa(y, Array{Float64,3})
 @test isequal(y, a)
+
+a = sparse([1.0 2.0im; 0 -1.0im])
+a_mx = mxarray(a)
+a_jl = jvalue(a_mx)
+delete(a_mx)
+@test a == a_jl
+@test isa(a_jl, SparseMatrixCSC{Complex{Float64}})
 
 a = "MATLAB"
 x = mxarray(a)
