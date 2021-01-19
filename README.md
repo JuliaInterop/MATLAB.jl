@@ -27,7 +27,7 @@ By default, `MATLAB.jl` uses the MATLAB installation with the greatest version n
 
 ### Windows
 
-1. Start a Command Prompt as an Administrator and enter `matlab /regserver`.
+1. For Matlab R2020a onwards, you should be able to go directly to step 2. If you encounter issues, run `matlab -batch "comserver('register')"` in the command prompt. For earlier versions of Matlab, start a command prompt as an administrator and enter `matlab /regserver`.
 
 2. From Julia run: `Pkg.add("MATLAB")`
 
