@@ -25,6 +25,8 @@ mutable struct MSession
         end
         ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), startcmd(flags))
         if ep == C_NULL
+            @show eng_open[]
+            @show matlab_libpath
             @warn("Confirm MATLAB is installed and discoverable.", maxlog=1)
             if Sys.iswindows()
                 @warn("Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.", maxlog=1)
