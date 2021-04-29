@@ -2,22 +2,22 @@ import Libdl
 
 const depsfile = joinpath(@__DIR__, "deps.jl")
 
-# Determine MATLAB library path and provide facilities to load libraries with
-# this path
-
-function find_matlab_homepath()
-    matlab_home = get(ENV, "MATLAB_HOME", nothing)
-    if isnothing(matlab_home)
+function find_matlab_root()
+    # Determine MATLAB library path and provide facilities to load libraries with this path
+    matlab_root = get(ENV, "MATLAB_ROOT",
+                        get(ENV, "MATLAB_HOME", nothing))
+    if isnothing(matlab_root)
         matlab_exe = Sys.which("matlab")
-        matlab_home = !isnothing(matlab_exe) ? dirname(dirname(matlab_exe)) : nothing
-        if isnothing(matlab_home)
+        if !isnothing(matlab_exe)
+            matlab_root = dirname(dirname(matlab_exe))
+        else
             if Sys.isapple()
                 default_dir = "/Applications"
                 if isdir(default_dir)
                     dirs = readdir(default_dir)
                     filter!(app -> occursin(r"^MATLAB_R[0-9]+[ab]\.app$", app), dirs)
                     if !isempty(dirs)
-                        matlab_home = joinpath(default_dir, maximum(dirs))
+                        matlab_root = joinpath(default_dir, maximum(dirs))
                     end
                 end
             elseif Sys.iswindows()
@@ -26,57 +26,47 @@ function find_matlab_homepath()
                     dirs = readdir(default_dir)
                     filter!(dir -> occursin(r"^R[0-9]+[ab]$", dir), dirs)
                     if !isempty(dirs)
-                        matlab_home = joinpath(default_dir, maximum(dirs))
+                        matlab_root = joinpath(default_dir, maximum(dirs))
                     end
                 end
             end
         end
     end
-    if isnothing(matlab_home)
-        return nothing
-    else
-        @info("Found MATLAB home path at $matlab_home")
-        return matlab_home
-    end
+    !isnothing(matlab_root) && isdir(matlab_root) && @info("Detected MATLAB root folder at \"$matlab_root\"")
+    return matlab_root
 end
 
-function find_matlab_libpath(matlab_home)
+function find_matlab_libpath(matlab_root)
     # get path to MATLAB libraries
-    matlab_lib_dir = if Sys.islinux()
+    matlab_libdir = if Sys.islinux()
         Sys.WORD_SIZE == 32 ? "glnx86" : "glnxa64"
     elseif Sys.isapple()
         Sys.WORD_SIZE == 32 ? "maci" : "maci64"
     elseif Sys.iswindows()
         Sys.WORD_SIZE == 32 ? "win32" : "win64"
     end
-    matlab_libpath = joinpath(matlab_home, "bin", matlab_lib_dir)
-    if !isdir(matlab_libpath)
-        @warn("The MATLAB library path could not be found.")
-    end
+    matlab_libpath = joinpath(matlab_root, "bin", matlab_libdir)
+    isdir(matlab_libpath) && @info("Detected MATLAB library path at \"$matlab_libpath\"")
     return matlab_libpath
 end
 
-function find_matlab_cmd(matlab_home)
-    if !Sys.iswindows()
-        matlab_cmd = joinpath(matlab_home, "bin", "matlab")
-        if !isfile(matlab_cmd)
-            @warn("The MATLAB path is invalid. Ensure the \"MATLAB_HOME\" evironmental variable to the MATLAB root directory.")
-        end
-        matlab_cmd = "exec $(Base.shell_escape(matlab_cmd))"
-    elseif Sys.iswindows()
-        matlab_cmd = joinpath(matlab_home, "bin", (Sys.WORD_SIZE == 32 ? "win32" : "win64"), "MATLAB.exe")
-        if !isfile(matlab_cmd)
-            error("The MATLAB path is invalid. Ensure the \"MATLAB_HOME\" evironmental variable to the MATLAB root directory.")
-        end
+function find_matlab_cmd(matlab_root)
+    if Sys.iswindows()
+        matlab_cmd = joinpath(matlab_root, "bin", (Sys.WORD_SIZE == 32 ? "win32" : "win64"), "matlab.exe")
+        isfile(matlab_cmd) && @info("Detected MATLAB executable at \"$matlab_cmd\"")
+    else
+        matlab_exe = joinpath(matlab_root, "bin", "matlab")
+        isfile(matlab_exe) && @info("Detected MATLAB executable at \"$matlab_exe\"")
+        matlab_cmd = "exec $(Base.shell_escape(matlab_exe))"
     end
     return matlab_cmd
 end
 
-matlab_homepath = find_matlab_homepath()
+matlab_root = find_matlab_root()
 
-if !isnothing(matlab_homepath)
-    matlab_libpath = find_matlab_libpath(matlab_homepath)
-    matlab_cmd = find_matlab_cmd(matlab_homepath)
+if !isnothing(matlab_root)
+    matlab_libpath = find_matlab_libpath(matlab_root)
+    matlab_cmd = find_matlab_cmd(matlab_root)
     libmx_size = filesize(Libdl.dlpath(joinpath(matlab_libpath, "libmx")))
     open(depsfile, "w") do io
         println(io,
@@ -115,5 +105,5 @@ elseif get(ENV, "JULIA_REGISTRYCI_AUTOMERGE", nothing) == "true" || get(ENV, "CI
             println(io, "const libmx_size = $libmx_size")
     end
 else
-    error("MATLAB cannot be found. Set the \"MATLAB_HOME\" environment variable to the MATLAB root directory and re-run Pkg.build(\"MATLAB\").")
+    error("MATLAB cannot be found. Set the \"MATLAB_ROOT\" environment variable to the MATLAB root directory and re-run Pkg.build(\"MATLAB\").")
 end
