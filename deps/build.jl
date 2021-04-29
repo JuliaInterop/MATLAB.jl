@@ -32,7 +32,7 @@ function find_matlab_root()
             end
         end
     end
-    isdir(matlab_root) && @info("Detected MATLAB root folder at \"$matlab_root\"")
+    !isnothing(matlab_root) && isdir(matlab_root) && @info("Detected MATLAB root folder at \"$matlab_root\"")
     return matlab_root
 end
 
