@@ -38,27 +38,27 @@ end
 
 function find_matlab_libpath(matlab_root)
     # get path to MATLAB libraries
-    matlab_lib_dir = if Sys.islinux()
+    matlab_libdir = if Sys.islinux()
         Sys.WORD_SIZE == 32 ? "glnx86" : "glnxa64"
     elseif Sys.isapple()
         Sys.WORD_SIZE == 32 ? "maci" : "maci64"
     elseif Sys.iswindows()
         Sys.WORD_SIZE == 32 ? "win32" : "win64"
     end
-    matlab_libpath = joinpath(matlab_root, "bin", matlab_lib_dir)
+    matlab_libpath = joinpath(matlab_root, "bin", matlab_libdir)
     isdir(matlab_libpath) || @warn("Unable to detected MATLAB library path")
     return matlab_libpath
 end
 
 function find_matlab_cmd(matlab_root)
-    matlab_cmd = if Sys.iswindows()
-        joinpath(matlab_root, "bin", (Sys.WORD_SIZE == 32 ? "win32" : "win64"), "matlab.exe")
+    if Sys.iswindows()
+        matlab_cmd = joinpath(matlab_root, "bin", (Sys.WORD_SIZE == 32 ? "win32" : "win64"), "matlab.exe")
     else
         # matlab_exe = joinpath(matlab_root, "bin", "matlab") # should be the standard path
-        Sys.which("matlab")
+        matlab_cmd = Sys.which("matlab")
+        @show matlab_cmd
         # "exec $(Base.shell_escape(matlab_exe))"
     end
-    @show matlab_exe, matlab_cmd
     isfile(matlab_cmd) || @info("Unable to detected matlab executable path")
     return matlab_cmd
 end
