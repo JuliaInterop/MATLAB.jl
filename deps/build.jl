@@ -46,7 +46,7 @@ function find_matlab_libpath(matlab_root)
         Sys.WORD_SIZE == 32 ? "win32" : "win64"
     end
     matlab_libpath = joinpath(matlab_root, "bin", matlab_libdir)
-    isdir(matlab_libpath) || @warn("Unable to detected MATLAB library path")
+    isdir(matlab_libpath) && @info("Detected MATLAB library path at \"$matlab_libpath\"")
     return matlab_libpath
 end
 
@@ -59,7 +59,7 @@ function find_matlab_cmd(matlab_root)
         @show matlab_cmd
         # "exec $(Base.shell_escape(matlab_exe))"
     end
-    isfile(matlab_cmd) || @info("Unable to detected matlab executable path")
+    isfile(matlab_cmd) && @info("Detected MATLAB executable at \"$matlab_cmd\"")
     return matlab_cmd
 end
 
