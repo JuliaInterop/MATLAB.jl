@@ -53,13 +53,12 @@ end
 function find_matlab_cmd(matlab_root)
     if Sys.iswindows()
         matlab_cmd = joinpath(matlab_root, "bin", (Sys.WORD_SIZE == 32 ? "win32" : "win64"), "matlab.exe")
+        isfile(matlab_cmd) && @info("Detected MATLAB executable at \"$matlab_cmd\"")
     else
-        # matlab_exe = joinpath(matlab_root, "bin", "matlab") # should be the standard path
-        matlab_cmd = Sys.which("matlab")
-        @show matlab_cmd
-        # "exec $(Base.shell_escape(matlab_exe))"
+        matlab_exe = joinpath(matlab_root, "bin", "matlab")
+        isfile(matlab_exe) && @info("Detected MATLAB executable at \"$matlab_exe\"")
+        matlab_cmd = "exec $(Base.shell_escape(matlab_exe))"
     end
-    isfile(matlab_cmd) && @info("Detected MATLAB executable at \"$matlab_cmd\"")
     return matlab_cmd
 end
 
