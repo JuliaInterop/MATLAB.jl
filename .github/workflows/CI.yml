@@ -25,10 +25,6 @@ jobs:
           - x64
     steps:
       - uses: actions/checkout@v2
-      - name: Install csh
-        run: sudo apt-get install csh
-      - name: Install MATLAB
-        uses: matlab-actions/setup-matlab@v0
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.version }}
