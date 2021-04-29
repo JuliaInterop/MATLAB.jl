@@ -84,9 +84,10 @@ if !isnothing(matlab_root)
             println(io, "const matlab_cmd = \"$(escape_string(matlab_cmd))\"")
             println(io, "const libmx_size = $libmx_size")
     end
-elseif get(ENV, "JULIA_REGISTRYCI_AUTOMERGE", nothing) == "true"
+elseif get(ENV, "JULIA_REGISTRYCI_AUTOMERGE", nothing) == "true" || get(ENV, "CI", nothing) == "true"
     # We need to be able to install and load this package without error for
     # Julia's registry AutoMerge to work, so we just use dummy values.
+    # Similarly we want to also be able to install and load this package for CI.
     matlab_libpath = ""
     matlab_cmd = ""
     libmx_size = 0
