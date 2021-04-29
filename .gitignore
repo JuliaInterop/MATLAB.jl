@@ -1,2 +1,4 @@
+deps/build.log
+deps/deps.jl
 *.mat
 Manifest.toml

@@ -1,7 +1,7 @@
 name = "MATLAB"
 uuid = "10e44e05-a98a-55b3-a45b-ba969058deb6"
-repo = "https://github.com/JuliaInterop/MATLAB.jl.git"
 license = "MIT"
+repo = "https://github.com/JuliaInterop/MATLAB.jl.git"
 version = "0.8.0"
 
 [deps]

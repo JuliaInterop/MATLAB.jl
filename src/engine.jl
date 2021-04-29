@@ -6,10 +6,10 @@
 #
 ###########################################################
 const default_startflag = "" # no additional flags
-default_matlabcmd() = matlab_cmd() * " -nosplash"
+const default_matlabcmd = matlab_cmd * " -nosplash"
 # pass matlab flags directly or as a Vector of flags, i.e. "-a" or ["-a", "-b", "-c"]
-startcmd(flag::AbstractString = default_startflag) = isempty(flag) ? default_matlabcmd() : default_matlabcmd() * " " * flag
-startcmd(flags::AbstractVector{T}) where {T<:AbstractString} = isempty(flags) ? default_matlabcmd() : default_matlabcmd() * " " * join(flags, " ")
+startcmd(flag::AbstractString = default_startflag) = isempty(flag) ? default_matlabcmd : default_matlabcmd * " " * flag
+startcmd(flags::AbstractVector{T}) where {T<:AbstractString} = isempty(flags) ? default_matlabcmd : default_matlabcmd * " " * join(flags, " ")
 
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
@@ -20,20 +20,20 @@ mutable struct MSession
     bufptr::Ptr{UInt8}
 
     function MSession(bufsize::Integer = default_output_buffer_size; flags=default_startflag)
-        if iswindows()
+        if Sys.iswindows()
             assign_persistent_msession()
         end
         ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), startcmd(flags))
         if ep == C_NULL
             @warn("Confirm MATLAB is installed and discoverable.", maxlog=1)
-            if iswindows()
+            if Sys.iswindows()
                 @warn("Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.", maxlog=1)
-            elseif islinux()
+            elseif Sys.islinux()
                 @warn("Ensure `csh` is installed; this may require running `sudo apt-get install csh`.", maxlog=1)
             end
             throw(MEngineError("failed to open MATLAB engine session"))
         end
-        if iswindows()
+        if Sys.iswindows()
             # hide the MATLAB command window on Windows and change to current directory
             ccall(eng_set_visible[], Cint, (Ptr{Cvoid}, Cint), ep, 0)
             ccall(eng_eval_string[], Cint, (Ptr{Cvoid}, Ptr{UInt8}),
@@ -103,7 +103,7 @@ function close_default_msession()
     return nothing
 end
 
-if iswindows()
+if Sys.iswindows()
     function show_msession(m::MSession = get_default_msession())
         ret = ccall(eng_set_visible[], Cint, (Ptr{Cvoid}, Cint), m, 1)
         ret != 0 && throw(MEngineError("failed to show MATLAB engine session (err = $ret)"))
