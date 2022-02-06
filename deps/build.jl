@@ -29,6 +29,15 @@ function find_matlab_root()
                         matlab_root = joinpath(default_dir, maximum(dirs))
                     end
                 end
+            elseif Sys.islinux()
+                default_dir = "/usr/local/MATLAB"
+                if isdir(default_dir)
+                    dirs = readdir(default_dir)
+                    filter!(dir -> occursin(r"^R[0-9]+[ab]$", dir), dirs)
+                    if !isempty(dirs)
+                        matlab_root = joinpath(default_dir, maximum(dirs))
+                    end
+                end
             end
         end
     end
