@@ -6,7 +6,7 @@ function find_matlab_root()
     # Determine MATLAB library path and provide facilities to load libraries with this path
     matlab_root = get(ENV, "MATLAB_ROOT",
                         get(ENV, "MATLAB_HOME", nothing))
-    if isnothing(matlab_root) || isempty(matlab_root)
+    if isnothing(matlab_root)
         matlab_exe = Sys.which("matlab")
         if !isnothing(matlab_exe) && !islink(matlab_exe) # guard against /usr/local 
             matlab_root = dirname(dirname(matlab_exe))
