@@ -8,7 +8,7 @@ function find_matlab_root()
                         get(ENV, "MATLAB_HOME", nothing))
     if isnothing(matlab_root)
         matlab_exe = Sys.which("matlab")
-        if !isnothing(matlab_exe)
+        if !isnothing(matlab_exe) && !islink(matlab_exe) # guard against /usr/local 
             matlab_root = dirname(dirname(matlab_exe))
         else
             if Sys.isapple()
@@ -22,6 +22,15 @@ function find_matlab_root()
                 end
             elseif Sys.iswindows()
                 default_dir = Sys.WORD_SIZE == 32 ? "C:\\Program Files (x86)\\MATLAB" : "C:\\Program Files\\MATLAB"
+                if isdir(default_dir)
+                    dirs = readdir(default_dir)
+                    filter!(dir -> occursin(r"^R[0-9]+[ab]$", dir), dirs)
+                    if !isempty(dirs)
+                        matlab_root = joinpath(default_dir, maximum(dirs))
+                    end
+                end
+            elseif Sys.islinux()
+                default_dir = "/usr/local/MATLAB"
                 if isdir(default_dir)
                     dirs = readdir(default_dir)
                     filter!(dir -> occursin(r"^R[0-9]+[ab]$", dir), dirs)
