@@ -267,7 +267,7 @@ As with ordinary string literals, you can also interpolate whole Julia expressio
 You may also use the `eval_string` function to evaluate MATLAB code as follows
  ```julia
 eval_string("a = sum([1,2,3])")
- ```
+```
 
 The `eval_string` function also takes an optional argument that specifies which MATLAB session to evaluate the code in, e.g.
 ```julia
@@ -335,7 +335,7 @@ using MATLAB
 x = range(-10.0, stop=10.0, length=500)
 y = range(2.0, stop=3.0, length=500)
 
-mat"addpath('path of folder')"
+mat"addpath('path/to/folder')"
 
 r, u = mxcall(:test,2,x,y)
 ```
