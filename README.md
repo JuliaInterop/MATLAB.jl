@@ -312,13 +312,13 @@ a = 63.0
 
 #### Calling custom MATLAB function
 
-Adding the location of the function to path, then call the function:
+If the MATLAB function is not in the current directory, we need to first add it to the MATLAB path before calling through Julia:
 
 ```julia
-mat"addpath('path/to/folder')"
+mat"addpath('/path/to/folder')"
 val = mat"myfunction($arg1, $arg2)"
 ```
-If there is a  MATLAB file like this:
+For example, if there is a MATLAB file located at `/path/to/folder` with contents:
 
 ```matlab
 function [r,u] = test(x, y)
@@ -327,7 +327,7 @@ function [r,u] = test(x, y)
 end
 ```
 
-then we can call it in Julia file:
+We can call this function as follows in Julia:
 
 ```julia
 using MATLAB
@@ -335,7 +335,7 @@ using MATLAB
 x = range(-10.0, stop=10.0, length=500)
 y = range(2.0, stop=3.0, length=500)
 
-mat"addpath('path/to/folder')"
+mat"addpath('/path/to/folder')"
 
 r, u = mxcall(:test,2,x,y)
 ```
