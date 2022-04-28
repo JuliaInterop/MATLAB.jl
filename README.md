@@ -310,6 +310,38 @@ julia> @show y
 a = 63.0
 ```
 
+#### Calling custom MATLAB function
+
+If the MATLAB function is not in the current directory, we need to first add it to the MATLAB path before calling through Julia:
+
+```julia
+mat"addpath('/path/to/folder')"
+val = mat"myfunction($arg1, $arg2)"
+```
+For example, if there is a MATLAB file located at `/path/to/folder` with contents:
+
+```matlab
+function [r,u] = test(x, y)
+	r = x + y;
+	u = x - y;
+end
+```
+
+We can call this function as follows in Julia:
+
+```julia
+using MATLAB
+
+x = range(-10.0, stop=10.0, length=500)
+y = range(2.0, stop=3.0, length=500)
+
+mat"addpath('/path/to/folder')"
+
+r, u = mxcall(:test,2,x,y)
+```
+
+
+
 #### Viewing the MATLAB Session (Windows only)
 
 To open an interactive window for the MATLAB session, use the command `show_msession()` and to hide the window, use `hide_msession()`. *Warning: manually closing this window will result in an error or result in a segfault; it is advised that you only use the `hide_msession()` command to hide the interactive window.*
