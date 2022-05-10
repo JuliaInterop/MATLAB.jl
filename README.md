@@ -6,7 +6,7 @@ You cannot use `MATLAB.jl` without having purchased and installed a copy of MATL
 
 ## Overview
 
-Generally, this package is comprised of two aspects:
+This package is composed of two aspects:
 
 * Creating and manipulating mxArrays (the data structure that MATLAB used to represent arrays and other kinds of data)
 
