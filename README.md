@@ -1,8 +1,9 @@
 ## MATLAB
 
-**Warning: MATLAB 2022a/2022b**
 
-**Presently, these versions of MATLAB trigger a segfault and no not work with `MATLAB.jl`. Maintainers are attempting to diagnoise the cause and fix the issue.**
+| :exclamation:  MATLAB versions 2022a/2022b trigger a segfault and no not work with `MATLAB.jl`. Maintainers are attempting to diagnoise the cause and fix the issue.**  |
+|-----------------------------------------|
+
 
 
 The `MATLAB.jl` package provides an interface for using [MATLAB®](http://www.mathworks.com/products/matlab/) from [Julia](http://julialang.org) using the MATLAB C api.  In other words, this package allows users to call MATLAB functions within Julia, thus making it easy to interoperate with MATLAB from the Julia language.
