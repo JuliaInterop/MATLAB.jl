@@ -50,7 +50,8 @@ function find_matlab_libpath(matlab_root)
     matlab_libdir = if Sys.islinux()
         Sys.WORD_SIZE == 32 ? "glnx86" : "glnxa64"
     elseif Sys.isapple()
-        Sys.WORD_SIZE == 32 ? "maci" : "maci64"
+        archchar = Sys.ARCH == :aarch64 ? "a" : "i"
+        Sys.WORD_SIZE == 32 ? "maci" : "mac" * archchar * "64"
     elseif Sys.iswindows()
         Sys.WORD_SIZE == 32 ? "win32" : "win64"
     end
