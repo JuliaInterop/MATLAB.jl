@@ -1,7 +1,7 @@
 ## MATLAB
 
 
-| :exclamation:  ** MATLAB versions 2022a and 2022b trigger a segfault and do not work with `MATLAB.jl`. Maintainers are attempting to diagnose the cause and fix the issue. **  |
+| :exclamation:  ** MATLAB versions 2022a, 2022b, and 2023a trigger a segfault and do not work with `MATLAB.jl`. Maintainers are attempting to diagnose the cause and fix the issue. **  |
 |-----------------------------------------|
 
 
