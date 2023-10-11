@@ -1,6 +1,6 @@
 ## MATLAB
 
-| :white_check_mark: ** MATLAB versions 2022 and 2023 now work with `MATLAB.jl`.** |
+| :white_check_mark: ** MATLAB versions 2022 and 2023 now work with `MATLAB.jl` ** <br/> If you experience a segfault when starting the MATLAB engine, try to [update](https://se.mathworks.com/help/matlab/matlab_env/check-for-software-updates.html) your MATLAB release |
 |----------------------------------------------------------------------------------|
 
 
