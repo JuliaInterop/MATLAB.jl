@@ -1,8 +1,10 @@
 ## MATLAB
 
+| ❗ Windows and MacOS platforms : MATLAB versions R2022 and R2023 do not work with `MATLAB.jl` ❗ <br/> You can use older versions as explained [further down](https://github.com/JuliaInterop/MATLAB.jl#changing_matlab_version). |
+|:----:|
 
-| :exclamation:  ** MATLAB versions 2022 and 2023 trigger a segfault and do not work with `MATLAB.jl`. Maintainers are attempting to diagnose the cause and fix the issue. **  |
-|-----------------------------------------|
+| ❗ Linux platforms : If you experience problems when starting the MATLAB engine with versions R2022 or R2023, try to [update](https://se.mathworks.com/help/matlab/matlab_env/check-for-software-updates.html) your MATLAB release. |
+|:----:|
 
 
 
@@ -28,8 +30,6 @@ This package is composed of two aspects:
 ## Installation
 
 **Important**: The procedure to setup this package consists of the following steps.
-
-By default, `MATLAB.jl` uses the MATLAB installation with the greatest version number. To specify that a specific MATLAB installation should be used, set the environment variable `MATLAB_ROOT`.
 
 ### Windows
 
@@ -58,6 +58,24 @@ By default, `MATLAB.jl` uses the MATLAB installation with the greatest version n
 1. Ensure that MATLAB is installed in `/Applications` (for example, if you are using MATLAB R2012b, you may add the following command to `.profile`:  `export MATLAB_HOME=/Applications/MATLAB_R2012b.app`).
 
 2. From Julia run: `Pkg.add("MATLAB")`
+
+
+## Changing MATLAB version
+
+By default, `MATLAB.jl` is built using the MATLAB installation with the greatest version number. To specify that a specific MATLAB installation should be used, set the environment variable `MATLAB_ROOT`:
+```julia
+julia> ENV["MATLAB_ROOT"] = "/usr/local/MATLAB/R2021b" # example on a Linux machine
+```
+```julia
+julia> ENV["MATLAB_ROOT"] = raw"C:\Program Files\MATLAB\R2021b" # example on a Windows machine
+```
+Replace the path string with the location of the MATLAB folder on your machine. You need to set the path to the `R20XX` folder, not the `matlab` binary.
+
+If you had the package `MATLAB.jl` already installed and built before changing the environment variable, you will need to rebuild it to apply the change:
+```julia
+julia> using Pkg; Pkg.build("MATLAB")
+```
+
 
 
 ## Usage
