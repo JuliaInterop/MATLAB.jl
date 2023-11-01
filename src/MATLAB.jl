@@ -57,7 +57,7 @@ if Sys.iswindows()
     # Engine clients are not loaded and unloaded repeatedly
     # see: https://www.mathworks.com/matlabcentral/answers/305877-what-is-the-primary-message-table-for-module-77
 
-    # initialization is delayed untill first call to MSession
+    # initialization is delayed until first call to MSession
     const persistent_msession_ref = Ref{MSession}()
     const persistent_msession_assigned = Ref(false)
 

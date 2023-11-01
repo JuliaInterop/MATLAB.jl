@@ -376,7 +376,7 @@ show_msession() # open the default MATLAB session interactive window
 get_msession_visiblity() # get the session's visibility state
 hide_msession() # hide the default MATLAB session interactive window
 
-# similarily
+# similarly
 s = MSession()
 show_msession(s)
 get_msession_visiblity(a)
