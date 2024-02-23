@@ -5,8 +5,8 @@
 #   Session open & close
 #
 ###########################################################
-const default_startflag = "" # no additional flags
-const default_matlabcmd = matlab_cmd * " -nosplash"
+const default_startflag = "-nodisplay -nosplash -nodesktop" # no additional flags
+const default_matlabcmd = matlab_cmd * " -nodisplay -nosplash -nodesktop"
 # pass matlab flags directly or as a Vector of flags, i.e. "-a" or ["-a", "-b", "-c"]
 startcmd(flag::AbstractString = default_startflag) = isempty(flag) ? default_matlabcmd : default_matlabcmd * " " * flag
 startcmd(flags::AbstractVector{<:AbstractString}) = isempty(flags) ? default_matlabcmd : default_matlabcmd * " " * join(flags, " ")
