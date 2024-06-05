@@ -80,7 +80,10 @@ function __init__()
     if libmx_size > 0 # non-zero size library path
 
     # load libraries
-
+    # workaround for https://github.com/JuliaInterop/MATLAB.jl/issues/200
+    if Sys.iswindows()
+        ENV["PATH"] = string(matlab_libpath, ";", ENV["PATH"])
+    end
     libmx[]  = Libdl.dlopen(joinpath(matlab_libpath, "libmx"), Libdl.RTLD_GLOBAL)
     libmat[] = Libdl.dlopen(joinpath(matlab_libpath, "libmat"), Libdl.RTLD_GLOBAL)
     libeng[] = Libdl.dlopen(joinpath(matlab_libpath, "libeng"), Libdl.RTLD_GLOBAL)
