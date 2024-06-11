@@ -1,6 +1,6 @@
 ## MATLAB
 
-| ❗ Windows and MacOS platforms : MATLAB versions R2022 and R2023 do not work with `MATLAB.jl` ❗ <br/> You can use older versions as explained [further down](https://github.com/JuliaInterop/MATLAB.jl#changing-matlab-version). |
+| ❗ If you get a 'Segmentation fault' error when calling MATLAB with version R2022 or newer, try using an [older version](https://github.com/JuliaInterop/MATLAB.jl#changing-matlab-version) of MATLAB. ❗ |
 |:----:|
 
 The `MATLAB.jl` package provides an interface for using [MATLAB®](http://www.mathworks.com/products/matlab/) from [Julia](http://julialang.org) using the MATLAB C api.  In other words, this package allows users to call MATLAB functions within Julia, thus making it easy to interoperate with MATLAB from the Julia language.
