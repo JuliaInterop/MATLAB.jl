@@ -1,6 +1,6 @@
 ## MATLAB
 
-| ❗ Windows and MacOS platforms : MATLAB versions R2022 and R2023 do not work with `MATLAB.jl` ❗ <br/> You can use older versions as explained [further down](https://github.com/JuliaInterop/MATLAB.jl#changing-matlab-version). |
+| ❗ MacOS platform : MATLAB versions R2022 through R2024a do not work with `MATLAB.jl` ❗ <br/> You can use older versions as explained [further down](https://github.com/JuliaInterop/MATLAB.jl#changing-matlab-version). |
 |:----:|
 
 The `MATLAB.jl` package provides an interface for using [MATLAB®](http://www.mathworks.com/products/matlab/) from [Julia](http://julialang.org) using the MATLAB C api.  In other words, this package allows users to call MATLAB functions within Julia, thus making it easy to interoperate with MATLAB from the Julia language.
