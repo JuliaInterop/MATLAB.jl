@@ -361,6 +361,14 @@ delete(a_mx)
 @test a == a_jl
 @test isa(a_jl, SparseMatrixCSC{Complex{Float64}})
 
+a = transpose(rand(10)) # transpose -> row vec
+x = mxarray(a)
+y = jvalue(x)
+delete(x)
+@test isa(y, Array{Float64,2})
+@test size(y) == size(a)
+@test isequal(y, a)
+
 a = "MATLAB"
 x = mxarray(a)
 y = jvalue(x)

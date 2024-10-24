@@ -264,7 +264,18 @@ function mxarray(a::Array{T}) where T<:MxRealNum
     return mx
 end
 
-function mxarray(a::Array{T}) where T<:MxComplexNum
+function mxarray(a::AbstractVecOrMat{T}) where {T<:MxRealNum}
+    mx = mxarray(T, size(a))
+    ptr = data_ptr(mx)
+    na = length(a)
+    dat = unsafe_wrap(Array{T}, ptr, na)
+    for (i, ix) in enumerate(eachindex(a))
+        dat[i] = a[ix]
+    end
+    return mx
+end
+
+function mxarray(a::Array{T}) where {T<:MxComplexNum}
     mx = mxarray(T, size(a))
     na = length(a)
     rdat = unsafe_wrap(Array, real_ptr(mx), na)
