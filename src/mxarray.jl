@@ -278,7 +278,7 @@ function mxarray(a::Array{T}) where {T<:MxComplexNum}
 end
 
 
-function mxarray(a::AbstractVecOrMat{T}) where {T<:MxRealNum}
+function mxarray(a::AbstractArray{T}) where {T<:MxRealNum}
     mx = mxarray(T, size(a))
     ptr = data_ptr(mx)
     na = length(a)
@@ -289,7 +289,7 @@ function mxarray(a::AbstractVecOrMat{T}) where {T<:MxRealNum}
     return mx
 end
 
-function mxarray(a::AbstractVecOrMat{T}) where {T<:MxComplexNum}
+function mxarray(a::AbstractArray{T}) where {T<:MxComplexNum}
     mx = mxarray(T, size(a))
     na = length(a)
     rdat = unsafe_wrap(Array, real_ptr(mx), na)

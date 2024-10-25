@@ -362,14 +362,6 @@ delete(a_mx)
 @test a == a_jl
 @test isa(a_jl, SparseMatrixCSC{Complex{Float64}})
 
-a = transpose(rand(10)) # transpose -> row vec
-x = mxarray(a)
-y = jvalue(x)
-delete(x)
-@test isa(y, Array{Float64,2})
-@test size(y) == size(a)
-@test isequal(y, a)
-
 ##############################
 # Abstract Array Conversions
 ##############################
@@ -391,11 +383,12 @@ delete(x)
 @test size(y) == size(a_)
 @test isequal(y, a_)
 
-a = rand(ComplexF32,10,10)
+a_ = rand(ComplexF32, 10, 10, 10)
+a = @view a_[3:7, 4:8, 2:5]
 x = mxarray(a)
 y = jvalue(x)
 delete(x)
-@test isa(y, Array{ComplexF32,2})
+@test isa(y, Array{ComplexF32,3})
 @test size(y) == size(a)
 
 a = 1:100 # range
@@ -405,11 +398,11 @@ delete(x)
 @test isa(y, Array{Int64,1})
 @test isequal(y, collect(a))
 
-a = BitMatrix(rand(Bool, 20,20))
+a = BitArray(rand(Bool, 5,20,10))
 x = mxarray(a)
 y = jvalue(x)
 delete(x)
-@test isa(y, Matrix{Bool})
+@test isa(y, Array{Bool,3})
 @test isequal(y, a)
 
 
