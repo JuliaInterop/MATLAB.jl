@@ -1,5 +1,6 @@
 using MATLAB
 using Test
+using SparseArrays
 
 # Unit testing for MxArray
 
@@ -360,6 +361,55 @@ a_jl = jvalue(a_mx)
 delete(a_mx)
 @test a == a_jl
 @test isa(a_jl, SparseMatrixCSC{Complex{Float64}})
+
+##############################
+# Abstract Array Conversions
+##############################
+
+a = transpose(rand(10))
+x = mxarray(a)
+y = jvalue(x)
+delete(x)
+@test isa(y, Array{Float64,2})
+@test size(y) == size(a)
+@test isequal(y, a)
+
+a = rand(10,10)
+a_ = @view a[3:7, 4:8]
+x = mxarray(a_)
+y = jvalue(x)
+delete(x)
+@test isa(y, Array{Float64,2})
+@test size(y) == size(a_)
+@test isequal(y, a_)
+
+a_ = rand(ComplexF32, 10, 10, 10)
+a = @view a_[3:7, 4:8, 2:5]
+x = mxarray(a)
+y = jvalue(x)
+delete(x)
+@test isa(y, Array{ComplexF32,3})
+@test size(y) == size(a)
+
+a = 1:100 # range
+x = mxarray(a)
+y = jvalue(x)
+delete(x)
+@test isa(y, Array{Int64,1})
+@test isequal(y, collect(a))
+
+a = BitArray(rand(Bool, 5,20,10))
+x = mxarray(a)
+y = jvalue(x)
+delete(x)
+@test isa(y, Array{Bool,3})
+@test isequal(y, a)
+
+
+
+##############################
+# String Conversions
+##############################
 
 a = "MATLAB"
 x = mxarray(a)
