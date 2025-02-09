@@ -289,7 +289,7 @@ function mxarray(a::AbstractArray{T}) where {T<:MxRealNum}
     return mx
 end
 
-function mxarray(a::AbstractArray{T}) where {T<:MxComplexNum}
+function mxarray(a::AbstractArray{T}) where {T <: MxComplexNum}
     mx = mxarray(T, size(a))
     na = length(a)
     rdat = unsafe_wrap(Array, real_ptr(mx), na)
@@ -301,6 +301,36 @@ function mxarray(a::AbstractArray{T}) where {T<:MxComplexNum}
     return mx
 end
 
+
+function mxarray(a::NTuple{N, T}) where {N, T <: MxRealNum}
+    mx = mxarray(T, N)
+    pdat = ccall(mx_get_data[], Ptr{T}, (Ptr{Cvoid},), mx)
+    dat = unsafe_wrap(Array, pdat, N)
+    for i in 1:N
+        dat[i] = a[i]
+    end
+    return mx
+end
+
+function mxarray(a::NTuple{N, T}) where {N, T <: MxComplexNum}
+    mx = mxarray(T, size(a))
+    na = length(a)
+    rdat = unsafe_wrap(Array, real_ptr(mx), na)
+    idat = unsafe_wrap(Array, imag_ptr(mx), na)
+    for (i, ix) in enumerate(eachindex(a))
+        rdat[i] = real(a[ix])
+        idat[i] = imag(a[ix])
+    end
+    return mx
+end
+
+function mxarray(a::Tuple)
+    mx = mxcellarray(length(a))
+    for i in 1:length(a)
+        set_cell(mx, i, mxarray(a[i]))
+    end
+    return mx
+end
 
 # sparse matrix
 
