@@ -405,6 +405,28 @@ delete(x)
 @test isa(y, Array{Bool,3})
 @test isequal(y, a)
 
+# Issue: Tuples converted to MATLAB structs
+# https://github.com/JuliaInterop/MATLAB.jl/issues/178
+a = (2.5, 2.6)
+x = mxarray(a)
+y = jvalue(x)
+@test classid(x) == MATLAB.mxDOUBLE_CLASS
+@test nrows(x) == 2
+@test ncols(x) == 1
+delete(x)
+@test isa(y, Vector{Float64})
+@test isequal(y, collect(a))
+
+# Tuple with mixed types
+a = (1, 2.0, "MATLAB", [1, 2, 3])
+x = mxarray(a)
+y = jvalue(x)
+@test nrows(x) == 4
+@test ncols(x) == 1
+@test classid(x) == MATLAB.mxCELL_CLASS
+@test isa(y, Vector{Any})
+@test length(y) == length(a)
+@test isequal(y, collect(a))
 
 
 ##############################
