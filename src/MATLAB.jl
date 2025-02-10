@@ -83,6 +83,8 @@ function __init__()
     # workaround for https://github.com/JuliaInterop/MATLAB.jl/issues/200
     if Sys.iswindows()
         ENV["PATH"] = string(matlab_libpath, ";", ENV["PATH"])
+    elseif Sys.islinux()
+        ENV["PATH"] = string(matlab_libpath, ":", ENV["PATH"])
     end
     libmx[]  = Libdl.dlopen(joinpath(matlab_libpath, "libmx"), Libdl.RTLD_GLOBAL)
     libmat[] = Libdl.dlopen(joinpath(matlab_libpath, "libmat"), Libdl.RTLD_GLOBAL)
