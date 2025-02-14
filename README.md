@@ -28,7 +28,7 @@ This package is composed of two aspects:
 
 ### Windows
 
-1. For Matlab R2020a onwards, you should be able to go directly to step 2. If you encounter issues, run `matlab -batch "comserver('register')"` in the command prompt. For earlier versions of Matlab, start a command prompt as an administrator and enter `matlab /regserver`.
+1. For Matlab R2020a onwards, you should be able to go directly to step 2. If you encounter issues, run `matlab -batch "comserver('register')"` in the command prompt. For earlier versions of Matlab, start a command prompt as an administrator and enter `matlab /regserver`. Alternatively, you can do the same using the MATLAB GUI. To do this, open MATLAB with administrative privileges and run the following command in the MATLAB command window: `!matlab -regserver`. Close MATLAB and restart Julia.
 
 2. From Julia run: `Pkg.add("MATLAB")`
 
@@ -73,6 +73,17 @@ If you had the package `MATLAB.jl` already installed and built before changing t
 ```julia
 julia> using Pkg; Pkg.build("MATLAB")
 ```
+
+### Notes for Windows Users
+
+If you are using Windows, MATLAB needs to register its COM interface to properly work with MATLAB.jl. This should happen automatically during installation, but if you encounter issues, you can manually re-register MATLAB (with the version you want to use). To do this
+
+1. Open a MATLAB window with administrative privileges
+2. Run the following command in the MATLAB command window: `!matlab -regserver`
+3. Close MATLAB and restart Julia
+
+> [!IMPORTANT]
+> The version of MATLAB that is registered must be same that `MATLAB.jl` uses.
 
 
 

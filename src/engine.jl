@@ -16,6 +16,21 @@ startcmd(flags::AbstractVector{<:AbstractString}) =
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
 
+const windows_regserver_warning = """
+Failed to start MATLAB engine. If you have/had multiple versions of MATLAB installed, this can happen if you 
+tried to start a different version of MATLAB in Julia compared to which MATLAB server is registered in Windows.
+
+Steps to resolve this:
+
+1. Register a specific MATLAB version manually as a server, open a MATLAB window as a user with administrator privileges. 
+In MATLAB, enter the command `!matlab -regserver`. Then close the MATLAB window. More details:
+https://de.mathworks.com/help/matlab/matlab_external/registering-matlab-software-as-a-com-server.html
+
+2. Ensure that the MATLAB.jl package is using the same MATLAB version that was registered in step 1. See the instructions on GitHub
+on how to change the version that MATLAB.jl uses:
+https://github.com/JuliaInterop/MATLAB.jl?tab=readme-ov-file#changing-matlab-version
+"""
+
 mutable struct MSession
     ptr::Ptr{Cvoid}
     buffer::Vector{UInt8}
@@ -27,12 +42,13 @@ mutable struct MSession
         end
         ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), startcmd(flags))
         if ep == C_NULL
-            @warn("Confirm MATLAB is installed and discoverable.", maxlog = 1)
+            @warn(
+                "Confirm MATLAB is installed and discoverable.",
+                matlab_libpath,
+                maxlog = 1
+            )
             if Sys.iswindows()
-                @warn(
-                    "Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.",
-                    maxlog = 1
-                )
+                @warn(windows_regserver_warning, maxlog = 1)
             elseif Sys.islinux()
                 @warn(
                     "Ensure `csh` is installed; this may require running `sudo apt-get install csh`.",
