@@ -6,8 +6,8 @@ using SparseArrays
 
 restart_default_msession()
 
-a = [1. 2. 3.; 4. 5. 6.]
-b = [2. 3. 4.; 8. 7. 6.]
+a = [1.0 2.0 3.0; 4.0 5.0 6.0]
+b = [2.0 3.0 4.0; 8.0 7.0 6.0]
 
 @mput a b
 mat"""
@@ -22,7 +22,7 @@ mat"""
 @mget r1::Vector
 @test isequal(r1, vec(a .* b))
 
-s = sparse([1. 0. 0.; 2. 3. 0.; 0. 4. 5.])
+s = sparse([1.0 0.0 0.0; 2.0 3.0 0.0; 0.0 4.0 5.0])
 put_variable(:s, s)
 s2 = get_variable(:s)
 @test isequal(s, s2)
@@ -32,9 +32,9 @@ s2 = get_variable(:s)
 r = mxcall(:plus, 1, a, b)
 @test isequal(r, a + b)
 
-(xx, yy) = mxcall(:meshgrid, 2, [1., 2.], [3., 4.])
-@test isequal(xx, [1. 2.; 1. 2.])
-@test isequal(yy, [3. 3.; 4. 4.])
+(xx, yy) = mxcall(:meshgrid, 2, [1.0, 2.0], [3.0, 4.0])
+@test isequal(xx, [1.0 2.0; 1.0 2.0])
+@test isequal(yy, [3.0 3.0; 4.0 4.0])
 
 close_default_msession()
 
@@ -43,7 +43,6 @@ close_default_msession()
 s = MSession()
 close(s)
 @test_throws UndefRefError close(s)
-
 
 # segfault on deleted references
 x = mxarray(3.0)

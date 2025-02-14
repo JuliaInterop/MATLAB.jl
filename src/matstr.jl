@@ -56,11 +56,11 @@ end
 function check_assignment(interp, i)
     # Go back to the last newline
     before = String[]
-    for j = i-1:-1:1
+    for j = (i-1):-1:1
         if isa(interp[j], String)
             sp = split(interp[j], "\n")
             pushfirst!(before, sp[end])
-            for k = length(sp)-1:-1:1
+            for k = (length(sp)-1):-1:1
                 match(r"\.\.\.[ \t]*\r?$", sp[k]) === nothing && @goto done_before
                 pushfirst!(before, sp[k])
             end
@@ -75,7 +75,7 @@ function check_assignment(interp, i)
     # Go until the next newline or comment
     after = String[]
     both_sides = false
-    for j = i+1:length(interp)
+    for j = (i+1):length(interp)
         if isa(interp[j], String)
             sp = split(interp[j], "\n")
             push!(after, sp[1])
@@ -90,7 +90,9 @@ function check_assignment(interp, i)
     @label done_after
 
     assigned = dumb_parse!(pstate, join(after))
-    used = !assigned || both_sides || (i < length(interp) && match(r"^[ \t]*\(", interp[i+1]) != nothing)
+    used =
+        !assigned || both_sides ||
+        (i < length(interp) && match(r"^[ \t]*\(", interp[i+1]) != nothing)
     return (assigned, used)
 end
 
@@ -130,15 +132,24 @@ function do_mat_str(ex)
 
             if used && !(var in usedvars)
                 push!(usedvars, var)
-                (var in assignedvars) || push!(putblock.args, :(put_variable($(Meta.quot(var)), $(esc(interp[i])))))
+                (var in assignedvars) || push!(
+                    putblock.args,
+                    :(put_variable($(Meta.quot(var)), $(esc(interp[i])))),
+                )
             end
             if assigned && !(var in assignedvars)
                 push!(assignedvars, var)
                 if isa(interp[i], Expr) && (interp[i].head == :ref)
                     # Assignment to a sliced variable, e.g., x[1:3], must use broadcasting in v0.7+
-                    push!(getblock.args, Expr(:(.=), esc(interp[i]), :(get_variable($(Meta.quot(var))))))
+                    push!(
+                        getblock.args,
+                        Expr(:(.=), esc(interp[i]), :(get_variable($(Meta.quot(var))))),
+                    )
                 else
-                    push!(getblock.args, Expr(:(=), esc(interp[i]), :(get_variable($(Meta.quot(var))))))
+                    push!(
+                        getblock.args,
+                        Expr(:(=), esc(interp[i]), :(get_variable($(Meta.quot(var))))),
+                    )
                 end
             end
 
@@ -160,10 +171,14 @@ function do_mat_str(ex)
         $(putblock)
         eval_string($(join(interp)))
         $(getblock)
-        $(if !isempty(usedvars) || !isempty(assignedvars)
-            # Clear variables we created
-            :(eval_string($(string("clear ", join(union(usedvars, assignedvars), " "), ";"))))
-        end)
+        $(
+            if !isempty(usedvars) || !isempty(assignedvars)
+                # Clear variables we created
+                :(eval_string(
+                    $(string("clear ", join(union(usedvars, assignedvars), " "), ";")),
+                ))
+            end
+        )
         if get_variable(:matlab_jl_has_ans) != 0
             # Return ans if it was set
             get_variable(:ans)

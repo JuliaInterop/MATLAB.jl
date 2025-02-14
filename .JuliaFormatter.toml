@@ -1,0 +1,12 @@
+whitespace_typedefs = false
+whitespace_ops_in_indices = false
+whitespace_in_kwargs = false
+remove_extra_newlines = true
+
+format_docstrings = true
+annotate_untyped_fields_with_any = true
+join_lines_based_on_source = true
+
+align_assignment = true
+align_pair_arrow = true
+align_struct_field = true
