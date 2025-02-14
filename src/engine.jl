@@ -27,16 +27,16 @@ mutable struct MSession
         end
         ep = ccall(eng_open[], Ptr{Cvoid}, (Ptr{UInt8},), startcmd(flags))
         if ep == C_NULL
-            @warn("Confirm MATLAB is installed and discoverable.", maxlog=1)
+            @warn("Confirm MATLAB is installed and discoverable.", maxlog = 1)
             if Sys.iswindows()
                 @warn(
                     "Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.",
-                    maxlog=1
+                    maxlog = 1
                 )
             elseif Sys.islinux()
                 @warn(
                     "Ensure `csh` is installed; this may require running `sudo apt-get install csh`.",
-                    maxlog=1
+                    maxlog = 1
                 )
             end
             throw(MEngineError("failed to open MATLAB engine session"))
