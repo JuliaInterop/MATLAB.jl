@@ -7,8 +7,8 @@ fn = "$(tempname()).mat"
 a32 = Int32[1 2 3; 4 5 6]
 a64 = Int64[1 2 3; 4 5 6]
 b = [1.2, 3.4, 5.6, 7.8]
-c = [[0., 1.], [1., 2.], [1., 2., 3.]]
-d = Dict("name"=>"MATLAB", "score"=>100.)
+c = [[0.0, 1.0], [1.0, 2.0], [1.0, 2.0, 3.0]]
+d = Dict("name"=>"MATLAB", "score"=>100.0)
 
 struct S
     x::Float64
@@ -16,12 +16,12 @@ struct S
     z::Vector{Float64}
 end
 
-ss = S[S(1.0, true, [1., 2.]), S(2.0, false, [3., 4.])]
+ss = S[S(1.0, true, [1.0, 2.0]), S(2.0, false, [3.0, 4.0])]
 
 write_matfile(fn; a32=a32, a64=a64, b=b, c=c, d=d, ss=mxstructarray(ss))
 
 r = read_matfile(fn)
-@test isa(r, Dict{String, MxArray})
+@test isa(r, Dict{String,MxArray})
 @test length(r) == 6
 
 ra32 = jmatrix(r["a32"])

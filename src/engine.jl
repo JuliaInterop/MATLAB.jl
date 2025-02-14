@@ -8,8 +8,10 @@
 const default_startflag = "-nodisplay -nosplash -nodesktop" # no additional flags
 const default_matlabcmd = matlab_cmd * " -nodisplay -nosplash -nodesktop"
 # pass matlab flags directly or as a Vector of flags, i.e. "-a" or ["-a", "-b", "-c"]
-startcmd(flag::AbstractString = default_startflag) = isempty(flag) ? default_matlabcmd : default_matlabcmd * " " * flag
-startcmd(flags::AbstractVector{<:AbstractString}) = isempty(flags) ? default_matlabcmd : default_matlabcmd * " " * join(flags, " ")
+startcmd(flag::AbstractString=default_startflag) =
+    isempty(flag) ? default_matlabcmd : default_matlabcmd * " " * flag
+startcmd(flags::AbstractVector{<:AbstractString}) =
+    isempty(flags) ? default_matlabcmd : default_matlabcmd * " " * join(flags, " ")
 
 # 64 K buffer should be sufficient to store the output text in most cases
 const default_output_buffer_size = 64 * 1024
@@ -19,7 +21,7 @@ mutable struct MSession
     buffer::Vector{UInt8}
     bufptr::Ptr{UInt8}
 
-    function MSession(bufsize::Integer = default_output_buffer_size; flags=default_startflag)
+    function MSession(bufsize::Integer=default_output_buffer_size; flags=default_startflag)
         if Sys.iswindows()
             assign_persistent_msession()
         end
@@ -27,9 +29,15 @@ mutable struct MSession
         if ep == C_NULL
             @warn("Confirm MATLAB is installed and discoverable.", maxlog=1)
             if Sys.iswindows()
-                @warn("Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.", maxlog=1)
+                @warn(
+                    "Ensure `matlab -regserver` has been run in a Command Prompt as Administrator.",
+                    maxlog=1
+                )
             elseif Sys.islinux()
-                @warn("Ensure `csh` is installed; this may require running `sudo apt-get install csh`.", maxlog=1)
+                @warn(
+                    "Ensure `csh` is installed; this may require running `sudo apt-get install csh`.",
+                    maxlog=1
+                )
             end
             throw(MEngineError("failed to open MATLAB engine session"))
         end
@@ -90,7 +98,7 @@ function get_default_msession()
     return default_msession_ref[]
 end
 
-function restart_default_msession(bufsize::Integer = default_output_buffer_size)
+function restart_default_msession(bufsize::Integer=default_output_buffer_size)
     close_default_msession()
     default_msession_ref[] = MSession(bufsize)
     return nothing
@@ -104,19 +112,19 @@ function close_default_msession()
 end
 
 if Sys.iswindows()
-    function show_msession(m::MSession = get_default_msession())
+    function show_msession(m::MSession=get_default_msession())
         ret = ccall(eng_set_visible[], Cint, (Ptr{Cvoid}, Cint), m, 1)
         ret != 0 && throw(MEngineError("failed to show MATLAB engine session (err = $ret)"))
         return nothing
     end
 
-    function hide_msession(m::MSession = get_default_msession())
+    function hide_msession(m::MSession=get_default_msession())
         ret = ccall(eng_set_visible[], Cint, (Ptr{Cvoid}, Cint), m, 0)
         ret != 0 && throw(MEngineError("failed to hide MATLAB engine session (err = $ret)"))
         return nothing
     end
 
-    function get_msession_visiblity(m::MSession = get_default_msession())
+    function get_msession_visiblity(m::MSession=get_default_msession())
         vis = Ref{Cint}(true)
         ccall(eng_get_visible[], Int, (Ptr{Cvoid}, Ptr{Cint}), m, vis)
         return vis[] == 1 ? true : false
@@ -146,11 +154,19 @@ end
 
 eval_string(stmt::String) = eval_string(get_default_msession(), stmt)
 
-
 function put_variable(session::MSession, name::Symbol, v::MxArray)
     # put a variable into a MATLAB engine session
-    ret = ccall(eng_put_variable[], Cint, (Ptr{Cvoid}, Ptr{UInt8}, Ptr{Cvoid}), session, string(name), v)
-    ret != 0 && throw(MEngineError("failed to put variable $(name) into MATLAB session (err = $ret)"))
+    ret = ccall(
+        eng_put_variable[],
+        Cint,
+        (Ptr{Cvoid}, Ptr{UInt8}, Ptr{Cvoid}),
+        session,
+        string(name),
+        v,
+    )
+    ret != 0 && throw(
+        MEngineError("failed to put variable $(name) into MATLAB session (err = $ret)"),
+    )
     return nothing
 end
 
@@ -158,10 +174,16 @@ put_variable(session::MSession, name::Symbol, v) = put_variable(session, name, m
 
 put_variable(name::Symbol, v) = put_variable(get_default_msession(), name, v)
 
-
 function get_mvariable(session::MSession, name::Symbol)
-    pv = ccall(eng_get_variable[], Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{UInt8}), session, string(name))
-    pv == C_NULL && throw(MEngineError("failed to get variable $(name) from MATLAB session"))
+    pv = ccall(
+        eng_get_variable[],
+        Ptr{Cvoid},
+        (Ptr{Cvoid}, Ptr{UInt8}),
+        session,
+        string(name),
+    )
+    pv == C_NULL &&
+        throw(MEngineError("failed to get variable $(name) from MATLAB session"))
     return MxArray(pv)
 end
 
@@ -169,7 +191,6 @@ get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
 
 get_variable(name::Symbol) = jvalue(get_mvariable(name))
 get_variable(name::Symbol, kind) = jvalue(get_mvariable(name), kind)
-
 
 ###########################################################
 #
@@ -181,24 +202,23 @@ function _mput_multi(vs::Symbol...)
     nv = length(vs)
     if nv == 1
         v = vs[1]
-        :( MATLAB.put_variable($(Meta.quot(v)), $(v)) )
+        :(MATLAB.put_variable($(Meta.quot(v)), $(v)))
     else
         stmts = Vector{Expr}(undef, nv)
-        for i = 1 : nv
+        for i = 1:nv
             v = vs[i]
-            stmts[i] = :( MATLAB.put_variable($(Meta.quot(v)), $(v)) )
+            stmts[i] = :(MATLAB.put_variable($(Meta.quot(v)), $(v)))
         end
         Expr(:block, stmts...)
     end
 end
 
 macro mput(vs...)
-    esc( _mput_multi(vs...) )
+    esc(_mput_multi(vs...))
 end
 
-
 function make_getvar_statement(v::Symbol)
-    :( $(v) = MATLAB.get_variable($(Meta.quot(v))) )
+    :($(v) = MATLAB.get_variable($(Meta.quot(v))))
 end
 
 function make_getvar_statement(ex::Expr)
@@ -208,10 +228,10 @@ function make_getvar_statement(ex::Expr)
     v::Symbol = ex.args[1]
     k::Symbol = ex.args[2]
 
-    :( $(v) = MATLAB.get_variable($(Meta.quot(v)), $(k)) )
+    :($(v) = MATLAB.get_variable($(Meta.quot(v)), $(k)))
 end
 
-function _mget_multi(vs::Union{Symbol, Expr}...)
+function _mget_multi(vs::Union{Symbol,Expr}...)
     nv = length(vs)
     if nv == 1
         make_getvar_statement(vs[1])
@@ -225,9 +245,8 @@ function _mget_multi(vs::Union{Symbol, Expr}...)
 end
 
 macro mget(vs...)
-    esc( _mget_multi(vs...) )
+    esc(_mget_multi(vs...))
 end
-
 
 ###########################################################
 #
@@ -314,4 +333,5 @@ function mxcall(session::MSession, mfun::Symbol, nout::Integer, in_args...)
     return ret
 end
 
-mxcall(mfun::Symbol, nout::Integer, in_args...) = mxcall(get_default_msession(), mfun, nout, in_args...)
+mxcall(mfun::Symbol, nout::Integer, in_args...) =
+    mxcall(get_default_msession(), mfun, nout, in_args...)
