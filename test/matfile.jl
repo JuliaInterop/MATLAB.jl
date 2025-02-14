@@ -8,7 +8,7 @@ a32 = Int32[1 2 3; 4 5 6]
 a64 = Int64[1 2 3; 4 5 6]
 b = [1.2, 3.4, 5.6, 7.8]
 c = [[0.0, 1.0], [1.0, 2.0], [1.0, 2.0, 3.0]]
-d = Dict("name"=>"MATLAB", "score"=>100.0)
+d = Dict("name" => "MATLAB", "score" => 100.0)
 
 struct S
     x::Float64

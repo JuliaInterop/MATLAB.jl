@@ -263,7 +263,7 @@ function mxarray(a::Array{T}) where {T<:MxRealNum}
         (Ptr{Cvoid}, Ptr{Cvoid}, UInt),
         data_ptr(mx),
         a,
-        length(a)*sizeof(T),
+        length(a) * sizeof(T),
     )
     return mx
 end
@@ -374,7 +374,7 @@ function _copy_sparse_mat(
         ir[i] = rinds[i] - 1
     end
 
-    jc = unsafe_wrap(Array, jc_p, (n+1,))
+    jc = unsafe_wrap(Array, jc_p, (n + 1,))
     for i = 1:(n+1)
         jc[i] = colptr[i] - 1
     end
@@ -402,7 +402,7 @@ function _copy_sparse_mat(
         ir[i] = rinds[i] - 1
     end
 
-    jc = unsafe_wrap(Array, jc_p, (n+1,))
+    jc = unsafe_wrap(Array, jc_p, (n + 1,))
     for i = 1:(n+1)
         jc[i] = colptr[i] - 1
     end
@@ -414,7 +414,7 @@ function mxarray(a::SparseMatrixCSC{V,I}) where {V<:Union{Float64,ComplexF64,Boo
     m::Int = a.m
     n::Int = a.n
     nnz = length(a.nzval)
-    @assert nnz == a.colptr[n+1]-1
+    @assert nnz == a.colptr[n+1] - 1
 
     mx = mxsparse(V, m, n, nnz)
     ir_p = ccall(mx_get_ir[], Ptr{mwIndex}, (Ptr{Cvoid},), mx)
@@ -439,7 +439,7 @@ function mxarray(s::String)
         _dims_to_mwSize((1, length(utf16string))))
     mx = MxArray(pm)
     ccall(:memcpy, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, UInt), data_ptr(mx), utf16string,
-        length(utf16string)*sizeof(UInt16))
+        length(utf16string) * sizeof(UInt16))
     return mx
 end
 
@@ -453,7 +453,7 @@ end
 mxcellarray(dims::Integer...) = mxcellarray(dims)
 
 function get_cell(mx::MxArray, i::Integer)
-    pm = ccall(mx_get_cell[], Ptr{Cvoid}, (Ptr{Cvoid}, mwIndex), mx, i-1)
+    pm = ccall(mx_get_cell[], Ptr{Cvoid}, (Ptr{Cvoid}, mwIndex), mx, i - 1)
     MxArray(pm, false)
 end
 
@@ -505,7 +505,7 @@ function set_field(mx::MxArray, i::Integer, f::String, v::MxArray)
         Cvoid,
         (Ptr{Cvoid}, mwIndex, Ptr{UInt8}, Ptr{Cvoid}),
         mx,
-        i-1,
+        i - 1,
         f,
         v,
     )
@@ -515,7 +515,7 @@ end
 set_field(mx::MxArray, f::String, v::MxArray) = set_field(mx, 1, f, v)
 
 function get_field(mx::MxArray, i::Integer, f::String)
-    pm = ccall(mx_get_field[], Ptr{Cvoid}, (Ptr{Cvoid}, mwIndex, Ptr{UInt8}), mx, i-1, f)
+    pm = ccall(mx_get_field[], Ptr{Cvoid}, (Ptr{Cvoid}, mwIndex, Ptr{UInt8}), mx, i - 1, f)
     pm == C_NULL && throw(ArgumentError("Failed to get field."))
     MxArray(pm, false)
 end
@@ -523,7 +523,14 @@ end
 get_field(mx::MxArray, f::String) = get_field(mx, 1, f)
 
 function get_field(mx::MxArray, i::Integer, fn::Integer)
-    pm = ccall(mx_get_field_bynum[], Ptr{Cvoid}, (Ptr{Cvoid}, mwIndex, Cint), mx, i-1, fn-1)
+    pm = ccall(
+        mx_get_field_bynum[],
+        Ptr{Cvoid},
+        (Ptr{Cvoid}, mwIndex, Cint),
+        mx,
+        i - 1,
+        fn - 1,
+    )
     pm == C_NULL && throw(ArgumentError("Failed to get field."))
     MxArray(pm, false)
 end
@@ -531,7 +538,7 @@ end
 get_field(mx::MxArray, fn::Integer) = get_field(mx, 1, fn)
 
 function get_fieldname(mx::MxArray, i::Integer)
-    p = ccall(mx_get_fieldname[], Ptr{UInt8}, (Ptr{Cvoid}, Cint), mx, i-1)
+    p = ccall(mx_get_fieldname[], Ptr{UInt8}, (Ptr{Cvoid}, Cint), mx, i - 1)
     unsafe_string(p)
 end
 
@@ -606,7 +613,7 @@ function _jarrayx(fun::String, mx::MxArray, siz::Tuple)
                     (Ptr{Cvoid}, Ptr{Cvoid}, UInt),
                     a,
                     data_ptr(mx),
-                    length(a)*sizeof(T),
+                    length(a) * sizeof(T),
                 )
             end
         end
@@ -644,7 +651,7 @@ function jscalar(mx::MxArray)
     @assert !is_sparse(mx)
     if is_complex(mx)
         return unsafe_wrap(Array, real_ptr(mx), (1,))[1] +
-               im*unsafe_wrap(Array, imag_ptr(mx), (1,))[1]
+               im * unsafe_wrap(Array, imag_ptr(mx), (1,))[1]
     else
         return unsafe_wrap(Array, data_ptr(mx), (1,))[1]
     end
@@ -656,18 +663,18 @@ function _jsparse(ty::Type{T}, mx::MxArray) where {T<:MxRealNum}
     ir_ptr = ccall(mx_get_ir[], Ptr{mwIndex}, (Ptr{Cvoid},), mx)
     jc_ptr = ccall(mx_get_jc[], Ptr{mwIndex}, (Ptr{Cvoid},), mx)
 
-    jc_a::Vector{mwIndex} = unsafe_wrap(Array, jc_ptr, (n+1,))
+    jc_a::Vector{mwIndex} = unsafe_wrap(Array, jc_ptr, (n + 1,))
     nnz = jc_a[n+1]
 
     ir = Vector{Int}(undef, nnz)
-    jc = Vector{Int}(undef, n+1)
+    jc = Vector{Int}(undef, n + 1)
 
     ir_x = unsafe_wrap(Array, ir_ptr, (nnz,))
     for i = 1:nnz
         ir[i] = ir_x[i] + 1
     end
 
-    jc_x = unsafe_wrap(Array, jc_ptr, (n+1,))
+    jc_x = unsafe_wrap(Array, jc_ptr, (n + 1,))
     for i = 1:(n+1)
         jc[i] = jc_x[i] + 1
     end
@@ -713,7 +720,14 @@ function Dict(mx::MxArray)
     for i = 1:nf
         fnames[i] = get_fieldname(mx, i)
         pv =
-            ccall(mx_get_field_bynum[], Ptr{Cvoid}, (Ptr{Cvoid}, mwIndex, Cint), mx, 0, i-1)
+            ccall(
+                mx_get_field_bynum[],
+                Ptr{Cvoid},
+                (Ptr{Cvoid}, mwIndex, Cint),
+                mx,
+                0,
+                i - 1,
+            )
         fx = MxArray(pv, false)
         fvals[i] = jvalue(fx)
     end

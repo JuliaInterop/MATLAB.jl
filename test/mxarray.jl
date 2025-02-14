@@ -176,7 +176,7 @@ a2 = jvector(a_mx)
 @test isequal([1:5;], a2)
 delete(a_mx)
 
-a = rand(5, 6) + rand(5, 6)*im
+a = rand(5, 6) + rand(5, 6) * im
 a_mx = mxarray(a)
 a2 = jarray(a_mx)
 @test isequal(a, a2)
@@ -290,7 +290,7 @@ a = mxstruct("abc", "efg", "xyz")
 @test get_fieldname(a, 3) == "xyz"
 delete(a)
 
-s = Dict("name"=>"MATLAB", "version"=>12.0, "data"=>[1, 2, 3])
+s = Dict("name" => "MATLAB", "version" => 12.0, "data" => [1, 2, 3])
 a = mxstruct(s)
 @test is_struct(a)
 @test mxnfields(a) == 3
@@ -448,7 +448,7 @@ delete(x)
 @test y[2] == a[2]
 @test y[3] == a[3]
 
-a = Dict("abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB")
+a = Dict("abc" => 10.0, "efg" => [1, 2, 3], "xyz" => "MATLAB")
 x = mxarray(a)
 y = jvalue(x)
 delete(x)
