@@ -58,15 +58,15 @@ a = mxarray(Float64, 0, 0)
 
 @mx_test_basic_types Float64 is_double
 @mx_test_basic_types Float32 is_single
-@mx_test_basic_types Int64   is_int64
-@mx_test_basic_types UInt64  is_uint64
-@mx_test_basic_types Int32   is_int32
-@mx_test_basic_types UInt32  is_uint32
-@mx_test_basic_types Int16   is_int16
-@mx_test_basic_types UInt16  is_uint16
-@mx_test_basic_types Int8    is_int8
-@mx_test_basic_types UInt8   is_uint8
-@mx_test_basic_types Bool    is_logical
+@mx_test_basic_types Int64 is_int64
+@mx_test_basic_types UInt64 is_uint64
+@mx_test_basic_types Int32 is_int32
+@mx_test_basic_types UInt32 is_uint32
+@mx_test_basic_types Int16 is_int16
+@mx_test_basic_types UInt16 is_uint16
+@mx_test_basic_types Int8 is_int8
+@mx_test_basic_types UInt8 is_uint8
+@mx_test_basic_types Bool is_logical
 
 # complex arrays
 
@@ -290,13 +290,13 @@ a = mxstruct("abc", "efg", "xyz")
 @test get_fieldname(a, 3) == "xyz"
 delete(a)
 
-s = Dict("name"=>"MATLAB", "version"=>12.0, "data"=>[1,2,3])
+s = Dict("name"=>"MATLAB", "version"=>12.0, "data"=>[1, 2, 3])
 a = mxstruct(s)
 @test is_struct(a)
 @test mxnfields(a) == 3
 @test jstring(get_field(a, "name")) == "MATLAB"
 @test jscalar(get_field(a, "version")) == 12.0
-@test isequal(jvector(get_field(a, "data")), [1,2,3])
+@test isequal(jvector(get_field(a, "data")), [1, 2, 3])
 delete(a)
 
 mutable struct TestType
@@ -304,27 +304,26 @@ mutable struct TestType
     version::Float64
     data::Vector{Int}
 end
-t = TestType("MATLAB", 12.0, [1,2,3])
+t = TestType("MATLAB", 12.0, [1, 2, 3])
 a = mxstruct(t)
 @test is_struct(a)
 @test mxnfields(a) == 3
 @test jstring(get_field(a, "name")) == "MATLAB"
 @test jscalar(get_field(a, "version")) == 12.0
-@test isequal(jvector(get_field(a, "data")), [1,2,3])
+@test isequal(jvector(get_field(a, "data")), [1, 2, 3])
 delete(a)
 
-a = mxstructarray([TestType("MATLAB", 12.0, [1,2,3]),
-    TestType("Julia", 0.2, [4,5,6])])
+a = mxstructarray([TestType("MATLAB", 12.0, [1, 2, 3]),
+    TestType("Julia", 0.2, [4, 5, 6])])
 @test is_struct(a)
 @test mxnfields(a) == 3
 @test jstring(get_field(a, 1, "name")) == "MATLAB"
 @test jscalar(get_field(a, 1, "version")) == 12.0
-@test isequal(jvector(get_field(a, 1, "data")), [1,2,3])
+@test isequal(jvector(get_field(a, 1, "data")), [1, 2, 3])
 @test jstring(get_field(a, 2, "name")) == "Julia"
 @test jscalar(get_field(a, 2, "version")) == 0.2
-@test isequal(jvector(get_field(a, 2, "data")), [4,5,6])
+@test isequal(jvector(get_field(a, 2, "data")), [4, 5, 6])
 delete(a)
-
 
 # bi-directional conversions
 
@@ -374,7 +373,7 @@ delete(x)
 @test size(y) == size(a)
 @test isequal(y, a)
 
-a = rand(10,10)
+a = rand(10, 10)
 a_ = @view a[3:7, 4:8]
 x = mxarray(a_)
 y = jvalue(x)
@@ -398,7 +397,7 @@ delete(x)
 @test isa(y, Array{Int64,1})
 @test isequal(y, collect(a))
 
-a = BitArray(rand(Bool, 5,20,10))
+a = BitArray(rand(Bool, 5, 20, 10))
 x = mxarray(a)
 y = jvalue(x)
 delete(x)
@@ -428,7 +427,6 @@ y = jvalue(x)
 @test length(y) == length(a)
 @test isequal(y, collect(a))
 
-
 ##############################
 # String Conversions
 ##############################
@@ -454,7 +452,7 @@ a = Dict("abc"=>10.0, "efg"=>[1, 2, 3], "xyz"=>"MATLAB")
 x = mxarray(a)
 y = jvalue(x)
 delete(x)
-@test isa(y, Dict{String, Any})
+@test isa(y, Dict{String,Any})
 
 @test y["abc"] == 10.0
 @test isequal(y["efg"], [1, 2, 3])

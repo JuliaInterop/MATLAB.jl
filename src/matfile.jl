@@ -35,7 +35,6 @@ function close(f::MatFile)
     return nothing
 end
 
-
 # get & put variables
 
 function get_mvariable(f::MatFile, name::String)
