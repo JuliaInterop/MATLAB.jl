@@ -82,7 +82,8 @@ If you are using Windows, MATLAB needs to register its COM interface to properly
 2. Run the following command in the MATLAB command window: `!matlab -regserver`
 3. Close MATLAB and restart Julia
 
-> [!NOTE] The version of MATLAB that is registered must be same that `MATLAB.jl` uses.
+> [!IMPORTANT]
+> The version of MATLAB that is registered must be same that `MATLAB.jl` uses.
 
 
 
