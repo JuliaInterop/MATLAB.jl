@@ -35,8 +35,13 @@ mutable struct MSession
     ptr::Ptr{Cvoid}
     buffer::Vector{UInt8}
     bufptr::Ptr{UInt8}
+    check_exceptions::Bool
 
-    function MSession(bufsize::Integer=default_output_buffer_size; flags=default_startflag)
+    function MSession(
+        bufsize::Integer=default_output_buffer_size;
+        flags=default_startflag,
+        check_exceptions::Bool=true,
+    )
         if Sys.iswindows()
             assign_persistent_msession()
         end
@@ -72,7 +77,7 @@ mutable struct MSession
             bufptr = convert(Ptr{UInt8}, C_NULL)
         end
 
-        self = new(ep, buf, bufptr)
+        self = new(ep, buf, bufptr, check_exceptions)
         finalizer(release, self)
         return self
     end
@@ -100,6 +105,13 @@ function close(session::MSession)
     session.ptr = C_NULL
     return nothing
 end
+
+has_exception_check_enabled(session::MSession=get_default_msession()) =
+    session.check_exceptions
+disable_exception_check!(session::MSession=get_default_msession()) =
+    (session.check_exceptions = false; nothing)
+enable_exception_check!(session::MSession=get_default_msession()) =
+    (session.check_exceptions = true; nothing)
 
 # default session
 
@@ -153,7 +165,7 @@ end
 #
 ###########################################################
 
-function eval_string(session::MSession, stmt::String)
+function _eval_string(session::MSession, stmt::String)
     # evaluate a MATLAB statement in a given MATLAB session
     ret = ccall(eng_eval_string[], Cint, (Ptr{Cvoid}, Ptr{UInt8}), session, stmt)
     ret != 0 && throw(MEngineError("invalid engine session (err = $ret)"))
@@ -166,6 +178,13 @@ function eval_string(session::MSession, stmt::String)
         end
     end
     return nothing
+end
+
+function eval_string(session::MSession, stmt::String)
+    _eval_string(session, stmt)
+    if session.check_exceptions
+        check_and_clear_last_exception(session)
+    end
 end
 
 eval_string(stmt::String) = eval_string(get_default_msession(), stmt)
@@ -207,6 +226,33 @@ get_mvariable(name::Symbol) = get_mvariable(get_default_msession(), name)
 
 get_variable(name::Symbol) = jvalue(get_mvariable(name))
 get_variable(name::Symbol, kind) = jvalue(get_mvariable(name), kind)
+
+"""
+    check_and_clear_last_exception(session::MSession)
+
+Checks if an exception has been thrown in the MATLAB session by checking the `MException.last` variable.
+If it is not empty, it throws a `MatlabException` with the message and identifier of the last exception.
+In any case, it clears the `MException.last` variable.
+"""
+function check_and_clear_last_exception(session::MSession)
+    exception_check_code = """
+    matlab_exception_jl_message = MException.last.message; 
+    matlab_exception_jl_identifier = MException.last.identifier; 
+    MException.last('reset');
+    """
+    _eval_string(session, exception_check_code)
+    message = jvalue(get_mvariable(session, :matlab_exception_jl_message))
+    identifier = jvalue(get_mvariable(session, :matlab_exception_jl_identifier))
+
+    if !isempty(identifier)
+        throw(MatlabException(identifier, message))
+    end
+
+    _eval_string(
+        session,
+        "clear matlab_exception_jl_message matlab_exception_jl_identifier;",
+    )
+end
 
 ###########################################################
 #

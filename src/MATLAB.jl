@@ -43,11 +43,7 @@ else
     )
 end
 
-# exceptions
-struct MEngineError <: Exception
-    message::String
-end
-
+include("exceptions.jl")
 include("init.jl") # initialize Refs
 include("mxarray.jl")
 include("matfile.jl")

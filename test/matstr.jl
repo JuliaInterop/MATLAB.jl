@@ -70,3 +70,33 @@ $d ...
 # Test strings with =
 text = "hello = world"
 @test mat"strfind($text, 'o = w')" == 5
+
+@testset "Propagate Matlab Exceptions" begin
+
+    # Checks should be enabled by default
+    @test MATLAB.has_exception_check_enabled() == true
+
+    # Test invalid command
+    @test_throws MATLAB.MatlabException mat"invalid_command"
+
+    # Test invalid assignment
+    @test_throws MATLAB.MatlabException mat"1 = 2"
+
+    # Test invalid command within a block
+    @test_throws MATLAB.MatlabException mat"""
+    xyz = 1 + 2;
+    invalid_command;
+    abc = 2 * xyz;
+    """
+
+    # Disable Checks
+    MATLAB.disable_exception_check!()
+    @test MATLAB.has_exception_check_enabled() == false
+
+    # Test invalid command
+    try
+        mat"invalid_command"
+    catch ex
+        @test false # should not throw an exception
+    end
+end
