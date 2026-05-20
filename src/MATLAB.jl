@@ -3,7 +3,7 @@ module MATLAB
 using Libdl
 using SparseArrays
 
-import Base: eltype, close, size, copy, ndims, unsafe_convert
+import Base: eltype, close, size, copy, ndims, unsafe_convert, String, Dict
 
 # mxarray
 export MxArray,
