@@ -199,8 +199,13 @@ function put_variable(session::MSession, name::Symbol, v::MxArray)
         string(name),
         v,
     )
+
+    # The size limit for `put_variable` is 2GB according to the MATLAB documentation, but seems to be a bit higher in practice.
+    # https://www.mathworks.com/help/matlab/apiref/engputvariable.html
     ret != 0 && throw(
-        MEngineError("failed to put variable $(name) into MATLAB session (err = $ret)"),
+        MEngineError(
+            "failed to put variable $(name) into MATLAB session (err = $ret). Ensure the that the variable name does not conflict with internal MATLAB names and that the size of the variable is below the MATLAB limit of 2GB.",
+        ),
     )
     return nothing
 end

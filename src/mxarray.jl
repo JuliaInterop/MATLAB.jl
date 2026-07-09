@@ -256,6 +256,14 @@ mxarray(x::T) where {T<:MxComplexNum} = mxarray([x])
 # mxArray use Julia array's memory
 
 function mxarray(a::Array{T}) where {T<:MxRealNum}
+    # Check the array size
+    if sizeof(a) > 2 * 1024^3
+        @warn(
+            "Input array size exceeds the limit of 2 GB and is too large to be used with the MATLAB engine.",
+            maxlog = 1
+        )
+    end
+
     mx = mxarray(T, size(a))
     ccall(
         :memcpy,
@@ -269,6 +277,14 @@ function mxarray(a::Array{T}) where {T<:MxRealNum}
 end
 
 function mxarray(a::Array{T}) where {T<:MxComplexNum}
+    # Check the array size
+    if sizeof(a) > 2 * 1024^3
+        @warn(
+            "Input array size exceeds the limit of 2 GB and is too large to be used with the MATLAB engine.",
+            maxlog = 1
+        )
+    end
+
     mx = mxarray(T, size(a))
     na = length(a)
     rdat = unsafe_wrap(Array, real_ptr(mx), na)
